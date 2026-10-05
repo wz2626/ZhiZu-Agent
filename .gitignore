@@ -1,6 +1,8 @@
 .venv/
 venv/
 __pycache__/
+.pytest_cache/
+.runtime/
 *.py[cod]
 *.so
 

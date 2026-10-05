@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="11" time="3.225" timestamp="2026-10-05T23:17:12.587988+08:00" hostname="wz"><testcase classname="tests.test_health" name="test_health_without_api_keys" time="0.025" /><testcase classname="tests.test_health" name="test_health_configuration_and_secret_protection[your_chat_api_key_here-your_embedding_api_key_here-False]" time="0.012" /><testcase classname="tests.test_health" name="test_health_configuration_and_secret_protection[test-chat-key-not-real--False]" time="0.012" /><testcase classname="tests.test_health" name="test_health_configuration_and_secret_protection[   -   -False]" time="0.012" /><testcase classname="tests.test_health" name="test_health_configuration_and_secret_protection[test-chat-key-not-real-test-embedding-key-not-real-True]" time="0.012" /><testcase classname="tests.test_health" name="test_settings_read_configuration_without_exposing_keys" time="0.008" /><testcase classname="tests.test_health" name="test_root_serves_same_origin_page_from_another_directory" time="0.011"><error message="failed on setup with &quot;FileNotFoundError: [WinError 3] 系统找不到指定的路径。: 'D:\\AgentDev\\ZhiZu-Agent\\.pytest_cache\\tmp'&quot;">self = WindowsPath('D:/AgentDev/ZhiZu-Agent/.pytest_cache/tmp'), mode = 448
+parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+&gt;           os.mkdir(self, mode)
+E           FileNotFoundError: [WinError 3] 系统找不到指定的路径。: 'D:\\AgentDev\\ZhiZu-Agent\\.pytest_cache\\tmp'
+
+.runtime\python\cpython-3.12-windows-x86_64-none\Lib\pathlib.py:1311: FileNotFoundError</error></testcase><testcase classname="tests.test_health" name="test_api_documentation" time="0.021" /><testcase classname="tests.test_health" name="test_cors_allows_local_origins[http://127.0.0.1:8000]" time="0.011" /><testcase classname="tests.test_health" name="test_cors_allows_local_origins[http://localhost:8000]" time="0.011" /><testcase classname="tests.test_health" name="test_cors_rejects_unlisted_origin" time="0.010" /></testsuite></testsuites>

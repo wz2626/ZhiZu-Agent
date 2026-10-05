@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <title>智租博弈 · 开发起点</title>
+  <style>
+    :root { --ink: #193a36; --muted: #63736e; --green: #19695b; --paper: #f5f6f0; --line: #dce4dc; }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: var(--paper); font-family: "Segoe UI", "Microsoft YaHei", sans-serif; }
+    a { color: inherit; }
+    .shell { max-width: 1120px; margin: auto; padding: 32px 28px; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-bottom: 26px; border-bottom: 1px solid var(--line); }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; }
+    .mark { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; color: white; background: var(--green); font-size: 20px; }
+    .brand small { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; letter-spacing: 2px; }
+    .stage { border: 1px solid var(--line); border-radius: 999px; padding: 8px 13px; color: var(--muted); font-size: 12px; }
+    main { display: grid; grid-template-columns: 1.1fr 1fr; gap: 58px; align-items: center; padding: 68px 0 54px; }
+    .eyebrow { color: var(--green); font-size: 12px; letter-spacing: 2px; font-weight: 700; }
+    h1 { margin: 18px 0; font-size: clamp(32px, 4.2vw, 48px); line-height: 1.3; letter-spacing: -1px; }
+    .intro { max-width: 420px; color: var(--muted); line-height: 1.9; font-size: 15px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+    .button { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 11px 18px; border-radius: 10px; border: 1px solid var(--line); background: white; text-decoration: none; font-size: 14px; }
+    .primary { color: white; background: var(--green); border-color: var(--green); }
+    .button:focus-visible, button:focus-visible { outline: 3px solid #e7b459; outline-offset: 3px; }
+    .status-card { padding: 28px; border: 1px solid var(--line); border-radius: 20px; background: white; box-shadow: 0 16px 40px #193a3608; }
+    .card-head { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+    h2 { margin: 0; font-size: 18px; }
+    #refresh { background: none; border: 0; color: var(--green); font: inherit; font-size: 13px; cursor: pointer; padding: 8px 0; }
+    #refresh:disabled { opacity: .5; cursor: wait; }
+    dl { margin: 20px 0 0; }
+    .row { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 15px 0; border-bottom: 1px solid #edf0eb; font-size: 14px; }
+    dt { color: var(--muted); flex-shrink: 0; }
+    dd { margin: 0; text-align: right; overflow-wrap: anywhere; }
+    .good { color: var(--green); }
+    .pending { color: #8e621e; }
+    .error { color: #a43c31; }
+    #health-note { margin: 18px 0 0; color: var(--muted); font-size: 12px; line-height: 1.8; }
+    .roadmap { padding: 28px 0; border-top: 1px solid var(--line); }
+    .roadmap-head { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+    .roadmap-head span { color: var(--muted); font-size: 12px; }
+    .scenarios { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .scenario { border: 1px solid var(--line); padding: 22px; border-radius: 14px; }
+    .number { color: #78948a; font-size: 12px; letter-spacing: 2px; }
+    h3 { margin: 12px 0 8px; font-size: 17px; }
+    .scenario p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.8; }
+    footer { margin-top: 18px; color: var(--muted); font-size: 12px; line-height: 1.8; }
+    @media (max-width: 760px) {
+      .shell { padding: 22px 20px; }
+      main { grid-template-columns: 1fr; gap: 30px; padding: 40px 0; }
+      .scenarios { grid-template-columns: 1fr; }
+      .status-card { padding: 22px; }
+      .stage { font-size: 11px; padding: 7px 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div class="brand"><span class="mark" aria-hidden="true">租</span><div>智租博弈<small>ZHI ZU AGENT</small></div></div>
+      <span class="stage">Day 1 · 最小运行底座</span>
+    </header>
+    <main>
+      <section aria-labelledby="intro-title">
+        <div class="eyebrow">从一次清晰的协商开始</div>
+        <h1 id="intro-title">让租房问题，<br>有据可查，有话可谈。</h1>
+        <p class="intro">智租博弈将围绕合同风险审查、实景谈判演练与协商清单，帮助青年租客练习表达诉求。当前版本提供服务健康检查与环境配置状态。</p>
+        <div class="actions">
+          <a class="button primary" href="/docs">打开 API 文档 <span aria-hidden="true">&nbsp;↗</span></a>
+          <a class="button" href="/api/health">查看健康 JSON</a>
+        </div>
+      </section>
+      <section class="status-card" aria-labelledby="status-title">
+        <div class="card-head"><h2 id="status-title">本地服务状态</h2><button id="refresh" type="button">重新检查</button></div>
+        <div aria-live="polite" aria-atomic="true">
+          <dl>
+            <div class="row"><dt>后端连接</dt><dd id="backend-status">检查中…</dd></div>
+            <div class="row"><dt>项目</dt><dd id="project">—</dd></div>
+            <div class="row"><dt>当前版本</dt><dd id="version">—</dd></div>
+            <div class="row"><dt>API 环境配置</dt><dd id="env-status">—</dd></div>
+          </dl>
+          <p id="health-note">正在读取本地服务状态…</p>
+        </div>
+      </section>
+    </main>
+    <section class="roadmap" aria-labelledby="roadmap-title">
+      <div class="roadmap-head"><h2 id="roadmap-title">三个核心场景</h2><span>规划中</span></div>
+      <div class="scenarios">
+        <article class="scenario"><span class="number">01 / 押金</span><h3>押金扣留</h3><p>梳理扣款理由与返还诉求，练习有依据的沟通。</p></article>
+        <article class="scenario"><span class="number">02 / 维修</span><h3>维修责任</h3><p>厘清维修事项与责任，构造具体可谈的条件。</p></article>
+        <article class="scenario"><span class="number">03 / 退租</span><h3>提前退租</h3><p>检查退出条款，练习违约金与交接安排的协商。</p></article>
+      </div>
+    </section>
+    <footer>开发占位页 · 合同审查、谈判演练与清单导出将在后续回合实现。</footer>
+  </div>
+  <script>
+    const button = document.getElementById("refresh");
+    const backend = document.getElementById("backend-status");
+    const project = document.getElementById("project");
+    const version = document.getElementById("version");
+    const environment = document.getElementById("env-status");
+    const note = document.getElementById("health-note");
+
+    async function checkHealth() {
+      button.disabled = true;
+      backend.textContent = "检查中…";
+      backend.className = "";
+      project.textContent = version.textContent = environment.textContent = "—";
+      environment.className = "";
+      note.textContent = "正在读取本地服务状态…";
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 5000);
+      try {
+        const response = await fetch("/api/health", { signal: controller.signal, cache: "no-store" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        if (typeof data.status !== "string" || typeof data.project !== "string" || typeof data.version !== "string" || typeof data.env_configured !== "boolean") {
+          throw new Error("健康检查响应格式不正确");
+        }
+        backend.textContent = data.status === "ok" ? "正常运行" : data.status;
+        backend.className = data.status === "ok" ? "good" : "pending";
+        project.textContent = data.project;
+        version.textContent = data.version;
+        environment.textContent = data.env_configured ? "已配置" : "尚未配置完整";
+        environment.className = data.env_configured ? "good" : "pending";
+        note.textContent = data.env_configured
+          ? "配置项已齐全；此检查未调用云 API，不代表凭据已通过验证。"
+          : "未配置密钥仍可运行健康检查。后续 AI 功能需要完整配置。";
+      } catch (error) {
+        backend.textContent = "连接失败";
+        backend.className = "error";
+        note.textContent = error.name === "AbortError"
+          ? "健康检查超时，请确认本地服务正在运行后重试。"
+          : `无法读取服务状态：${error.message}。请确认本地服务正在运行。`;
+      } finally {
+        clearTimeout(timer);
+        button.disabled = false;
+      }
+    }
+
+    button.addEventListener("click", checkHealth);
+    checkHealth();
+  </script>
+</body>
+</html>
