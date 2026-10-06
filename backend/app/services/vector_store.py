@@ -8,14 +8,16 @@ import chromadb
 from langchain_core.embeddings import Embeddings
 
 from backend.app.core.config import PROJECT_ROOT, get_settings
-from backend.app.schemas.knowledge import EvidenceItem, KBInitResult, LawArticle
-from backend.app.services.embedding import get_embeddings
+from backend.app.schemas.knowledge import EvidenceItem, KBInitResult, KBStatusResponse, LawArticle
+from backend.app.services.embedding import DIMENSIONS, get_embeddings
 
 LAW_FILE = PROJECT_ROOT / "backend" / "data" / "laws" / "civil_code_lease_703_734.json"
 VALID_IDS = {f"LAW-{number}" for number in range(703, 735)}
+SOURCE_URL = "https://www.court.gov.cn/zixun/xiangqing/233181.html"
+VERIFIED_DATE = "2026-10-05"
 
 
-def _mask_sensitive_text(text: str) -> str:
+def mask_sensitive_text(text: str) -> str:
     text = re.sub(r"(?<!\d)1[3-9]\d{9}(?!\d)", "[手机号]", text)
     return re.sub(r"(?<!\d)\d{17}[\dXx](?!\d)", "[身份证号]", text)
 
@@ -39,6 +41,7 @@ class LawVectorStoreService:
         persist_directory: str | Path | None = None,
         collection_name: str = "civil_code_lease_laws",
         embeddings: Embeddings | None = None,
+        create_if_missing: bool = True,
     ) -> None:
         directory = persist_directory if persist_directory is not None else get_settings().chroma_path
         self.persist_directory = Path(directory).resolve()
@@ -48,16 +51,27 @@ class LawVectorStoreService:
         self.embedding_identity = (
             f"{self.embedding_mode}:{getattr(self.embeddings, 'model', 'deterministic-v1')}"
         )
-        self.persist_directory.mkdir(parents=True, exist_ok=True)
+        self.embedding_dimension = getattr(self.embeddings, "expected_dimension", DIMENSIONS)
+        if create_if_missing:
+            self.persist_directory.mkdir(parents=True, exist_ok=True)
+        elif not (self.persist_directory / "chroma.sqlite3").is_file():
+            raise ValueError("law collection is not initialized")
         self.client = chromadb.PersistentClient(path=str(self.persist_directory))
-        self.collection = self.client.get_or_create_collection(
-            name=collection_name,
-            metadata={
-                "hnsw:space": "cosine",
-                "embedding_mode": self.embedding_mode,
-                "embedding_identity": self.embedding_identity,
-            },
-        )
+        if create_if_missing:
+            self.collection = self.client.get_or_create_collection(
+                name=collection_name,
+                metadata={
+                    "hnsw:space": "cosine",
+                    "embedding_mode": self.embedding_mode,
+                    "embedding_identity": self.embedding_identity,
+                    "embedding_dimension": self.embedding_dimension,
+                },
+            )
+        else:
+            try:
+                self.collection = self.client.get_collection(name=collection_name)
+            except chromadb.errors.NotFoundError:
+                raise ValueError("law collection is not initialized") from None
         self._check_mode()
 
     def _check_mode(self) -> None:
@@ -70,6 +84,59 @@ class LawVectorStoreService:
             raise ValueError(
                 "collection embedding model differs; use a new collection or rebuild it explicitly"
             )
+        stored_dimension = (self.collection.metadata or {}).get("embedding_dimension")
+        if stored_dimension is not None and stored_dimension != self.embedding_dimension:
+            raise ValueError(
+                f"collection embedding dimension differs: expected {self.embedding_dimension}, "
+                f"got {stored_dimension}"
+            )
+
+    @classmethod
+    def inspect_status(
+        cls,
+        persist_directory: str | Path | None = None,
+        collection_name: str = "civil_code_lease_laws",
+        embeddings: Embeddings | None = None,
+    ) -> KBStatusResponse:
+        """Inspect an existing collection without creating a directory or collection."""
+        directory = persist_directory if persist_directory is not None else get_settings().chroma_path
+        path = Path(directory).resolve()
+        selected_embeddings = embeddings if embeddings is not None else get_embeddings()
+        configured_mode = getattr(selected_embeddings, "mode", "custom")
+        expected_identity = (
+            f"{configured_mode}:{getattr(selected_embeddings, 'model', 'deterministic-v1')}"
+        )
+        expected_dimension = getattr(selected_embeddings, "expected_dimension", DIMENSIONS)
+        indexed_count = 0
+        is_ready = False
+        embedding_mode = configured_mode
+        if (path / "chroma.sqlite3").is_file():
+            client = chromadb.PersistentClient(path=str(path))
+            try:
+                collection = client.get_collection(name=collection_name)
+            except chromadb.errors.NotFoundError:
+                pass
+            else:
+                metadata = collection.metadata or {}
+                embedding_mode = metadata.get("embedding_mode", configured_mode)
+                ids = collection.get(include=[])["ids"]
+                indexed_count = len(ids)
+                is_ready = (
+                    indexed_count == 32
+                    and set(ids) == VALID_IDS
+                    and embedding_mode == configured_mode
+                    and metadata.get("embedding_identity") == expected_identity
+                    and metadata.get("embedding_dimension") == expected_dimension
+                )
+        return KBStatusResponse(
+            collection_name=collection_name,
+            persist_directory=str(path),
+            indexed_count=indexed_count,
+            is_ready=is_ready,
+            embedding_mode=embedding_mode,
+            source_url=SOURCE_URL,
+            verified_date=VERIFIED_DATE,
+        )
 
     def _check_ids(self) -> list[str]:
         ids = self.collection.get(include=[])["ids"]
@@ -99,17 +166,31 @@ class LawVectorStoreService:
         laws = load_authoritative_laws()
         existing = set(self._check_ids())
         before_count = len(existing)
+        if before_count and (self.collection.metadata or {}).get("embedding_dimension") is None:
+            stored_vectors = self.collection.get(include=["embeddings"])["embeddings"]
+            if stored_vectors is None or any(len(vector) != self.embedding_dimension for vector in stored_vectors):
+                raise ValueError("existing collection has incompatible embedding dimensions")
         ids = [article.law_id for article in laws]
         documents = [self._document(article) for article in laws]
         vectors = self.embeddings.embed_documents(documents)
         if len(vectors) != 32:
             raise ValueError("embedding service returned an unexpected vector count")
+        for vector in vectors:
+            if len(vector) != self.embedding_dimension:
+                raise ValueError(
+                    f"embedding dimension mismatch: expected {self.embedding_dimension}, got {len(vector)}"
+                )
         self.collection.upsert(
             ids=ids,
             documents=[article.content for article in laws],
             metadatas=[self._metadata(article) for article in laws],
             embeddings=vectors,
         )
+        if (self.collection.metadata or {}).get("embedding_dimension") is None:
+            updated_metadata = dict(self.collection.metadata or {})
+            updated_metadata.pop("hnsw:space", None)
+            updated_metadata["embedding_dimension"] = self.embedding_dimension
+            self.collection.modify(metadata=updated_metadata)
         total_count = self.collection.count()
         if total_count != 32:
             raise RuntimeError("authoritative law collection must contain exactly 32 records")
@@ -147,9 +228,15 @@ class LawVectorStoreService:
         self._check_ids()
         if self.collection.count() == 0:
             return []
-        safe_query = _mask_sensitive_text(query) if self.embedding_mode == "cloud" else query
+        safe_query = mask_sensitive_text(query) if self.embedding_mode == "cloud" else query
+        query_vector = self.embeddings.embed_query(safe_query)
+        if len(query_vector) != self.embedding_dimension:
+            raise ValueError(
+                f"embedding dimension mismatch: expected {self.embedding_dimension}, "
+                f"got {len(query_vector)}"
+            )
         result = self.collection.query(
-            query_embeddings=[self.embeddings.embed_query(safe_query)],
+            query_embeddings=[query_vector],
             n_results=min(top_k, self.collection.count()),
             include=["distances"],
         )

@@ -1,7 +1,7 @@
 """Contracts for the authoritative lease-law knowledge base."""
 
 from datetime import date
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field, HttpUrl, StringConstraints, model_validator
 
@@ -72,10 +72,24 @@ class KBInitResult(BaseModel):
 
 
 class KBSearchRequest(BaseModel):
-    query: NonEmpty
-    top_k: int = Field(default=4, ge=1, le=32)
+    query: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=500)]
+    top_k: int = Field(default=4, ge=1, le=8)
 
 
 class KBSearchResponse(BaseModel):
     query: NonEmpty
-    evidence: list[EvidenceItem]
+    top_k: int = Field(ge=1, le=8)
+    results: list[EvidenceItem]
+    direct_basis_sufficient: bool
+    boundary_notice: str
+
+
+class KBStatusResponse(BaseModel):
+    collection_name: NonEmpty
+    persist_directory: NonEmpty
+    authoritative_law_count: Literal[32] = 32
+    indexed_count: int = Field(ge=0)
+    is_ready: bool
+    embedding_mode: NonEmpty
+    source_url: HttpUrl
+    verified_date: date

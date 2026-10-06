@@ -12,8 +12,16 @@
 
 默认 Chroma 集合名为 `civil_code_lease_laws`，持久化目录取配置 `CHROMA_PATH`，可在测试或命令行中覆盖。每条以 `law_id` 作为固定 Chroma ID，入库前查询现有 ID，按 ID `upsert`；既有 ID 计入 `updated_count`，新增 ID 计入 `inserted_count`。专用集合出现其他 ID 时拒绝写入，避免误删或混入非权威内容。因此在专用集合内，首次入库为 32 新增，重复入库为 32 更新，总数均为 32。
 
-`auto` 模式在有效向量密钥存在时使用 SiliconFlow 的 OpenAI 兼容 embeddings API，否则使用本地确定性 mock。`cloud` 模式无有效密钥时直接报错。集合记录向量模式与模型标识，两者不同的向量不得混用；切换模式或模型应使用新的集合或经明确管理流程重建。mock 仅供离线开发测试，1024 维确定性向量的检索分数不能视为法律相关性的可靠度。云端检索前后端再次用正则遮蔽手机号和身份证号；上层仍需处理姓名、地址等自由文本的人工预览。
+`auto` 模式在有效向量密钥存在时使用 SiliconFlow 的 OpenAI 兼容 embeddings API，否则使用本地确定性 mock。`cloud` 模式无有效密钥时直接报错。云端适配器逐条校验返回向量维度，默认必须为 1024；空向量或 512、1536 等错误维度在写入 Chroma 前抛出包含期望值和实际值的 `ValueError`，不泄露密钥。入库和查询也验证向量维度。集合 metadata 记录 `embedding_mode`、`embedding_identity` 与 `embedding_dimension`（默认 1024），三者不一致时拒绝混用。Day 2 回合 1 创建的旧集合缺少维度元数据时，状态会显示未就绪；重新运行 `scripts/init_kb.py` 可在核对现有向量维度后幂等补录。
+
+mock 仅供离线开发测试，1024 维确定性向量的检索分数不能视为法律相关性的可靠度。云端检索前后端再次用正则遮蔽手机号和身份证号；上层仍需处理姓名、地址等自由文本的人工预览。
 
 ## 检索与证据
 
 `search_evidence(query, top_k=4)` 对空白查询和越界 `top_k` 报错；返回的 `EvidenceItem` 含 `evidence_id`、条号整数及中文、法名、章节、完整正文、来源 URL、核对日期和 0～1 范围的向量相似分数。返回 ID 只允许在 32 条白名单内；正文、来源和日期始终从固定 JSON 重新读取，避免被集合中的旧元数据污染。`get_laws_by_ids` 按固定 ID 精确回查并过滤无效 ID，供 Critic 核对引用。向量召回表示候选依据，不自动判定法律结论；尤其这 32 条没有直接规定押金返还，押金查询只能展示相关条文并提示直接依据不足。甲醛问题引用第 731 条时，还需核实是否实际危及安全或健康。
+
+## 只读核验 API
+
+`GET /api/kb/status` 不创建目录、集合或法条记录。`KBStatusResponse` 返回集合名、持久化目录、固定权威条数 32、实际索引条数、就绪状态、向量模式、固定来源 URL 和核对日期。集合不存在或未入库时条数为 0、`is_ready=false`。就绪要求恰好 32 个合法 ID，且集合向量模式、模型标识和维度与当前配置一致；旧集合可通过幂等入库补录维度元数据。
+
+`POST /api/kb/search` 接收 `KBSearchRequest`：去除首尾空白后的 `query` 长度 1～500，`top_k` 默认 4、范围 1～8。后端先用正则遮蔽手机号和身份证号，再打开已存在的集合检索；此路径不创建目录、集合或法条记录。未就绪返回 HTTP 503，错误体 `detail` 包含 `code=KB_NOT_READY`、`indexed_count` 和运行 `scripts/init_kb.py` 的提示。成功时 `KBSearchResponse` 返回脱敏 `query`、`top_k`、`results`（`EvidenceItem` 列表）、`direct_basis_sufficient` 和 `boundary_notice`。押金返还、提前退租费用或具体通知天数等本章无直接规定的细则标记依据不足，提示补充合同约定及其他适用依据。该标记只反映本库范围，不能代替法律判断。

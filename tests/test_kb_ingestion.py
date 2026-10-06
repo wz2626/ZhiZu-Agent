@@ -74,7 +74,10 @@ def test_cloud_embedding_response_and_secret_safe_error(monkeypatch):
 
     monkeypatch.setattr("backend.app.services.embedding.httpx.post", fake_post)
     secret = "sk-private-test-secret"
-    embedder = SiliconFlowEmbeddings(base_url="https://example.invalid/v1/", model="BAAI/bge-m3", api_key=secret)
+    embedder = SiliconFlowEmbeddings(
+        base_url="https://example.invalid/v1/", model="BAAI/bge-m3",
+        api_key=secret, expected_dimension=2,
+    )
     assert embedder.embed_documents(["维修", "转租"]) == [[1.0, 0.0], [0.0, 1.0]]
     assert calls[0][0] == "https://example.invalid/v1/embeddings"
     assert calls[0][1]["timeout"] == 20.0
