@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from backend.app.core.config import Settings, get_settings
 from backend.app.schemas.knowledge import KBSearchRequest, KBSearchResponse, KBStatusResponse
-from backend.app.services.vector_store import LawVectorStoreService, mask_sensitive_text
+from backend.app.services.vector_store import STORAGE_ERRORS, LawVectorStoreService, mask_sensitive_text
 
 router = APIRouter(prefix="/api/kb", tags=["knowledge"])
 
@@ -19,6 +19,16 @@ def _not_ready(indexed_count: int) -> HTTPException:
             "code": "KB_NOT_READY",
             "message": "知识库尚未就绪，请先运行 scripts/init_kb.py。",
             "indexed_count": indexed_count,
+        },
+    )
+
+
+def _upstream_embedding_error() -> HTTPException:
+    return HTTPException(
+        status_code=503,
+        detail={
+            "code": "UPSTREAM_EMBEDDING_ERROR",
+            "message": "云端向量服务异常，请稍后重试。",
         },
     )
 
@@ -50,20 +60,25 @@ def kb_search(
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> KBSearchResponse:
     safe_query = mask_sensitive_text(request.query)
-    status = LawVectorStoreService.inspect_status(settings.chroma_path)
-    if not status.is_ready:
-        raise _not_ready(status.indexed_count)
+    indexed_count = 0
     try:
-        service = LawVectorStoreService(
+        with LawVectorStoreService(
             persist_directory=settings.chroma_path, create_if_missing=False,
-        )
-    except ValueError:
-        raise _not_ready(status.indexed_count) from None
+        ) as service:
+            status = service.get_status()
+            indexed_count = status.indexed_count
+            if not status.is_ready:
+                raise _not_ready(indexed_count)
+            results = service.search_evidence(safe_query, top_k=request.top_k)
+    except (ValueError, *STORAGE_ERRORS):
+        raise _not_ready(indexed_count) from None
+    except RuntimeError:
+        raise _upstream_embedding_error() from None
     sufficient, notice = _boundary_notice(safe_query)
     return KBSearchResponse(
         query=safe_query,
         top_k=request.top_k,
-        results=service.search_evidence(safe_query, top_k=request.top_k),
+        results=results,
         direct_basis_sufficient=sufficient,
         boundary_notice=notice,
     )

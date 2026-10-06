@@ -9,11 +9,13 @@ from dotenv import load_dotenv
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 load_dotenv(PROJECT_ROOT / ".env", override=False)
 
-_PLACEHOLDER_KEYS = {
-    "your_chat_api_key_here",
-    "your_embedding_api_key_here",
-    "your_api_key_here",
-}
+_PLACEHOLDER_MARKERS = ("your_", "placeholder", "replace_me", "填入", "示例")
+
+
+def has_real_key(key: str) -> bool:
+    """Reject empty/template keys without making a network request."""
+    candidate = key.strip().casefold()
+    return bool(candidate) and not any(marker in candidate for marker in _PLACEHOLDER_MARKERS)
 
 
 @dataclass(frozen=True)
@@ -39,9 +41,7 @@ class Settings:
             self.chroma_path,
         )
         keys = (self.chat_api_key, self.embedding_api_key)
-        return all(values) and all(
-            key.casefold() not in _PLACEHOLDER_KEYS for key in keys
-        )
+        return all(values) and all(has_real_key(key) for key in keys)
 
 
 def get_settings() -> Settings:

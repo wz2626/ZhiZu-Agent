@@ -6,9 +6,12 @@ from pathlib import Path
 
 import pytest
 
+from backend.app.core.config import get_settings, has_real_key
 from backend.app.schemas.knowledge import EvidenceItem, KBSearchRequest, chinese_article_no
 from backend.app.services.embedding import DeterministicHashEmbeddings, SiliconFlowEmbeddings, get_embeddings
-from backend.app.services.vector_store import LAW_FILE, LawVectorStoreService, load_authoritative_laws
+from backend.app.services.vector_store import (
+    LAW_FILE, LawVectorStoreService, load_authoritative_laws, mask_sensitive_text,
+)
 
 
 def test_authoritative_json_is_complete_and_consecutive():
@@ -62,8 +65,8 @@ def test_cloud_embedding_response_and_secret_safe_error(monkeypatch):
 
         def json(self):
             return {"data": [
-                {"index": 1, "embedding": [0.0, 1.0]},
-                {"index": 0, "embedding": [1.0, 0.0]},
+                {"index": 1, "embedding": [0, 1.0]},
+                {"index": 0, "embedding": [1.0, 0]},
             ]}
 
     calls = []
@@ -202,3 +205,124 @@ def test_cli_mock_mode_is_idempotent(tmp_path):
     assert len(first_lines) == len(second_lines) == 6
     assert all(len(line["evidence"]) == 3 for line in first_lines[1:])
     assert "直接依据不足" in first_lines[1]["note"] or "没有直接规定" in first_lines[1]["note"]
+
+
+@pytest.mark.parametrize(
+    "invalid_value", [True, False, "0.1", None, float("nan"), float("inf"), -float("inf")],
+    ids=["true", "false", "numeric-string", "null", "nan", "infinity", "negative-infinity"],
+)
+def test_cloud_rejects_invalid_vector_elements(monkeypatch, invalid_value):
+    secret = "sk-synthetic-element-test"
+
+    class FakeResponse:
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return {"data": [{"index": 0, "embedding": [0.1, invalid_value]}]}
+
+    monkeypatch.setattr("backend.app.services.embedding.httpx.post", lambda *args, **kwargs: FakeResponse())
+    embeddings = SiliconFlowEmbeddings(
+        base_url="https://example.invalid/v1", model="test-model",
+        api_key=secret, expected_dimension=2,
+    )
+    with pytest.raises(ValueError, match="element 1.*finite int or float") as error:
+        embeddings.embed_query("维修")
+    assert secret not in str(error.value)
+
+
+@pytest.mark.parametrize("query", ["！！！", "😀🏠", "\u200b\u200c\u200d"])
+def test_zero_vector_query_does_not_call_chroma(tmp_path, monkeypatch, query):
+    with LawVectorStoreService(tmp_path / "chroma", embeddings=DeterministicHashEmbeddings()) as service:
+        service.ingest_laws()
+
+        def unexpected_query(*args, **kwargs):
+            pytest.fail("zero vectors must not reach Chroma query")
+
+        monkeypatch.setattr(type(service.collection), "query", unexpected_query)
+        assert service.search_evidence(query) == []
+
+
+@pytest.mark.parametrize("distance", [float("nan"), float("inf"), -float("inf")])
+def test_nonfinite_distance_is_rejected(tmp_path, monkeypatch, distance):
+    with LawVectorStoreService(tmp_path / "chroma", embeddings=DeterministicHashEmbeddings()) as service:
+        service.ingest_laws()
+        monkeypatch.setattr(
+            type(service.collection), "query",
+            lambda *args, **kwargs: {"ids": [["LAW-712"]], "distances": [[distance]]},
+        )
+        with pytest.raises(ValueError, match="distance must be finite"):
+            service.search_evidence("维修")
+
+
+def test_zero_scores_are_removed_and_small_positive_scores_are_kept(tmp_path, monkeypatch):
+    with LawVectorStoreService(tmp_path / "chroma", embeddings=DeterministicHashEmbeddings()) as service:
+        service.ingest_laws()
+        monkeypatch.setattr(
+            type(service.collection), "query",
+            lambda *args, **kwargs: {
+                "ids": [["LAW-703", "LAW-704", "LAW-705", "LAW-706"]],
+                "distances": [[1.0, 1.2, 0.99, 0.4]],
+            },
+        )
+        evidence = service.search_evidence("修")
+        assert [item.evidence_id for item in evidence] == ["LAW-705", "LAW-706"]
+        assert [item.score for item in evidence] == pytest.approx([0.01, 0.6])
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("+8613800138000", "[手机号]"),
+        ("8613800138000", "[手机号]"),
+        ("+86 13800138000", "[手机号]"),
+        ("138-0013-8000", "[手机号]"),
+        ("138 0013 8000", "[手机号]"),
+        ("+86-138-0013-8000", "[手机号]"),
+        ("110101900101123", "[身份证号]"),
+        ("110101199001011234", "[身份证号]"),
+        ("11010119900101123X", "[身份证号]"),
+        ("11010119900101123x", "[身份证号]"),
+    ],
+)
+def test_sensitive_number_formats_are_masked(text, expected):
+    assert mask_sensitive_text(text) == expected
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "银行卡6222021234567890",
+        "银行卡622202123456789012",
+        "订单6222021234567890123",
+        "金额138001380000元",
+        "订单1101011990010112349",
+        "日期2026-10-07和20261007",
+        "民法典第712条、LAW-712、第七百一十二条",
+    ],
+)
+def test_unrelated_numbers_and_long_digit_boundaries_are_preserved(text):
+    assert mask_sensitive_text(text) == text
+
+
+@pytest.mark.parametrize(
+    ("key", "configured"),
+    [
+        ("", False), (" YOUR_embedding_api_key_here ", False),
+        ("placeholder", False), ("replace_me", False),
+        ("请填入密钥", False), ("示例密钥", False),
+        ("sk-synthetic-configured", True),
+    ],
+)
+def test_key_configuration_and_embedding_mode_agree(monkeypatch, key, configured):
+    for name, value in {
+        "CHAT_BASE_URL": "https://example.invalid/v1",
+        "CHAT_MODEL": "test-chat", "CHAT_API_KEY": key,
+        "EMBEDDING_BASE_URL": "https://example.invalid/v1",
+        "EMBEDDING_MODEL": "test-embedding", "EMBEDDING_API_KEY": key,
+        "CHROMA_PATH": ".runtime/not-opened",
+    }.items():
+        monkeypatch.setenv(name, value)
+    assert has_real_key(key) is configured
+    assert get_settings().env_configured is configured
+    assert get_embeddings("auto").mode == ("cloud" if configured else "mock")

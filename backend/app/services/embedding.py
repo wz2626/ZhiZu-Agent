@@ -7,7 +7,7 @@ import re
 import httpx
 from langchain_core.embeddings import Embeddings
 
-from backend.app.core.config import get_settings
+from backend.app.core.config import get_settings, has_real_key
 
 DIMENSIONS = 1024
 _TOPICS = (
@@ -24,13 +24,6 @@ _TOPICS = (
     ("续租", "优先承租"),
     ("交付", "交房", "无法使用"),
 )
-
-
-def has_real_key(key: str) -> bool:
-    candidate = key.strip().casefold()
-    return bool(candidate) and not any(
-        marker in candidate for marker in ("your_", "placeholder", "replace_me", "填入", "示例")
-    )
 
 
 class SiliconFlowEmbeddings(Embeddings):
@@ -66,20 +59,39 @@ class SiliconFlowEmbeddings(Embeddings):
             response.raise_for_status()
             payload = response.json()
             indexed = sorted(payload["data"], key=lambda item: item["index"])
-            vectors = [[float(value) for value in item["embedding"]] for item in indexed]
+            raw_vectors = [item["embedding"] for item in indexed]
         except (httpx.HTTPError, KeyError, TypeError, ValueError, IndexError, AttributeError):
             raise RuntimeError("embedding service request failed; check endpoint, model and credentials") from None
-        if len(vectors) != len(texts):
+        if len(raw_vectors) != len(texts):
             raise ValueError(
-                f"embedding response count mismatch: expected {len(texts)}, got {len(vectors)}"
+                f"embedding response count mismatch: expected {len(texts)}, got {len(raw_vectors)}"
             )
-        for vector in vectors:
-            actual_dimension = len(vector)
+        vectors = []
+        for vector_index, raw_vector in enumerate(raw_vectors):
+            if not isinstance(raw_vector, list):
+                raise ValueError("embedding response vector must be a list of finite numbers")
+            actual_dimension = len(raw_vector)
             if actual_dimension != self.expected_dimension:
                 raise ValueError(
                     f"embedding dimension mismatch: expected {self.expected_dimension}, "
                     f"got {actual_dimension}"
                 )
+            vector = []
+            for element_index, value in enumerate(raw_vector):
+                error = (
+                    f"embedding vector {vector_index} element {element_index} "
+                    "must be a finite int or float (bool is not allowed)"
+                )
+                if not isinstance(value, (int, float)) or isinstance(value, bool):
+                    raise ValueError(error)
+                try:
+                    number = float(value)
+                except (OverflowError, ValueError):
+                    raise ValueError(error) from None
+                if not math.isfinite(number):
+                    raise ValueError(error)
+                vector.append(number)
+            vectors.append(vector)
         return vectors
 
     def embed_query(self, text: str) -> list[float]:

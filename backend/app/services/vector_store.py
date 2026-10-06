@@ -1,7 +1,11 @@
 """Dedicated Chroma collection for the 32 authoritative lease articles."""
 
 import json
+import logging
+import math
 import re
+import sqlite3
+from contextlib import closing
 from pathlib import Path
 
 import chromadb
@@ -15,11 +19,30 @@ LAW_FILE = PROJECT_ROOT / "backend" / "data" / "laws" / "civil_code_lease_703_73
 VALID_IDS = {f"LAW-{number}" for number in range(703, 735)}
 SOURCE_URL = "https://www.court.gov.cn/zixun/xiangqing/233181.html"
 VERIFIED_DATE = "2026-10-05"
+STORAGE_ERRORS = (chromadb.errors.ChromaError, sqlite3.DatabaseError, OSError)
+logger = logging.getLogger(__name__)
+
+_PHONE_PATTERN = re.compile(r"(?<!\d)(?:\+?86[ \t-]*)?1[3-9]\d[ \t-]?\d{4}[ \t-]?\d{4}(?!\d)")
+_BIRTH_MONTH_DAY = r"(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])"
+_ID_PATTERN = re.compile(
+    r"(?<!\d)(?:"
+    r"[1-9]\d{5}(?:18|19|20)\d{2}" + _BIRTH_MONTH_DAY + r"\d{3}[\dXx]|"
+    r"[1-9]\d{5}\d{2}" + _BIRTH_MONTH_DAY + r"\d{3})(?!\d)"
+)
 
 
 def mask_sensitive_text(text: str) -> str:
-    text = re.sub(r"(?<!\d)1[3-9]\d{9}(?!\d)", "[手机号]", text)
-    return re.sub(r"(?<!\d)\d{17}[\dXx](?!\d)", "[身份证号]", text)
+    text = _PHONE_PATTERN.sub("[手机号]", text)
+    return _ID_PATTERN.sub("[身份证号]", text)
+
+
+def _check_sqlite_readable(directory: Path) -> None:
+    """Reject damaged files before Chroma can cache a partially started System."""
+    database_uri = (directory / "chroma.sqlite3").as_uri() + "?mode=ro"
+    with closing(sqlite3.connect(database_uri, uri=True)) as connection:
+        checks = connection.execute("PRAGMA quick_check").fetchall()
+        if checks != [("ok",)]:
+            raise ValueError("law storage integrity check failed")
 
 
 def load_authoritative_laws() -> list[LawArticle]:
@@ -54,25 +77,40 @@ class LawVectorStoreService:
         self.embedding_dimension = getattr(self.embeddings, "expected_dimension", DIMENSIONS)
         if create_if_missing:
             self.persist_directory.mkdir(parents=True, exist_ok=True)
-        elif not (self.persist_directory / "chroma.sqlite3").is_file():
-            raise ValueError("law collection is not initialized")
-        self.client = chromadb.PersistentClient(path=str(self.persist_directory))
-        if create_if_missing:
-            self.collection = self.client.get_or_create_collection(
-                name=collection_name,
-                metadata={
-                    "hnsw:space": "cosine",
-                    "embedding_mode": self.embedding_mode,
-                    "embedding_identity": self.embedding_identity,
-                    "embedding_dimension": self.embedding_dimension,
-                },
-            )
         else:
-            try:
-                self.collection = self.client.get_collection(name=collection_name)
-            except chromadb.errors.NotFoundError:
-                raise ValueError("law collection is not initialized") from None
-        self._check_mode()
+            if not (self.persist_directory / "chroma.sqlite3").is_file():
+                raise ValueError("law collection is not initialized")
+            _check_sqlite_readable(self.persist_directory)
+        self.client = chromadb.PersistentClient(path=str(self.persist_directory))
+        try:
+            if create_if_missing:
+                self.collection = self.client.get_or_create_collection(
+                    name=collection_name,
+                    metadata={
+                        "hnsw:space": "cosine",
+                        "embedding_mode": self.embedding_mode,
+                        "embedding_identity": self.embedding_identity,
+                        "embedding_dimension": self.embedding_dimension,
+                    },
+                )
+            else:
+                try:
+                    self.collection = self.client.get_collection(name=collection_name)
+                except chromadb.errors.NotFoundError:
+                    raise ValueError("law collection is not initialized") from None
+            self._check_mode()
+        except Exception:
+            self.close()
+            raise
+
+    def close(self) -> None:
+        self.client.close()
+
+    def __enter__(self) -> "LawVectorStoreService":
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
+        self.close()
 
     def _check_mode(self) -> None:
         existing_mode = (self.collection.metadata or {}).get("embedding_mode")
@@ -102,6 +140,30 @@ class LawVectorStoreService:
         directory = persist_directory if persist_directory is not None else get_settings().chroma_path
         path = Path(directory).resolve()
         selected_embeddings = embeddings if embeddings is not None else get_embeddings()
+        if (path / "chroma.sqlite3").is_file():
+            try:
+                _check_sqlite_readable(path)
+                with chromadb.PersistentClient(path=str(path)) as client:
+                    collection = client.get_collection(name=collection_name)
+                    return cls._collection_status(path, collection_name, selected_embeddings, collection)
+            except (ValueError, *STORAGE_ERRORS) as error:
+                # Do not expose database details or assume a damaged DB has zero records.
+                logger.warning("KB storage inspection failed (%s)", type(error).__name__)
+        return cls._collection_status(path, collection_name, selected_embeddings)
+
+    def get_status(self) -> KBStatusResponse:
+        """Inspect the collection already opened by this service."""
+        return self._collection_status(
+            self.persist_directory, self.collection_name, self.embeddings, self.collection,
+        )
+
+    @staticmethod
+    def _collection_status(
+        path: Path,
+        collection_name: str,
+        selected_embeddings: Embeddings,
+        collection: chromadb.Collection | None = None,
+    ) -> KBStatusResponse:
         configured_mode = getattr(selected_embeddings, "mode", "custom")
         expected_identity = (
             f"{configured_mode}:{getattr(selected_embeddings, 'model', 'deterministic-v1')}"
@@ -110,24 +172,18 @@ class LawVectorStoreService:
         indexed_count = 0
         is_ready = False
         embedding_mode = configured_mode
-        if (path / "chroma.sqlite3").is_file():
-            client = chromadb.PersistentClient(path=str(path))
-            try:
-                collection = client.get_collection(name=collection_name)
-            except chromadb.errors.NotFoundError:
-                pass
-            else:
-                metadata = collection.metadata or {}
-                embedding_mode = metadata.get("embedding_mode", configured_mode)
-                ids = collection.get(include=[])["ids"]
-                indexed_count = len(ids)
-                is_ready = (
-                    indexed_count == 32
-                    and set(ids) == VALID_IDS
-                    and embedding_mode == configured_mode
-                    and metadata.get("embedding_identity") == expected_identity
-                    and metadata.get("embedding_dimension") == expected_dimension
-                )
+        if collection is not None:
+            metadata = collection.metadata or {}
+            embedding_mode = metadata.get("embedding_mode", configured_mode)
+            ids = collection.get(include=[])["ids"]
+            indexed_count = len(ids)
+            is_ready = (
+                indexed_count == 32
+                and set(ids) == VALID_IDS
+                and embedding_mode == configured_mode
+                and metadata.get("embedding_identity") == expected_identity
+                and metadata.get("embedding_dimension") == expected_dimension
+            )
         return KBStatusResponse(
             collection_name=collection_name,
             persist_directory=str(path),
@@ -207,6 +263,8 @@ class LawVectorStoreService:
 
     @staticmethod
     def _evidence(article: LawArticle, score: float) -> EvidenceItem:
+        if not math.isfinite(score):
+            raise ValueError("evidence score must be finite")
         return EvidenceItem(
             evidence_id=article.law_id,
             article_number=article.article_number,
@@ -235,17 +293,28 @@ class LawVectorStoreService:
                 f"embedding dimension mismatch: expected {self.embedding_dimension}, "
                 f"got {len(query_vector)}"
             )
+        try:
+            norm = math.hypot(*query_vector)
+        except (TypeError, ValueError, OverflowError):
+            raise ValueError("query vector must contain finite numbers") from None
+        if not math.isfinite(norm):
+            raise ValueError("query vector norm must be finite")
+        if norm == 0.0:
+            return []
         result = self.collection.query(
             query_embeddings=[query_vector],
             n_results=min(top_k, self.collection.count()),
             include=["distances"],
         )
         authoritative = {article.law_id: article for article in load_authoritative_laws()}
-        return [
-            self._evidence(authoritative[law_id], 1.0 - distance)
-            for law_id, distance in zip(result["ids"][0], result["distances"][0])
-            if law_id in authoritative
-        ]
+        evidence = []
+        for law_id, distance in zip(result["ids"][0], result["distances"][0]):
+            if not math.isfinite(distance):
+                raise ValueError("retrieval distance must be finite")
+            score = 1.0 - distance
+            if law_id in authoritative and score > 0.0:
+                evidence.append(self._evidence(authoritative[law_id], score))
+        return evidence
 
     def get_laws_by_ids(self, evidence_ids: list[str]) -> list[EvidenceItem]:
         self._check_mode()

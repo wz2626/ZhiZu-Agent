@@ -49,7 +49,7 @@ if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 
 默认入库命令使用 `CHROMA_PATH`（未设置时为 `./backend/chroma_db`）；API 也读取此路径。离线独立目录用于测试，如需让 API 查看它，在启动服务前将 `CHROMA_PATH` 指向该目录。旧集合若缺少维度元数据，重新运行入库脚本即可在校验现有 1024 维向量后补录。
 
-启动后可访问同源首页 `http://127.0.0.1:8000/`、健康接口 `/api/health`、知识库状态 `/api/kb/status` 和 Swagger `/docs`。知识库检索接口为 `POST /api/kb/search`，请求示例：`{"query":"房屋漏水由谁维修？","top_k":4}`。返回脱敏后的 `query`、`top_k`、`results`（法条证据）、`direct_basis_sufficient` 与 `boundary_notice`；未入库时返回 503 并提示运行 `scripts/init_kb.py`。押金问题仅展示相关条文，并明确提示本章没有押金返还的直接依据。
+启动后可访问同源首页 `http://127.0.0.1:8000/`、健康接口 `/api/health`、知识库状态 `/api/kb/status` 和 Swagger `/docs`。知识库检索接口为 `POST /api/kb/search`，请求示例：`{"query":"房屋漏水由谁维修？","top_k":4}`。返回脱敏后的 `query`、`top_k`、`results`（法条证据）、`direct_basis_sufficient` 与 `boundary_notice`；缺库、损坏库或检索校验异常返回 503 `KB_NOT_READY`，云端向量调用失败返回 503 `UPSTREAM_EMBEDDING_ERROR`。缺库或空目录请求不创建存储目录；零向量查询返回空证据，零分候选被过滤。押金问题仅展示相关条文，并明确提示本章没有押金返还的直接依据。
 
 在仓库目录的另一个 PowerShell 窗口运行全量测试：
 
@@ -59,7 +59,9 @@ if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 
 `pytest.ini` 将缓存目录设为 `.runtime/pytest_cache`，避开旧的 `.pytest_cache` ACL 问题。`env_configured` 表示配置项已齐全且密钥不是模板占位值，不会联网验证密钥。`.env` 从仓库根目录加载，已有进程环境变量优先；健康 JSON 不返回密钥。单元测试使用合成配置，不调用云 API。首页从相同源请求 `/api/health`，CORS 仅允许本地 `127.0.0.1:8000` 与 `localhost:8000`。
 
-本回合在 Python 3.12.13 下验证健康底座，11 项 pytest 通过；[验证记录](docs/test-results/day01-round02.md)保留首次命令问题、复测结果和页面截图。该次仅安装底座相关依赖，未验证全量 RAG 依赖及完整业务复现。
+Day 1 在 Python 3.12.13 下验证健康底座，11 项 pytest 通过；[验证记录](docs/test-results/day01-round02.md)保留首次命令问题、复测结果和页面截图。该次仅安装底座相关依赖，未验证全量 RAG 依赖及完整业务复现。
+
+Day 2 回合 2 全量测试为 43 passed，见[向量维度与知识库 API 实测](docs/test-results/day02-round02.md)。2026-10-07 的 Day 3 前置底座加固后，最新全量测试为 **103 passed in 11.35s**，退出码 0，无失败、跳过或警告；使用上述 `.venv` 命令，未调用真实云 API。新增覆盖严格向量数值校验、非有限距离、零向量/零分过滤、扩展脱敏、密钥判定、损坏库降级、错误码区分与单客户端检索；过程失败和修复见[本次实测报告](docs/test-results/day02-round03-hardening.md)。
 
 常见问题：提示缺少模块时，确认使用仓库的 `.venv`；端口 8000 被占用时，先停止占用该端口的本地服务。占位密钥显示“尚未配置完整”属于正常状态，不影响健康接口。切换 mock 与云端向量或更换模型时应使用不同集合或目录；错误维度的云端向量会在写入前被拒绝。
 
