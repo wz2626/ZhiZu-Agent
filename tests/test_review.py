@@ -4,9 +4,12 @@ import json
 import re
 from pathlib import Path
 from types import SimpleNamespace
+from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
+from langchain_core.messages import AIMessage
+from langchain_openai import ChatOpenAI
 
 from backend.app.core.config import PROJECT_ROOT, get_settings
 from backend.app.main import app
@@ -164,7 +167,7 @@ def test_success_uses_retrieved_law_text_ids_and_requested_top_k(monkeypatch, to
     assert "JSON 数组" in system.content and "没有直接规定押金返还" in system.content
     payload = json.loads(human.content)
     assert payload["合同文本"] == CONTRACT
-    assert payload["法律依据"] == [{"id": "LAW-716", "正文": store.evidence[0].content}]
+    assert payload["法律依据"] == [{"law_id": "LAW-716", "正文": store.evidence[0].content}]
 
 
 def test_risk_count_is_computed_for_all_risk_levels(monkeypatch):
@@ -189,7 +192,7 @@ def test_anomalous_scores_are_filtered_before_prompt(monkeypatch, score):
     llm = FakeLLM(json.dumps([finding()]))
     response = real_mode_service(monkeypatch, llm, store).analyze_contract(CONTRACT)
     assert response.status == "success"
-    assert [law["id"] for law in json.loads(llm.calls[0][1].content)["法律依据"]] == ["LAW-716"]
+    assert [law["law_id"] for law in json.loads(llm.calls[0][1].content)["法律依据"]] == ["LAW-716"]
 
 
 def test_small_positive_score_is_not_arbitrarily_dropped(monkeypatch):
@@ -212,9 +215,9 @@ def test_untrusted_law_content_ids_and_duplicates_do_not_enter_prompt(monkeypatc
 @pytest.mark.parametrize("bad_output", [
     "not JSON", "```json\n[]\n```", "[]", "{}", "null", ["content block"],
     json.dumps([finding(original_clause="凭空生成的原文")]),
-    json.dumps([finding(evidence_ids=["LAW-712"])]),
-    json.dumps([finding(evidence_ids=["LAW-999"])]),
-    json.dumps([finding(evidence_ids=["SCENARIO-01"])]),
+    json.dumps([finding(evidence_ids="LAW-716")]),
+    json.dumps([finding(evidence_ids=[None])]),
+    json.dumps([finding(evidence_ids=[{"law_id": "LAW-716"}])]),
     json.dumps([finding(risk_level="CRITICAL")]),
     json.dumps([finding(explanation="", negotiation_tip="")]),
     json.dumps([finding(), finding()]),
@@ -297,7 +300,7 @@ def test_chat_client_uses_config_and_disables_hidden_retries(monkeypatch):
     service = ContractReviewService()
     assert calls == [{
         "base_url": "https://chat.example.invalid/v1", "model": "test-review-model",
-        "api_key": "sk-synthetic-config-test", "temperature": 0,
+        "api_key": "sk-synthetic-config-test", "temperature": 0.1,
         "timeout": 20.0, "max_retries": 0, "use_responses_api": False,
     }]
     service.close()
@@ -355,3 +358,145 @@ def test_sample_scenarios_remain_reference_data(client):
         assert response.status_code == 200
         assert_mock(ReviewResponse.model_validate(response.json()), item["contract_text"])
     assert len(load_authoritative_laws()) == 32
+
+
+@pytest.fixture
+def configured_chat_service(monkeypatch):
+    """Build the actual SDK client; every invocation remains intercepted."""
+    monkeypatch.setenv("CHAT_API_KEY", "sk-synthetic-real-client-test")
+    service = ContractReviewService(vector_store=FakeStore())
+    assert isinstance(service.llm, ChatOpenAI)
+    assert not service.mock_mode
+    try:
+        yield service
+    finally:
+        service.close()
+
+
+def test_chatopenai_invoke_parses_success_and_uses_masked_prompt(configured_chat_service):
+    text = "租客联系13800138000，身份证110101199001011234。" + CONTRACT
+    with patch("langchain_openai.ChatOpenAI.invoke", return_value=AIMessage(
+        content=json.dumps([finding()], ensure_ascii=False),
+    )) as invoke:
+        response = configured_chat_service.analyze_contract(text, top_k=8)
+    invoke.assert_called_once()
+    assert response.status == "success" and response.total_risks == 1
+    assert response.results[0].original_clause in mask_sensitive_text(text)
+    assert response.results[0].evidence_ids == ["LAW-716"]
+    assert configured_chat_service.llm.temperature == 0.1
+    assert configured_chat_service.llm.max_retries == 0
+    system, human = invoke.call_args.args[0]
+    assert "严苛的中国合同法务专家" in system.content
+    assert "不得输出 Markdown" in system.content
+    assert "没有直接规定押金返还" in system.content
+    payload = json.loads(human.content)
+    assert payload["合同文本"] == mask_sensitive_text(text)
+    assert payload["法律依据"] == [{
+        "law_id": "LAW-716", "正文": configured_chat_service.vector_store.evidence[0].content,
+    }]
+    assert configured_chat_service.vector_store.calls == [(mask_sensitive_text(text), 8)]
+
+
+@pytest.mark.parametrize("wrapper", [" \n%s\t ", "```json\n%s\n```", " \n```\n%s\n```\t "])
+def test_chatopenai_complete_fences_are_cleaned_without_retry(configured_chat_service, wrapper):
+    clause = "双方记录备注为 json 与 ``` 字符，不改变原条款。"
+    content = json.dumps([finding(original_clause=clause)], ensure_ascii=False)
+    with patch("langchain_openai.ChatOpenAI.invoke", return_value=AIMessage(content=wrapper % content)) as invoke:
+        response = configured_chat_service.analyze_contract(clause)
+    assert response.status == "success"
+    assert response.results[0].original_clause == clause  # Preserve data inside the array.
+    invoke.assert_called_once()
+
+
+def test_chatopenai_three_json_decode_failures_trip_mock_fallback(configured_chat_service):
+    with patch("langchain_openai.ChatOpenAI.invoke", side_effect=[
+        AIMessage(content="第一轮乱码"), AIMessage(content="第二轮乱码"), AIMessage(content="第三轮乱码"),
+    ]) as invoke:
+        response = configured_chat_service.analyze_contract(CONTRACT)
+    assert_mock(response, CONTRACT)
+    assert invoke.call_count == 3
+    # The last request contains the two bounded rewrite instructions.
+    assert len(invoke.call_args.args[0]) == 4
+    assert len(configured_chat_service.vector_store.calls) == 1
+
+
+@pytest.mark.parametrize("invalid_attempts", [1, 3])
+def test_chatopenai_tampered_clause_retries_and_has_finite_exit(configured_chat_service, invalid_attempts):
+    responses = [AIMessage(content=json.dumps([finding(original_clause="模型改写的原句")]))] * invalid_attempts
+    if invalid_attempts < 3:
+        responses.append(AIMessage(content=json.dumps([finding()])))
+    with patch("langchain_openai.ChatOpenAI.invoke", side_effect=responses) as invoke:
+        response = configured_chat_service.analyze_contract(CONTRACT)
+    assert invoke.call_count == min(invalid_attempts + 1, 3)
+    if invalid_attempts == 3:
+        assert_mock(response, CONTRACT)
+    else:
+        assert response.status == "success"
+        assert response.results[0].original_clause == RISK_CLAUSE
+
+
+@pytest.mark.parametrize("citations", [
+    ["LAW-716", "LAW-999"], ["LAW-712", "LAW-716", "LAW-716"], ["SCENARIO-01", "LAW-716"],
+])
+def test_chatopenai_filters_invented_and_unretrieved_ids(configured_chat_service, citations):
+    with patch("langchain_openai.ChatOpenAI.invoke", return_value=AIMessage(
+        content=json.dumps([finding(evidence_ids=citations)]),
+    )) as invoke:
+        response = configured_chat_service.analyze_contract(CONTRACT)
+    assert response.status == "success" and response.total_risks == 1
+    assert response.results[0].evidence_ids == ["LAW-716"]
+    assert response.results[0].risk_level.value == "HIGH"
+    invoke.assert_called_once()
+
+
+@pytest.mark.parametrize("citations", [[], ["LAW-999"], ["LAW-712"], ["SCENARIO-01"]])
+def test_chatopenai_high_without_retrieved_evidence_is_mock(configured_chat_service, citations):
+    with patch("langchain_openai.ChatOpenAI.invoke", return_value=AIMessage(
+        content=json.dumps([finding(evidence_ids=citations)]),
+    )) as invoke:
+        response = configured_chat_service.analyze_contract(CONTRACT)
+    assert_mock(response, CONTRACT)
+    assert all(item.evidence_ids == [] for item in response.results)
+    invoke.assert_called_once()
+
+
+@pytest.mark.parametrize("level", ["MEDIUM", "LOW", "NONE"])
+def test_chatopenai_lower_levels_never_keep_unretrieved_citations(configured_chat_service, level):
+    with patch("langchain_openai.ChatOpenAI.invoke", return_value=AIMessage(content=json.dumps([
+        finding(level, evidence_ids=["LAW-712", "LAW-999"], explanation="直接依据不足，需要补充材料。"),
+    ]))) as invoke:
+        response = configured_chat_service.analyze_contract(CONTRACT)
+    assert response.status == "success"
+    assert response.results[0].evidence_ids == []
+    assert response.total_risks == (0 if level == "NONE" else 1)
+    invoke.assert_called_once()
+
+
+@pytest.mark.parametrize("wrapper", [
+    "n%ss", "```json\n%s", "```python\n%s\n```", "审查结果：%s", "%s审查结束",
+    "%s[]", "`%s`",
+])
+def test_chatopenai_cleanup_does_not_accept_damaged_or_extra_text(configured_chat_service, wrapper):
+    with patch("langchain_openai.ChatOpenAI.invoke", return_value=AIMessage(
+        content=wrapper % json.dumps([finding()]),
+    )) as invoke:
+        response = configured_chat_service.analyze_contract(CONTRACT)
+    assert_mock(response, CONTRACT)
+    assert invoke.call_count == 3
+
+
+@pytest.mark.parametrize("constant", ["NaN", "Infinity", "-Infinity"])
+def test_chatopenai_rejects_nonstandard_json_constants(configured_chat_service, constant):
+    content = json.dumps([finding()]).replace('"HIGH"', constant)
+    with patch("langchain_openai.ChatOpenAI.invoke", return_value=AIMessage(content=content)) as invoke:
+        response = configured_chat_service.analyze_contract(CONTRACT)
+    assert_mock(response, CONTRACT)
+    assert invoke.call_count == 3
+
+
+def test_chatopenai_rejects_duplicate_json_keys(configured_chat_service):
+    content = json.dumps([finding()]).replace('"risk_level": "HIGH"', '"risk_level": "NONE", "risk_level": "HIGH"')
+    with patch("langchain_openai.ChatOpenAI.invoke", return_value=AIMessage(content=content)) as invoke:
+        response = configured_chat_service.analyze_contract(CONTRACT)
+    assert_mock(response, CONTRACT)
+    assert invoke.call_count == 3
