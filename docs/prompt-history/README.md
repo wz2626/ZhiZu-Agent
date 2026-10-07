@@ -10,6 +10,8 @@
 | [chain-02-graph-critic](chain-02-graph-critic/README.md) | 双图状态、Critic 熔断、会话隔离、JSON 校验及确定性算分的生成与修复 |
 | [chain-03-web-board](chain-03-web-board/README.md) | 网页看板、脱敏预览、原文联动、真实回放与清单导出的生成与修复 |
 
+Day 3 回合 1 按用户指定新增 [chain-02-risk-review](chain-02-risk-review/README.md) 专项目录，记录合同审查核心 Schema、RAG + LLM、API 与演练参考数据。它不替换或重命名既有 `chain-02-graph-critic`；完整图及 Critic 仍归既有主题链，专项摘要不代表完整原始对话归档。
+
 ## 责任与真实性
 
 - 开发者使用工具支持的功能导出完整原始对话；不支持导出时，用连续截图或录屏保留用户提问、AI 可见回复及用户引导修复过程。

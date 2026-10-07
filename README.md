@@ -1,6 +1,6 @@
 # 智租博弈（ZhiZu-Agent）
 
-面向青年租房押金扣留、维修责任和提前退租问题的 AI 辅助演练项目。目标流程是合同风险审查、模拟协商、导出协商清单。目前已具备 FastAPI 运行底座、《民法典》租赁合同 32 条法条知识库及只读状态、检索接口；合同审查图和谈判图仍在后续开发中。
+面向青年租房押金扣留、维修责任和提前退租问题的 AI 辅助演练项目。目标流程是合同风险审查、模拟协商、导出协商清单。目前已具备 FastAPI 运行底座、《民法典》租赁合同 32 条法条知识库、只读状态与检索接口，以及“契光排雷”合同审查核心服务和 API；完整合同审查图与谈判图仍在后续开发中。
 
 ## 核心特性（规划）
 
@@ -31,7 +31,7 @@
 
 ## Windows PowerShell：启动、入库与测试
 
-以下命令在仓库根目录运行，使用已配置的 `.venv`。未填写聊天或向量 API 密钥时，法条入库的 `auto` 模式会使用确定性 mock 向量；真实云端向量需在本地 `.env` 配置有效密钥。法条数据只来自 `backend/data/laws/civil_code_lease_703_734.json`，演练案例不作为法律依据。
+以下命令在仓库根目录运行，使用已配置的 `.venv`。未填写有效向量 API 密钥时，法条入库的 `auto` 模式会使用确定性 mock 向量；真实云端向量需在本地 `.env` 配置有效密钥。缺少有效聊天密钥时，合同审查直接返回标记为 `mock` 的演示结果。法条数据只来自 `backend/data/laws/civil_code_lease_703_734.json`，演练案例不作为法律依据。
 
 ```powershell
 # 仅在没有 .env 时复制模板，保留自己的已有配置
@@ -51,6 +51,27 @@ if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 
 启动后可访问同源首页 `http://127.0.0.1:8000/`、健康接口 `/api/health`、知识库状态 `/api/kb/status` 和 Swagger `/docs`。知识库检索接口为 `POST /api/kb/search`，请求示例：`{"query":"房屋漏水由谁维修？","top_k":4}`。返回脱敏后的 `query`、`top_k`、`results`（法条证据）、`direct_basis_sufficient` 与 `boundary_notice`；缺库、损坏库或检索校验异常返回 503 `KB_NOT_READY`，云端向量调用失败返回 503 `UPSTREAM_EMBEDDING_ERROR`。缺库或空目录请求不创建存储目录；零向量查询返回空证据，零分候选被过滤。押金问题仅展示相关条文，并明确提示本章没有押金返还的直接依据。
 
+### 契光排雷：合同审查 API
+
+`POST /api/review/analyze` 接收必填字符串 `contract_text`（长度 10～5000，纯空白拒绝）和整数 `top_k`（默认 4，范围 1～8）。缺字段、越界长度和非法 `top_k` 返回 422。示例：
+
+```json
+{
+  "contract_text": "租客每月按约支付租金。租客未经房东同意擅自转租房屋。",
+  "top_k": 4
+}
+```
+
+返回 `status`（`success` 或 `mock`）、`results` 和 `total_risks`。每条结果包含 `clause_id`、`original_clause`、`risk_level`（`HIGH` / `MEDIUM` / `LOW` / `NONE`）、`explanation`、`evidence_ids` 和 `negotiation_tip`；`total_risks` 由 Python 统计 HIGH、MEDIUM、LOW 项，NONE 不计入。`evidence_ids` 仅允许 `LAW-703`～`LAW-734`，成功结果的引用还必须属于本次检索提供的法条。
+
+后端在检索和聊天之前复查并遮蔽手机号、身份证号；`original_clause` 按[总规格](docs/specs/spec-00-architecture.md)校验为**后端脱敏文本的精确子串**。输入已脱敏或不含上述敏感信息时，它也必须是请求原文的精确子串；调用方应使用同一脱敏文本定位和高亮，不按未脱敏文本偏移定位。姓名和住址等自由文本仍需人工脱敏。
+
+真实模式使用 `config.py` 的 `CHAT_BASE_URL`、`CHAT_MODEL`、`CHAT_API_KEY` 配置 `ChatOpenAI`，检索使用当前 `CHROMA_PATH` 和向量配置；须先按匹配的向量模式完成 32 条法条入库。审查请求不自动入库，缺库不创建存储目录。Prompt 要求严格依据提供的原始法条和 ID，仅输出 JSON 数组，禁止 Markdown 代码块；服务再次校验结构、原句、引用、敏感数字和唯一条款 ID。校验失败最多重写 2 次、总生成最多 3 次；关闭 SDK 自动重试，单次聊天超时 20 秒。空证据、未就绪/异常知识库、聊天初始化/调用失败或最终校验失败均回退 `mock`。
+
+缺少真实 `CHAT_API_KEY`（包括模板占位值）时直接 HTTP 200 返回固定演示：1 个 HIGH、1 个 NONE，`total_risks=1`，原句从当前脱敏文本截取，`evidence_ids=[]`。此路径不初始化聊天客户端或向量库、不调用任何云 API，即使仅配置了真实向量密钥也一样。**Mock 不是真实风险判断**，正常合同也会出现演示 HIGH；解释明确注明演示和依据不足，不伪造法条引用。涉及押金返还的实质判断仍需补充本章以外的依据。
+
+本轮实现核心服务和结构/引用/定位校验，不代表完整 LangGraph Critic 图、语义依据充分性审查或 trace 已完成。本轮按用户明确要求使用 `success/mock`；总规格中完整图的 `needs_review` 出口留待后续实现。两份脱敏合成演练文本位于 `backend/data/scenarios/sample_contracts.json`，不进入法条库，也不替代后续固定工程测试集。
+
 在仓库目录的另一个 PowerShell 窗口运行全量测试：
 
 ```powershell
@@ -61,7 +82,9 @@ if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 
 Day 1 在 Python 3.12.13 下验证健康底座，11 项 pytest 通过；[验证记录](docs/test-results/day01-round02.md)保留首次命令问题、复测结果和页面截图。该次仅安装底座相关依赖，未验证全量 RAG 依赖及完整业务复现。
 
-Day 2 回合 2 全量测试为 43 passed，见[向量维度与知识库 API 实测](docs/test-results/day02-round02.md)。2026-10-07 的 Day 3 前置底座加固后，最新全量测试为 **103 passed in 11.35s**，退出码 0，无失败、跳过或警告；使用上述 `.venv` 命令，未调用真实云 API。新增覆盖严格向量数值校验、非有限距离、零向量/零分过滤、扩展脱敏、密钥判定、损坏库降级、错误码区分与单客户端检索；过程失败和修复见[本次实测报告](docs/test-results/day02-round03-hardening.md)。
+Day 2 回合 2 全量测试为 43 passed，见[向量维度与知识库 API 实测](docs/test-results/day02-round02.md)。2026-10-07 的 Day 3 前置底座加固后，全量测试为 **103 passed in 11.35s**，退出码 0，无失败、跳过或警告；新增覆盖严格向量数值校验、非有限距离、零向量/零分过滤、扩展脱敏、密钥判定、损坏库降级、错误码区分与单客户端检索，见[加固实测报告](docs/test-results/day02-round03-hardening.md)。
+
+Day 3 回合 1 最新全量结果为 **175 passed in 15.09s**（Day 1/2 原有 103 项 + 审查新增 72 项），退出码 0，无失败、跳过或警告；审查针对性复测为 **72 passed in 3.31s**。均使用上述 `.venv` 与固定临时目录，未调用真实云 API。首次受限运行在 Windows asyncio 本地 socketpair 初始化阻塞，诊断后使用受控提升权限完成离线测试，见[本轮实测报告](docs/test-results/day03-round01.md)。真实 SiliconFlow 聊天/向量连通性与模型语义质量尚未验证。
 
 常见问题：提示缺少模块时，确认使用仓库的 `.venv`；端口 8000 被占用时，先停止占用该端口的本地服务。占位密钥显示“尚未配置完整”属于正常状态，不影响健康接口。切换 mock 与云端向量或更换模型时应使用不同集合或目录；错误维度的云端向量会在写入前被拒绝。
 
@@ -71,4 +94,4 @@ Day 2 回合 2 全量测试为 43 passed，见[向量维度与知识库 API 实�
 
 ## 规格与过程证据
 
-协作按 [AGENTS.md](AGENTS.md) 执行，后续实现以 [总规格](docs/specs/spec-00-architecture.md) 为基准。三条 Prompt 链分别记录法条检索与审查、图与 Critic、网页看板的真实 AI 交互和修复过程，归档时读取[归档总说明](docs/prompt-history/README.md)。当前各链仅有待补原始记录的索引，不表示完整对话证据已生成。
+协作按 [AGENTS.md](AGENTS.md) 执行，后续实现以 [总规格](docs/specs/spec-00-architecture.md) 为基准。三条 Prompt 主题链分别记录法条检索与审查、图与 Critic、网页看板的真实 AI 交互和修复过程；本轮按用户指定增加 [Chain-02 风险审查专项记录](docs/prompt-history/chain-02-risk-review/README.md)，保留既有链目录。归档时读取[归档总说明](docs/prompt-history/README.md)。当前索引及过程摘要仍待补完整原始记录，不表示完整对话证据已生成。

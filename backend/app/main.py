@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 
 from backend.app.api.knowledge import router as knowledge_router
+from backend.app.api.review import router as review_router
 from backend.app.core.config import PROJECT_ROOT, Settings, get_settings
 from backend.app.schemas.health import HealthResponse
 
@@ -17,6 +18,7 @@ app.add_middleware(
     allow_headers=["Content-Type"],
 )
 app.include_router(knowledge_router)
+app.include_router(review_router, prefix="/api/review")
 
 
 @app.get("/api/health", response_model=HealthResponse, tags=["health"])
