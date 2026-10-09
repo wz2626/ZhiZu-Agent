@@ -15,6 +15,7 @@ from backend.app.core.config import PROJECT_ROOT, get_settings
 from backend.app.main import app
 from backend.app.schemas.review import ReviewResponse
 from backend.app.services.embedding import DeterministicHashEmbeddings
+from backend.app.services.graph import review_graph
 from backend.app.services.review import ContractReviewService
 from backend.app.services.vector_store import LawVectorStoreService, load_authoritative_laws, mask_sensitive_text
 
@@ -450,14 +451,14 @@ def test_chatopenai_filters_invented_and_unretrieved_ids(configured_chat_service
 
 
 @pytest.mark.parametrize("citations", [[], ["LAW-999"], ["LAW-712"], ["SCENARIO-01"]])
-def test_chatopenai_high_without_retrieved_evidence_is_mock(configured_chat_service, citations):
+def test_chatopenai_high_without_retrieved_evidence_retries_then_is_mock(configured_chat_service, citations):
     with patch("langchain_openai.ChatOpenAI.invoke", return_value=AIMessage(
         content=json.dumps([finding(evidence_ids=citations)]),
     )) as invoke:
         response = configured_chat_service.analyze_contract(CONTRACT)
     assert_mock(response, CONTRACT)
     assert all(item.evidence_ids == [] for item in response.results)
-    invoke.assert_called_once()
+    assert invoke.call_count == 3
 
 
 @pytest.mark.parametrize("level", ["MEDIUM", "LOW", "NONE"])
@@ -500,3 +501,107 @@ def test_chatopenai_rejects_duplicate_json_keys(configured_chat_service):
         response = configured_chat_service.analyze_contract(CONTRACT)
     assert_mock(response, CONTRACT)
     assert invoke.call_count == 3
+
+
+def graph_input(text=CONTRACT):
+    return {
+        "contract_text": mask_sensitive_text(text), "evidence_list": FakeStore().evidence,
+        "current_draft": None, "errors": [], "retry_count": 0,
+        "final_results": [], "status": "drafting", "messages": [],
+        "retry_pending": False,
+    }
+
+
+def test_service_invokes_compiled_graph_with_masked_text_and_filtered_evidence(monkeypatch):
+    text = "联系电话13800138000。" + CONTRACT
+    store = FakeStore()
+    store.evidence.insert(0, store.evidence[0].model_copy(update={"content": "伪造法条"}))
+    llm = FakeLLM(json.dumps([finding()]))
+    service = real_mode_service(monkeypatch, llm, store)
+    with patch("backend.app.services.review.review_graph.invoke", wraps=review_graph.invoke) as invoke:
+        response = service.analyze_contract(text)
+    invoke.assert_called_once()
+    initial = invoke.call_args.args[0]
+    assert initial["contract_text"] == mask_sensitive_text(text)
+    assert len(initial["evidence_list"]) == 1
+    assert initial["retry_count"] == 0 and initial["errors"] == []
+    assert invoke.call_args.kwargs["context"] == {"llm": llm}
+    assert set(response.model_dump()) == {"status", "results", "total_risks"}
+    assert response.status == "success"
+
+
+@pytest.mark.parametrize("invalid_attempts", [0, 1, 2])
+def test_graph_runs_actual_nodes_and_only_commits_valid_findings(invalid_attempts):
+    llm = FakeLLM(*([json.dumps([finding(original_clause="模型改写的原句")])] * invalid_attempts),
+                  json.dumps([finding()]))
+    events = list(review_graph.stream(graph_input(), context={"llm": llm}, stream_mode="updates"))
+    assert [next(iter(event)) for event in events] == ["drafting", "critic"] * (invalid_attempts + 1)
+    reviews = [event["critic"] for event in events if "critic" in event]
+    for index, review in enumerate(reviews[:-1], 1):
+        assert review["status"] == "needs_review" and review["retry_count"] == index
+        assert review["final_results"] == []
+        assert "original clause" in review["errors"][0]
+        assert review["errors"][0] in llm.calls[index][-1].content
+    assert reviews[-1]["status"] == "success" and reviews[-1]["errors"] == []
+    assert reviews[-1]["final_results"][0].original_clause == RISK_CLAUSE
+
+
+def test_graph_exhaustion_keeps_needs_review_reason_and_discards_invalid_draft():
+    llm = FakeLLM("broken", "broken", "broken")
+    state = review_graph.invoke(graph_input(), context={"llm": llm})
+    assert len(llm.calls) == 3
+    assert state["retry_count"] == 2 and state["status"] == "needs_review"
+    assert state["errors"] and "JSON" in state["errors"][0]
+    assert state["final_results"] == [] and state["current_draft"] is None
+    assert not state["retry_pending"]
+
+
+def test_graph_failure_runs_mock_node_without_additional_chat_calls():
+    llm = FakeLLM(RuntimeError("sk-synthetic-private-error"))
+    events = list(review_graph.stream(graph_input(), context={"llm": llm}, stream_mode="updates"))
+    assert [next(iter(event)) for event in events] == ["drafting", "mock"]
+    assert events[-1]["mock"]["status"] == "needs_review"
+    assert len(llm.calls) == 1
+    assert "sk-synthetic-private-error" not in str(events)
+
+
+@pytest.mark.parametrize("invalid_field", ["original_clause", "explanation", "extra_field"])
+def test_critic_feedback_does_not_echo_untrusted_output(invalid_field):
+    private = "sk-synthetic-private-model-output 13800138000"
+    bad = finding(**{invalid_field: {"untrusted": private} if invalid_field == "explanation" else private})
+    llm = FakeLLM(json.dumps([bad]), json.dumps([finding()]))
+    state = review_graph.invoke(graph_input(), context={"llm": llm})
+    assert state["status"] == "success" and len(llm.calls) == 2
+    assert private not in " ".join(message.content for message in llm.calls[1])
+    assert private not in str(state["errors"]) + str(state["final_results"])
+
+
+def test_critic_ungrounded_high_can_succeed_only_after_citation_is_fixed():
+    llm = FakeLLM(json.dumps([finding(evidence_ids=["LAW-999"])]), json.dumps([finding()]))
+    state = review_graph.invoke(graph_input(), context={"llm": llm})
+    assert state["status"] == "success" and state["retry_count"] == 1
+    assert len(llm.calls) == 2
+    assert "HIGH finding has no retrieved evidence" in llm.calls[1][-1].content
+    assert state["final_results"][0].evidence_ids == ["LAW-716"]
+
+
+def test_reused_graph_does_not_share_errors_messages_or_retries_between_requests():
+    failed = review_graph.invoke(graph_input(), context={"llm": FakeLLM("bad", "bad", "bad")})
+    llm = FakeLLM(json.dumps([finding()]))
+    succeeded = review_graph.invoke(graph_input(), context={"llm": llm})
+    assert failed["status"] == "needs_review" and failed["retry_count"] == 2
+    assert succeeded["status"] == "success" and succeeded["retry_count"] == 0
+    assert succeeded["errors"] == [] and len(llm.calls[0]) == 2
+
+
+@pytest.mark.parametrize("failure", ["needs_review", "exception"])
+def test_service_graph_failure_preserves_mock_api_and_hides_internal_reason(monkeypatch, caplog, failure):
+    private = "sk-synthetic-graph-error"
+    service = real_mode_service(monkeypatch, FakeLLM())
+    outcome = ({"return_value": {"status": "needs_review", "errors": [private], "final_results": []}}
+               if failure == "needs_review" else {"side_effect": RuntimeError(private)})
+    with patch("backend.app.services.review.review_graph.invoke", **outcome):
+        response = service.analyze_contract(CONTRACT)
+    assert_mock(response, CONTRACT)
+    assert set(response.model_dump()) == {"status", "results", "total_risks"}
+    assert private not in response.model_dump_json() + caplog.text

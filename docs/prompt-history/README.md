@@ -12,6 +12,8 @@
 
 Day 3 回合 1 按用户指定新增 [chain-02-risk-review](chain-02-risk-review/README.md) 专项目录，记录合同审查核心 Schema、RAG + LLM、API 与演练参考数据。它不替换或重命名既有 `chain-02-graph-critic`；完整图及 Critic 仍归既有主题链，专项摘要不代表完整原始对话归档。
 
+Day 4 回合 1 按用户指定新增 [chain-03-langgraph](chain-03-langgraph/README.md) 专项目录，记录合同审查 StateGraph、确定性 Critic、有界纠错与 API 兼容适配；作为既有图主题链的专项入口，不替换 `chain-03-web-board`。完整原始对话仍待开发者导出。
+
 ## 责任与真实性
 
 - 开发者使用工具支持的功能导出完整原始对话；不支持导出时，用连续截图或录屏保留用户提问、AI 可见回复及用户引导修复过程。
