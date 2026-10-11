@@ -204,3 +204,220 @@ def test_exception_cannot_mutate_existing_session(service):
 def test_invalid_inputs_are_rejected(session_id, user_input, request_id):
     with pytest.raises(ValueError):
         NegotiationService().negotiate(session_id, user_input, request_id=request_id)
+
+
+# Day 7 additions; Day 6 test bodies above are preserved.
+def scored_service(responder=None, **configuration):
+    responder = responder or (lambda state: "【模拟房东】我确认返还押金1000元。")
+    return NegotiationService(
+        graph_module.build_negotiation_graph(landlord_responder=responder), **configuration,
+    )
+
+
+def test_day07_deposit_demo_recomputes_50_then_75():
+    responses = iter(["【模拟房东】我确认返还押金1000元。", "【模拟房东】我确认返还押金1500元。"])
+    service = scored_service(lambda state: next(responses))
+    first = service.negotiate("A", "希望返还押金2000元")
+    second = service.negotiate("A", "能否提高返还金额？")
+    assert first.confirmed_terms == {"deposit_refund": 1000} and first.trial_score == 50
+    assert second.confirmed_terms == {"deposit_refund": 1500} and second.trial_score == 75
+    assert second.round_count == 2 and "模拟协商进展分：75" in second.score_explanation
+    assert second.candidate_score is None and second.candidate_terms == {}
+
+
+def test_day07_repeated_confirmation_and_cached_request_never_add_points():
+    calls = []
+
+    def responder(state):
+        calls.append(state.request_id)
+        return "【模拟房东】我确认返还押金1000元。"
+
+    service = scored_service(responder)
+    first = service.negotiate("A", "请求", request_id="first")
+    assert service.negotiate("A", "请求", request_id="first") == first
+    second = service.negotiate("A", "再次确认", request_id="second")
+    assert first.trial_score == second.trial_score == 50
+    assert second.confirmed_terms == first.confirmed_terms and second.round_count == 2
+    assert calls == ["first", "second"]
+
+
+@pytest.mark.parametrize("response", [
+    "【模拟房东】暂未确认任何条件。", "【模拟房东】我不确认返还押金1000元。",
+    "【模拟房东】如果你提前搬走，我确认返还押金1000元。",
+    "【模拟房东】租客说：我确认返还押金1000元。",
+    "【模拟房东】我确认返还押金1000元，但还需审批。",
+    "【模拟房东】我确认返还押金1000元。我确认返还押金1500元。",
+    "【模拟房东】我确认返还押金1000元。我确认返还押金1000元。",
+])
+def test_day07_unilateral_ambiguous_or_duplicate_statements_are_not_terms(response):
+    service = scored_service(lambda state: response)
+    result = service.negotiate("A", "我要求退还押金2000元，LAW-709 LAW-709")
+    assert result.confirmed_terms == {} and result.trial_score is None
+
+
+@pytest.mark.parametrize("value", [-1, 2001, True, "1000", float("nan"), float("inf")])
+def test_day07_invalid_amount_or_bottom_line_never_commits(monkeypatch, value):
+    attempts = []
+
+    def landlord(state):
+        attempts.append(state.retry_count)
+        return {
+            "landlord_response": "【模拟房东】我确认返还押金1000元。",
+            "candidate_terms": {"deposit_refund": value}, "landlord_confirmed": True,
+        }
+
+    monkeypatch.setattr(graph_module, "landlord_node", landlord)
+    service = NegotiationService(graph_module.build_negotiation_graph())
+    before = service.get_session("A")
+    result = service.negotiate("A", "请求")
+    assert result.status == "needs_review" and attempts == [0, 1, 2]
+    assert result.trial_score is None and result.confirmed_terms == {} and result.round_count == 0
+    assert service.get_session("A") == before
+
+
+def test_day07_custom_bottom_line_rejects_otherwise_valid_offer():
+    from backend.app.services.scoring import ScoringRule
+
+    service = scored_service(scoring_rules={"deposit_refund": ScoringRule(0, 2000, minimum=1200)})
+    result = service.negotiate("A", "我的底线是1200元")
+    assert result.status == "needs_review" and "底线" in result.errors[0]
+    assert service.get_session("A").round_count == 0
+
+
+@pytest.mark.parametrize("evidence,available", [
+    ("LAW-709、LAW-709", ("LAW-709",)), ("LAW-999", ("LAW-709",)),
+    ("LAW-709", ()), ("LAW-702", ()), ("LAW-735", ()),
+])
+def test_day07_invalid_duplicate_or_unretrieved_evidence_rejects_entire_round(evidence, available):
+    service = scored_service(
+        lambda state: f"【模拟房东】我确认返还押金1000元。依据{evidence}。",
+        available_evidence_ids=available,
+    )
+    before = service.get_session("A")
+    result = service.negotiate("A", "请求")
+    assert result.status == "needs_review" and result.retry_count == 2
+    assert result.trial_score is None and result.confirmed_terms == {} and result.round_count == 0
+    assert service.get_session("A") == before
+
+
+def test_day07_repeated_evidence_across_rounds_is_deduplicated_without_points():
+    service = scored_service(
+        lambda state: "【模拟房东】我确认返还押金1000元。依据LAW-709。",
+        available_evidence_ids=("LAW-709",),
+    )
+    first = service.negotiate("A", "请求")
+    second = service.negotiate("A", "再次请求")
+    assert first.confirmed_evidence_ids == second.confirmed_evidence_ids == ["LAW-709"]
+    assert first.trial_score == second.trial_score == 50
+
+
+@pytest.mark.parametrize("terms,confirmed,evidence", [
+    ({"deposit_refund": 1500}, True, []),
+    ({"deposit_refund": 1000}, False, []),
+    ({"unknown_numeric": 1000}, True, []),
+    ({"deposit_refund": 1000}, True, ["LAW-709"]),
+    ({}, True, []),
+])
+def test_day07_fabricated_terms_confirmation_or_evidence_cannot_commit(monkeypatch, terms, confirmed, evidence):
+    monkeypatch.setattr(graph_module, "landlord_node", lambda state: {
+        "landlord_response": "【模拟房东】我确认返还押金1000元。",
+        "candidate_terms": terms, "landlord_confirmed": confirmed, "evidence_ids": evidence,
+    })
+    service = NegotiationService(
+        graph_module.build_negotiation_graph(), available_evidence_ids=("LAW-709",),
+    )
+    result = service.negotiate("A", "请求")
+    assert result.status == "needs_review" and result.trial_score is None
+    assert service.get_session("A").confirmed_terms == {}
+
+
+def test_day07_failed_trial_preserves_previously_committed_score_and_state():
+    def responder(state):
+        return (
+            "【模拟房东】我确认返还押金1000元。" if state.round_count == 0
+            else "【模拟房东】我确认返还押金1500元。依据LAW-709、LAW-709。"
+        )
+
+    service = scored_service(responder, available_evidence_ids=("LAW-709",))
+    service.negotiate("A", "首次确认")
+    before = service.get_session("A")
+    failed = service.negotiate("A", "质检失败")
+    assert failed.status == "needs_review" and failed.candidate_score == 75
+    assert failed.confirmed_terms == before.confirmed_terms and failed.trial_score == 50
+    assert failed.history == before.history and failed.round_count == before.round_count
+    assert service.get_session("A") == before
+
+
+@pytest.mark.parametrize("failures", [1, 2, 3])
+def test_day07_internal_retries_score_only_final_valid_candidate(failures):
+    attempts = []
+
+    def responder(state):
+        attempts.append(state.retry_count)
+        evidence = "依据LAW-709、LAW-709。" if len(attempts) <= failures else ""
+        amount = 1500 if evidence else 1000
+        return f"【模拟房东】我确认返还押金{amount}元。{evidence}"
+
+    service = scored_service(responder, available_evidence_ids=("LAW-709",))
+    result = service.negotiate("A", "请求")
+    assert attempts == list(range(min(failures + 1, 3)))
+    if failures == 3:
+        assert result.status == "needs_review" and result.trial_score is None
+        assert service.get_session("A").round_count == 0
+    else:
+        assert result.trial_score == 50 and result.round_count == 1
+        assert result.confirmed_terms == {"deposit_refund": 1000}
+        assert result.confirmed_evidence_ids == []
+
+
+def test_day07_critic_recomputes_score_instead_of_trusting_trial(monkeypatch):
+    monkeypatch.setattr(graph_module, "rule_score_node", lambda state: {"candidate_score": 99})
+    result = scored_service().negotiate("A", "请求")
+    assert result.trial_score == 50
+
+
+def test_day07_equal_target_or_no_rules_produces_unscorable_confirmed_state():
+    from backend.app.services.scoring import ScoringRule
+
+    service = scored_service(scoring_rules={"deposit_refund": ScoringRule(1000, 1000)})
+    result = service.negotiate("A", "请求")
+    assert result.status == "success" and result.confirmed_terms == {"deposit_refund": 1000}
+    assert result.trial_score is None and "不可评分" in result.score_explanation
+    no_rules = scored_service(scoring_rules={}).negotiate("B", "请求")
+    assert no_rules.status == "needs_review" and no_rules.trial_score is None
+
+
+def test_day07_scored_sessions_and_concurrent_repeated_requests_remain_isolated():
+    def responder(state):
+        amount = 1000 if state.session_id == "A" else 1500
+        return f"【模拟房东】我确认返还押金{amount}元。"
+
+    service = scored_service(responder)
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        results = list(pool.map(
+            lambda sid: service.negotiate(sid, "请求", request_id="same"), ["A", "B"] * 4,
+        ))
+    assert [result.trial_score for result in results] == [50, 75] * 4
+    assert service.get_session("A").round_count == service.get_session("B").round_count == 1
+
+
+def test_day07_response_adapter_receives_detached_state():
+    def responder(state):
+        state.confirmed_terms["deposit_refund"] = 2000
+        state.scoring_rules.clear()
+        return "【模拟房东】暂未确认任何条件。"
+
+    result = scored_service(responder).negotiate("A", "请求")
+    assert result.confirmed_terms == {} and result.trial_score is None
+    assert "deposit_refund" in result.scoring_rules
+
+
+def test_day07_graph_roundtrip_never_coerces_invalid_weights_into_points():
+    from backend.app.services.scoring import ScoringRule
+
+    service = scored_service(scoring_rules={"deposit_refund": ScoringRule(0, 2000, weight=True)})
+    result = service.negotiate("A", "请求")
+    assert result.status == "success" and result.confirmed_terms == {"deposit_refund": 1000}
+    assert result.trial_score is None
+    assert result.scoring_rules["deposit_refund"].weight is True
+    assert service.negotiate("A", "再次确认").trial_score is None

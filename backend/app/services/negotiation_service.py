@@ -5,12 +5,16 @@ all sessions. No review module or external model is involved.
 """
 
 from dataclasses import dataclass, field
+from copy import deepcopy
 from threading import Lock
 from typing import Protocol
 from uuid import uuid4
 
 from backend.app.schemas.negotiation import MAX_ROUNDS, NegotiationState
 from backend.app.services.negotiation_graph import negotiation_graph
+from backend.app.services.scoring import ScoringRule, default_scoring_rules
+from backend.app.schemas.knowledge import LawId
+from pydantic import TypeAdapter
 
 
 class NegotiationGraph(Protocol):
@@ -25,13 +29,26 @@ class _Session:
 
 
 class NegotiationService:
-    def __init__(self, graph: NegotiationGraph | None = None) -> None:
+    def __init__(
+        self, graph: NegotiationGraph | None = None, *,
+        scoring_rules: dict[str, ScoringRule] | None = None,
+        available_evidence_ids: tuple[str, ...] = (),
+    ) -> None:
         self._graph = graph if graph is not None else negotiation_graph
+        self._scoring_rules = deepcopy(
+            default_scoring_rules() if scoring_rules is None else scoring_rules,
+        )
+        self._available_evidence_ids = TypeAdapter(list[LawId]).validate_python(
+            list(available_evidence_ids), strict=True,
+        )
         self._sessions: dict[str, _Session] = {}
         self._registry_lock = Lock()
 
     def _session(self, session_id: str) -> _Session:
-        initial = NegotiationState(session_id=session_id)
+        initial = NegotiationState(
+            session_id=session_id, scoring_rules=deepcopy(self._scoring_rules),
+            available_evidence_ids=self._available_evidence_ids.copy(),
+        )
         with self._registry_lock:
             if session_id not in self._sessions:
                 self._sessions[session_id] = _Session(initial)
@@ -67,6 +84,8 @@ class NegotiationService:
             working.request_id = request_id
             working.user_input = user_input
             working.candidate_terms = {}
+            working.evidence_ids = []
+            working.candidate_score = None
             working.coach_advice = ""
             working.landlord_response = ""
             working.landlord_confirmed = False
