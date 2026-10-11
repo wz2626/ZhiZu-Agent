@@ -1,0 +1,163 @@
+{
+  "started_at": "2026-10-11T14:17:13.315551+08:00",
+  "mode": "real_cloud",
+  "chat_model": "deepseek-flash",
+  "embedding_model": "BAAI/bge-m3",
+  "chroma_path": "./.runtime/chroma_cloud",
+  "chat_timeout_seconds": 60.0,
+  "embedding_requests": [
+    {
+      "texts": 1,
+      "http_status": 200,
+      "elapsed_ms": 1871.62
+    },
+    {
+      "texts": 1,
+      "http_status": 200,
+      "elapsed_ms": 674.94
+    }
+  ],
+  "reviews": [
+    {
+      "scenario_id": "SCENARIO-REVIEW-01",
+      "title": "正常到期退租",
+      "chat_calls": [
+        {
+          "status": "returned",
+          "model_name": "deepseek-flash",
+          "tokens": {
+            "input_tokens": 713,
+            "output_tokens": 4899,
+            "total_tokens": 5612
+          },
+          "elapsed_ms": 25993.98
+        }
+      ],
+      "client_initialized": true,
+      "graph_status": "success",
+      "retry_count": 0,
+      "feedback": [],
+      "retrieved_ids": [
+        "LAW-733",
+        "LAW-721",
+        "LAW-705",
+        "LAW-730"
+      ],
+      "http_status": 200,
+      "response": {
+        "status": "success",
+        "results": [
+          {
+            "clause_id": "C-01",
+            "original_clause": "租赁期限为一年，租客按约支付租金。",
+            "risk_level": "MEDIUM",
+            "explanation": "该句仅约定租期一年和‘按约支付租金’，未明确租金金额、支付周期、每期支付日及支付方式。根据LAW-721，租金支付期限没有约定或约定不明确时需适用法定补充规则，可能造成支付时点争议；但提供依据下不构成直接违法。",
+            "evidence_ids": [
+              "LAW-721"
+            ],
+            "negotiation_tip": "建议明确租金金额、支付周期（如月付或季付）、每期具体支付日、支付方式及逾期付款责任；如另有租金约定，应写入或明确指向该约定。"
+          },
+          {
+            "clause_id": "C-02",
+            "original_clause": "合同到期后，双方共同核对房屋和设施状况，租客按照约定或者正常使用后的状态返还房屋。",
+            "risk_level": "NONE",
+            "explanation": "该句与LAW-733关于租赁期限届满承租人返还租赁物、返还状态应符合约定或按租赁物性质使用后状态的规定一致，在本次提供依据下未发现直接冲突。",
+            "evidence_ids": [
+              "LAW-733"
+            ],
+            "negotiation_tip": ""
+          },
+          {
+            "clause_id": "C-03",
+            "original_clause": "押金扣减应列明项目并提供凭证，余额按双方约定的时间返还。",
+            "risk_level": "LOW",
+            "explanation": "该句要求押金扣减列明项目和提供凭证，对承租人相对有利；但‘余额按双方约定的时间返还’未明确具体返还期限，且本次提供依据未包含押金返还的直接规定，无法仅凭LAW-733、LAW-721、LAW-705、LAW-730判断押金返还条款的合法性。需补充押金相关法律依据，并明确返还时间。",
+            "evidence_ids": [],
+            "negotiation_tip": "建议明确押金返还的具体期限（如退租并核对后若干日内）、扣减异议程序及逾期返还责任；同时请补充押金相关法律依据后再作法务判断。"
+          }
+        ],
+        "total_risks": 2
+      },
+      "original_clauses_verified": true,
+      "citations_verified": true,
+      "risk_count_verified": true,
+      "elapsed_ms": 28077.15
+    },
+    {
+      "scenario_id": "SCENARIO-REVIEW-02",
+      "title": "押金不退与擅自转租",
+      "chat_calls": [
+        {
+          "status": "returned",
+          "model_name": "deepseek-flash",
+          "tokens": {
+            "input_tokens": 722,
+            "output_tokens": 4120,
+            "total_tokens": 4842
+          },
+          "elapsed_ms": 19513.75
+        }
+      ],
+      "client_initialized": true,
+      "graph_status": "success",
+      "retry_count": 0,
+      "feedback": [],
+      "retrieved_ids": [
+        "LAW-716",
+        "LAW-718",
+        "LAW-733",
+        "LAW-721"
+      ],
+      "http_status": 200,
+      "response": {
+        "status": "success",
+        "results": [
+          {
+            "clause_id": "C-01",
+            "original_clause": "租客每月按约支付租金。",
+            "risk_level": "NONE",
+            "explanation": "",
+            "evidence_ids": [
+              "LAW-721"
+            ],
+            "negotiation_tip": ""
+          },
+          {
+            "clause_id": "C-02",
+            "original_clause": "无论任何原因退租，押金不退，房东无需说明扣款原因或提供凭证。",
+            "risk_level": "MEDIUM",
+            "explanation": "本次提供的法律依据未覆盖押金返还、扣款说明及凭证义务，无法据此确认该约定违法或合法；但“无论任何原因退租均不退押金且无需说明或提供凭证”可能限制承租人权利，需补充押金相关法律依据后再作确定性判断。",
+            "evidence_ids": [],
+            "negotiation_tip": "建议明确押金退还条件、可扣款情形、扣款金额计算、凭证提供义务及争议处理机制，避免概括约定不退押金。"
+          },
+          {
+            "clause_id": "C-03",
+            "original_clause": "租客可以未经房东同意擅自转租房屋，发生纠纷全部由租客承担。",
+            "risk_level": "HIGH",
+            "explanation": "LAW-716规定承租人经出租人同意可以将租赁物转租，未经出租人同意转租的，出租人可以解除合同。该条允许租客未经房东同意擅自转租，与上述法定规则直接冲突，房东可据此解除租赁合同，相关约定不能排除该法定解除权。",
+            "evidence_ids": [
+              "LAW-716"
+            ],
+            "negotiation_tip": "改为租客转租须事先取得房东书面同意；未经同意不得转租，并明确擅自转租的违约责任及损失承担。"
+          },
+          {
+            "clause_id": "C-04",
+            "original_clause": "正常使用产生的损耗，双方在交接时共同记录。",
+            "risk_level": "NONE",
+            "explanation": "",
+            "evidence_ids": [
+              "LAW-733"
+            ],
+            "negotiation_tip": ""
+          }
+        ],
+        "total_risks": 2
+      },
+      "original_clauses_verified": true,
+      "citations_verified": true,
+      "risk_count_verified": true,
+      "elapsed_ms": 20290.22
+    }
+  ],
+  "queries": []
+}

@@ -1,5 +1,6 @@
 """Load local configuration without requiring cloud credentials at startup."""
 
+import math
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -27,6 +28,7 @@ class Settings:
     embedding_model: str
     embedding_api_key: str = field(repr=False)
     chroma_path: str
+    chat_timeout_seconds: float = 20.0
 
     @property
     def env_configured(self) -> bool:
@@ -44,6 +46,16 @@ class Settings:
         return all(values) and all(has_real_key(key) for key in keys)
 
 
+def _chat_timeout() -> float:
+    try:
+        value = float(os.getenv("CHAT_TIMEOUT_SECONDS", "20"))
+    except ValueError:
+        raise ValueError("CHAT_TIMEOUT_SECONDS must be a number between 1 and 120") from None
+    if not math.isfinite(value) or not 1 <= value <= 120:
+        raise ValueError("CHAT_TIMEOUT_SECONDS must be a number between 1 and 120")
+    return value
+
+
 def get_settings() -> Settings:
     """Environment variables take precedence over the repository's .env file."""
     return Settings(
@@ -56,4 +68,5 @@ def get_settings() -> Settings:
         embedding_model=os.getenv("EMBEDDING_MODEL", "BAAI/bge-m3").strip(),
         embedding_api_key=os.getenv("EMBEDDING_API_KEY", "").strip(),
         chroma_path=os.getenv("CHROMA_PATH", "./backend/chroma_db").strip(),
+        chat_timeout_seconds=_chat_timeout(),
     )

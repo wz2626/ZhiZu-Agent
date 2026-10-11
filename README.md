@@ -1,6 +1,10 @@
 # 智租博弈（ZhiZu-Agent）
 
-面向青年租房押金扣留、维修责任和提前退租问题的 AI 辅助演练项目。目标流程是合同风险审查、模拟协商、导出协商清单。目前已具备 FastAPI 运行底座、《民法典》租赁合同 32 条法条知识库、只读状态与检索接口，以及“契光排雷”合同审查核心服务和 API；完整合同审查图与谈判图仍在后续开发中。
+面向青年租房押金扣留、维修责任和提前退租问题的 AI 辅助演练项目。目标流程是合同风险审查、模拟协商、导出协商清单。目前已具备 FastAPI 运行底座、《民法典》租赁合同 32 条法条知识库、只读状态与检索接口、“契光排雷”合同审查核心服务和 API，以及 Day 4 的 LangGraph 起草与 Critic 有界重写图。Day 5 已完成首次真实云端小规模联调；完整语义质检、trace、谈判图及业务网页仍待后续验证或实现。
+
+Day 5 已确认先做首次真实模型小规模验证，再完善失败出口和 trace；新窗口从 [Day 5 交接说明](docs/day05-handoff.md) 开始。配置继续通过本地 `.env`，网页填写 API Key 的入口暂不纳入任务。
+
+2026-10-11：DeepSeek `deepseek-flash` + 硅基流动 `BAAI/bge-m3` 已完成真实 32 条入库、重复入库、五类检索和两份合成合同审查，结果与语义待复核点见 [Day 5 回合 1 实测](docs/test-results/day05-round01.md)。用户本轮选择先完成真实联调，接口与 Spec 暂不调整；Day 5 的失败出口与对外 trace 尚未完成。
 
 ## 核心特性（规划）
 
@@ -17,12 +21,12 @@
 | --- | --- |
 | `backend/app/api/` | FastAPI 接口 |
 | `backend/app/core/` | 配置与公共能力 |
-| `backend/app/graph/` | 风险审查图与谈判图 |
+| `backend/app/graph/` | 执行图预留目录；当前审查图实现在 `backend/app/services/graph.py` |
 | `backend/app/schemas/` | 输入、输出与状态 Schema |
 | `backend/app/services/` | 检索、模型适配与业务服务 |
 | `backend/data/laws/` | 权威租赁法条数据 |
 | `backend/data/scenarios/` | 三类演练场景与 20 个话术构造参考案例，不作为法律依据 |
-| `frontend-web/` | 单文件 Vue 3 网页 |
+| `frontend-web/` | 当前为 HTML/JavaScript 健康检查页；单文件 Vue 3 业务网页待实现 |
 | `scripts/` | 入库、启动和辅助脚本 |
 | `tests/` | 自动化测试；后续固定 20 例工程测试集与演练参考案例分开管理 |
 | `docs/specs/` | 模块规格；[总规格](docs/specs/spec-00-architecture.md) |
@@ -66,11 +70,11 @@ if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 
 后端在检索和聊天之前复查并遮蔽手机号、身份证号；`original_clause` 按[总规格](docs/specs/spec-00-architecture.md)校验为**后端脱敏文本的精确子串**。输入已脱敏或不含上述敏感信息时，它也必须是请求原文的精确子串；调用方应使用同一脱敏文本定位和高亮，不按未脱敏文本偏移定位。姓名和住址等自由文本仍需人工脱敏。
 
-真实模式使用 `config.py` 的 `CHAT_BASE_URL`、`CHAT_MODEL`、`CHAT_API_KEY` 配置 `ChatOpenAI`，检索使用当前 `CHROMA_PATH` 和向量配置；须先按匹配的向量模式完成 32 条法条入库。审查请求不自动入库，缺库不创建存储目录。Prompt 要求严格依据提供的原始法条和 ID，仅输出 JSON 数组，禁止 Markdown 代码块；服务再次校验结构、原句、引用、敏感数字和唯一条款 ID。校验失败最多重写 2 次、总生成最多 3 次；关闭 SDK 自动重试，单次聊天超时 20 秒。空证据、未就绪/异常知识库、聊天初始化/调用失败或最终校验失败均回退 `mock`。
+真实模式使用 `config.py` 的 `CHAT_BASE_URL`、`CHAT_MODEL`、`CHAT_API_KEY` 配置 `ChatOpenAI`，检索使用当前 `CHROMA_PATH` 和向量配置；须先按匹配的向量模式完成 32 条法条入库。审查请求不自动入库，缺库不创建存储目录。Prompt 要求严格依据提供的原始法条和 ID，仅输出 JSON 数组，禁止 Markdown 代码块；服务再次校验结构、原句、引用、敏感数字和唯一条款 ID。校验失败最多重写 2 次、总生成最多 3 次；关闭 SDK 自动重试。`CHAT_TIMEOUT_SECONDS` 控制聊天网络超时，默认 20 秒，允许 1～120 秒；本轮 DeepSeek 默认思考模式以 60 秒配置验证，正常样例聊天耗时约 26 秒。每次服务独立持有和关闭同步 HTTP 客户端，避免复用已关闭的连接。空证据、未就绪/异常知识库、聊天初始化/调用失败或最终校验失败均回退 `mock`。
 
 缺少真实 `CHAT_API_KEY`（包括模板占位值）时直接 HTTP 200 返回固定演示：1 个 HIGH、1 个 NONE，`total_risks=1`，原句从当前脱敏文本截取，`evidence_ids=[]`。此路径不初始化聊天客户端或向量库、不调用任何云 API，即使仅配置了真实向量密钥也一样。**Mock 不是真实风险判断**，正常合同也会出现演示 HIGH；解释明确注明演示和依据不足，不伪造法条引用。涉及押金返还的实质判断仍需补充本章以外的依据。
 
-本轮实现核心服务和结构/引用/定位校验，不代表完整 LangGraph Critic 图、语义依据充分性审查或 trace 已完成。本轮按用户明确要求使用 `success/mock`；总规格中完整图的 `needs_review` 出口留待后续实现。两份脱敏合成演练文本位于 `backend/data/scenarios/sample_contracts.json`，不进入法条库，也不替代后续固定工程测试集。
+Day 4 已将起草、Critic 校验和有界重写接入 LangGraph，最多总生成 3 次；图内失败终态为 `needs_review`，保留受控原因并清空未通过的草稿和结果。当前服务仍兼容既有 `success/mock` API，将图内失败适配为 Mock，接口尚不返回内部原因或 trace。Critic 当前检查结构、引用追溯、原句定位和隐私，不代表法律语义依据充分性已验证。两份脱敏合成演练文本位于 `backend/data/scenarios/sample_contracts.json`，不进入法条库，也不替代后续固定工程测试集。
 
 在仓库目录的另一个 PowerShell 窗口运行全量测试：
 
@@ -84,7 +88,9 @@ Day 1 在 Python 3.12.13 下验证健康底座，11 项 pytest 通过；[验证�
 
 Day 2 回合 2 全量测试为 43 passed，见[向量维度与知识库 API 实测](docs/test-results/day02-round02.md)。2026-10-07 的 Day 3 前置底座加固后，全量测试为 **103 passed in 11.35s**，退出码 0，无失败、跳过或警告；新增覆盖严格向量数值校验、非有限距离、零向量/零分过滤、扩展脱敏、密钥判定、损坏库降级、错误码区分与单客户端检索，见[加固实测报告](docs/test-results/day02-round03-hardening.md)。
 
-Day 3 回合 1 最新全量结果为 **175 passed in 15.09s**（Day 1/2 原有 103 项 + 审查新增 72 项），退出码 0，无失败、跳过或警告；审查针对性复测为 **72 passed in 3.31s**。均使用上述 `.venv` 与固定临时目录，未调用真实云 API。首次受限运行在 Windows asyncio 本地 socketpair 初始化阻塞，诊断后使用受控提升权限完成离线测试，见[本轮实测报告](docs/test-results/day03-round01.md)。真实 SiliconFlow 聊天/向量连通性与模型语义质量尚未验证。
+Day 3 回合 1 全量结果为 **175 passed in 15.09s**，见[回合 1 报告](docs/test-results/day03-round01.md)；回合 2 增至 **203 passed in 13.31s**，审查模块 **100 passed in 5.59s**，见[回合 2 报告](docs/test-results/day03-round02.md)。均为离线测试，真实聊天调用被拦截。
+
+Day 4 已提交为 `2c007bd`，当时全量 **216 passed, 1 warning in 13.92s**，见[Day 4 实测报告](docs/test-results/day04-round01.md)。Day 5 回合 1 最新全量为 **226 passed, 1 warning in 17.37s**，无失败或跳过；警告为 LangGraph 导入的 `LangChainPendingDeprecationWarning`。本次真实云调用另行记录，两份审查均返回 `success`，原句、引用范围和计数检查通过，但存在正常样例提示风险及转租授权语义待复核，尚未完成全面内容质量或独立语义 Critic 验证。
 
 常见问题：提示缺少模块时，确认使用仓库的 `.venv`；端口 8000 被占用时，先停止占用该端口的本地服务。占位密钥显示“尚未配置完整”属于正常状态，不影响健康接口。切换 mock 与云端向量或更换模型时应使用不同集合或目录；错误维度的云端向量会在写入前被拒绝。
 

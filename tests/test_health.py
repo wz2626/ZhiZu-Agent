@@ -111,3 +111,15 @@ def test_cors_rejects_unlisted_origin(client):
     )
     assert response.status_code == 400
     assert "access-control-allow-origin" not in response.headers
+
+
+@pytest.mark.parametrize("value", ["0", "-1", "121", "nan", "inf", "invalid"])
+def test_invalid_chat_timeout_is_rejected_without_echoing_value(monkeypatch, value):
+    monkeypatch.setenv("CHAT_TIMEOUT_SECONDS", value)
+    with pytest.raises(ValueError, match="CHAT_TIMEOUT_SECONDS must be a number between 1 and 120"):
+        get_settings()
+
+
+def test_default_chat_timeout_remains_twenty_seconds(monkeypatch):
+    monkeypatch.delenv("CHAT_TIMEOUT_SECONDS", raising=False)
+    assert get_settings().chat_timeout_seconds == 20

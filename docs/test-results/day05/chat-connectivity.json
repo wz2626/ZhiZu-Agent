@@ -1,0 +1,22 @@
+[
+  {
+    "via_environment_proxy": true,
+    "http_status": 200,
+    "models": [
+      "deepseek-flash",
+      "deepseek-v4-pro"
+    ],
+    "configured_model_available": true,
+    "elapsed_ms": 607.99
+  },
+  {
+    "via_environment_proxy": false,
+    "http_status": 200,
+    "models": [
+      "deepseek-flash",
+      "deepseek-v4-pro"
+    ],
+    "configured_model_available": true,
+    "elapsed_ms": 422.87
+  }
+]

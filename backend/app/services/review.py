@@ -5,6 +5,7 @@ import math
 import re
 from typing import Protocol
 
+import httpx
 from langchain_core.messages import BaseMessage
 from langchain_openai import ChatOpenAI
 
@@ -34,21 +35,36 @@ class ContractReviewService:
         self.mock_mode = not has_real_key(self.settings.chat_api_key)
         self._owns_vector_store = False
         self._owns_llm = False
+        self._http_client: httpx.Client | None = None
         if not self.mock_mode and self.llm is None:
             try:
+                # LangChain caches its default transport. A request-scoped
+                # service must own its transport so close() cannot poison the
+                # next request or another service that is still using it.
+                self._http_client = httpx.Client(timeout=self.settings.chat_timeout_seconds)
                 self.llm = ChatOpenAI(
                     base_url=self.settings.chat_base_url,
                     model=self.settings.chat_model,
                     api_key=self.settings.chat_api_key,
                     temperature=0.1,
-                    timeout=20.0,
+                    timeout=self.settings.chat_timeout_seconds,
                     max_retries=0,
                     use_responses_api=False,
+                    http_client=self._http_client,
                 )
                 self._owns_llm = True
             except Exception as error:
                 logger.warning("Review client initialization failed (%s)", type(error).__name__)
                 self.mock_mode = True
+                self._close_http_client()
+
+    def _close_http_client(self) -> None:
+        client, self._http_client = self._http_client, None
+        if client is not None:
+            try:
+                client.close()
+            except Exception as error:
+                logger.warning("Review transport cleanup failed (%s)", type(error).__name__)
 
     def close(self) -> None:
         if self._owns_vector_store:
@@ -63,6 +79,7 @@ class ContractReviewService:
                 self.llm.root_client.close()
             except Exception as error:
                 logger.warning("Review chat cleanup failed (%s)", type(error).__name__)
+        self._close_http_client()
 
     def analyze_contract(self, text: str, top_k: int = 4) -> ReviewResponse:
         request = ReviewRequest(contract_text=text, top_k=top_k)

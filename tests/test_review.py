@@ -28,6 +28,7 @@ def isolated_review_environment(monkeypatch, tmp_path):
     for key, value in {
         "CHAT_API_KEY": "", "CHAT_BASE_URL": "https://chat.example.invalid/v1",
         "CHAT_MODEL": "test-review-model", "EMBEDDING_API_KEY": "",
+        "CHAT_TIMEOUT_SECONDS": "20",
         "CHROMA_PATH": str(tmp_path / "missing_chroma"),
     }.items():
         monkeypatch.setenv(key, value)
@@ -303,10 +304,60 @@ def test_chat_client_uses_config_and_disables_hidden_retries(monkeypatch):
         "base_url": "https://chat.example.invalid/v1", "model": "test-review-model",
         "api_key": "sk-synthetic-config-test", "temperature": 0.1,
         "timeout": 20.0, "max_retries": 0, "use_responses_api": False,
+        "http_client": service._http_client,
     }]
     service.close()
     service.close()
     assert closed == [True]
+
+
+def test_real_chat_clients_do_not_reuse_closed_transports(monkeypatch):
+    monkeypatch.setenv("CHAT_API_KEY", "sk-synthetic-transport-test")
+    first = ContractReviewService()
+    second = ContractReviewService()
+    first_transport = first.llm.root_client._client
+    second_transport = second.llm.root_client._client
+    try:
+        assert first_transport is not second_transport
+        first.close()
+        assert first_transport.is_closed
+        assert not second_transport.is_closed
+        third = ContractReviewService()
+        try:
+            assert not third.llm.root_client._client.is_closed
+            assert third.llm.root_client._client is not first_transport
+        finally:
+            third.close()
+    finally:
+        first.close()
+        second.close()
+    assert second_transport.is_closed
+
+
+def test_chat_initialization_failure_closes_owned_transport(monkeypatch):
+    import httpx
+    transport = httpx.Client()
+    monkeypatch.setenv("CHAT_API_KEY", "sk-synthetic-transport-test")
+    monkeypatch.setattr("backend.app.services.review.httpx.Client", lambda **kwargs: transport)
+    def fail(**kwargs):
+        raise RuntimeError("synthetic initialization error")
+    monkeypatch.setattr("backend.app.services.review.ChatOpenAI", fail)
+    service = ContractReviewService()
+    assert service.mock_mode and transport.is_closed
+    service.close()
+
+
+def test_chat_timeout_configuration_reaches_sdk_and_transport(monkeypatch):
+    monkeypatch.setenv("CHAT_API_KEY", "sk-synthetic-timeout-test")
+    monkeypatch.setenv("CHAT_TIMEOUT_SECONDS", "60")
+    service = ContractReviewService()
+    try:
+        assert service.llm.request_timeout == 60
+        assert service.llm.root_client.timeout == 60
+        assert service._http_client.timeout.read == 60
+        assert service.llm.max_retries == 0
+    finally:
+        service.close()
 
 
 def test_cleanup_failure_preserves_mock_200_and_hides_error(client, monkeypatch, caplog):
