@@ -1,0 +1,6 @@
+{
+  "analyze_contract": true,
+  "_mock_response": true,
+  "legacy_response_schema_unchanged": true,
+  "legacy_test_file_unchanged": true
+}

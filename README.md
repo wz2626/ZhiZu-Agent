@@ -1,10 +1,10 @@
 # 智租博弈（ZhiZu-Agent）
 
-面向青年租房押金扣留、维修责任和提前退租问题的 AI 辅助演练项目。目标流程是合同风险审查、模拟协商、导出协商清单。目前已具备 FastAPI 运行底座、《民法典》租赁合同 32 条法条知识库、只读状态与检索接口、“契光排雷”合同审查核心服务和 API，以及 Day 4 的 LangGraph 起草与 Critic 有界重写图。Day 5 已完成首次真实云端小规模联调；完整语义质检、trace、谈判图及业务网页仍待后续验证或实现。
+面向青年租房押金扣留、维修责任和提前退租问题的 AI 辅助演练项目。目标流程是合同风险审查、模拟协商、导出协商清单。目前已具备 FastAPI 运行底座、《民法典》租赁合同 32 条法条知识库、只读状态与检索接口、“契光排雷”合同审查核心服务和 API，以及 LangGraph 起草与 Critic 有界重写图。Day 5 已完成首次真实云端小规模联调，并提供详细失败出口与实际节点 Trace；完整语义质检、前端回放、谈判图及业务网页仍待后续验证或实现。
 
 Day 5 已确认先做首次真实模型小规模验证，再完善失败出口和 trace；新窗口从 [Day 5 交接说明](docs/day05-handoff.md) 开始。配置继续通过本地 `.env`，网页填写 API Key 的入口暂不纳入任务。
 
-2026-10-11：DeepSeek `deepseek-flash` + 硅基流动 `BAAI/bge-m3` 已完成真实 32 条入库、重复入库、五类检索和两份合成合同审查，结果与语义待复核点见 [Day 5 回合 1 实测](docs/test-results/day05-round01.md)。用户本轮选择先完成真实联调，接口与 Spec 暂不调整；Day 5 的失败出口与对外 trace 尚未完成。
+2026-10-11：DeepSeek `deepseek-flash` + 硅基流动 `BAAI/bge-m3` 已完成真实 32 条入库、重复入库、五类检索和两份合成合同审查，见 [Day 5 回合 1 实测](docs/test-results/day05-round01.md)。后半段经用户正式授权新增 `/api/review/analyze-detailed` 与 Trace 契约，旧接口保留兼容行为；离线故障验证见 [Day 5 回合 2 实测](docs/test-results/day05-round02.md)。转租授权和正常合同疑似误报进入[已知问题](docs/known-issues.md)，后续集中复核与调优。
 
 ## 核心特性（规划）
 
@@ -35,23 +35,36 @@ Day 5 已确认先做首次真实模型小规模验证，再完善失败出口�
 
 ## Windows PowerShell：启动、入库与测试
 
-以下命令在仓库根目录运行，使用已配置的 `.venv`。未填写有效向量 API 密钥时，法条入库的 `auto` 模式会使用确定性 mock 向量；真实云端向量需在本地 `.env` 配置有效密钥。缺少有效聊天密钥时，合同审查直接返回标记为 `mock` 的演示结果。法条数据只来自 `backend/data/laws/civil_code_lease_703_734.json`，演练案例不作为法律依据。
+以下命令在仓库根目录运行，使用已配置的 `.venv`。安装依赖使用 `.\.venv\Scripts\python.exe -m pip install -r requirements.txt`，其中包含本机 SOCKS 代理所需的 httpx 扩展。法条数据只来自 `backend/data/laws/civil_code_lease_703_734.json`，演练案例不作为法律依据。
+
+`.env.example` 使用已经验证过的双平台组合，两把 Key 必须来自各自的平台。DeepSeek Flash 用于聊天分析，BGE-M3 用于生成1024维向量，不能将聊天模型名填进向量配置：
+
+```dotenv
+CHAT_BASE_URL=https://api.deepseek.com
+CHAT_MODEL=deepseek-flash
+CHAT_API_KEY=your_deepseek_api_key_here
+CHAT_TIMEOUT_SECONDS=60
+
+EMBEDDING_BASE_URL=https://api.siliconflow.cn/v1
+EMBEDDING_MODEL=BAAI/bge-m3
+EMBEDDING_API_KEY=your_siliconflow_api_key_here
+CHROMA_PATH=./.runtime/chroma_cloud
+```
+
+保留已有 `.env`，只在本地替换两处占位密钥；不上传或提交它。60秒是此组合验证使用的聊天网络超时，代码缺省仍为20秒。已有进程环境变量优先于 `.env`，修改后重启服务。健康检查 `env_configured=true` 只表示配置完整，不证明 Key 可用或已成功审查。
 
 ```powershell
 # 仅在没有 .env 时复制模板，保留自己的已有配置
 if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 
-# 使用当前配置的 CHROMA_PATH 入库；可加 --verify-queries 打印五类查询的 Top-3
-.\.venv\Scripts\python.exe scripts/init_kb.py --verify-queries
-
-# 离线验证建议使用独立目录，避免与云端向量混用
-.\.venv\Scripts\python.exe scripts/init_kb.py --mode mock --persist-dir .runtime/chroma_mock --verify-queries
+# 填好两把 Key 后显式使用 cloud，避免 auto 在缺 Key 时静默回退
+.\.venv\Scripts\python.exe scripts/init_kb.py --mode cloud --verify-queries
 
 # 启动；在浏览器访问 http://127.0.0.1:8000，按 Ctrl+C 停止
 .\.venv\Scripts\python.exe scripts/start.py
 ```
 
-默认入库命令使用 `CHROMA_PATH`（未设置时为 `./backend/chroma_db`）；API 也读取此路径。离线独立目录用于测试，如需让 API 查看它，在启动服务前将 `CHROMA_PATH` 指向该目录。旧集合若缺少维度元数据，重新运行入库脚本即可在校验现有 1024 维向量后补录。
+入库和 API 必须读取同一 `CHROMA_PATH`；上述模板使用独立云端目录 `.runtime/chroma_cloud`，代码未配置时默认 `./backend/chroma_db`。离线开发可另行运行 `.\.venv\Scripts\python.exe scripts/init_kb.py --mode mock --persist-dir .runtime/chroma_mock --verify-queries`；如需让 API 使用离线库，启动前配置其路径并清空向量密钥，不混用两种向量。`auto` 模式缺有效向量密钥会回退 Mock，真实验证请显式指定 `cloud`。旧集合若缺少维度元数据，重新运行入库脚本即可在校验现有 1024 维向量后补录。
 
 启动后可访问同源首页 `http://127.0.0.1:8000/`、健康接口 `/api/health`、知识库状态 `/api/kb/status` 和 Swagger `/docs`。知识库检索接口为 `POST /api/kb/search`，请求示例：`{"query":"房屋漏水由谁维修？","top_k":4}`。返回脱敏后的 `query`、`top_k`、`results`（法条证据）、`direct_basis_sufficient` 与 `boundary_notice`；缺库、损坏库或检索校验异常返回 503 `KB_NOT_READY`，云端向量调用失败返回 503 `UPSTREAM_EMBEDDING_ERROR`。缺库或空目录请求不创建存储目录；零向量查询返回空证据，零分候选被过滤。押金问题仅展示相关条文，并明确提示本章没有押金返还的直接依据。
 
@@ -74,7 +87,13 @@ if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 
 缺少真实 `CHAT_API_KEY`（包括模板占位值）时直接 HTTP 200 返回固定演示：1 个 HIGH、1 个 NONE，`total_risks=1`，原句从当前脱敏文本截取，`evidence_ids=[]`。此路径不初始化聊天客户端或向量库、不调用任何云 API，即使仅配置了真实向量密钥也一样。**Mock 不是真实风险判断**，正常合同也会出现演示 HIGH；解释明确注明演示和依据不足，不伪造法条引用。涉及押金返还的实质判断仍需补充本章以外的依据。
 
-Day 4 已将起草、Critic 校验和有界重写接入 LangGraph，最多总生成 3 次；图内失败终态为 `needs_review`，保留受控原因并清空未通过的草稿和结果。当前服务仍兼容既有 `success/mock` API，将图内失败适配为 Mock，接口尚不返回内部原因或 trace。Critic 当前检查结构、引用追溯、原句定位和隐私，不代表法律语义依据充分性已验证。两份脱敏合成演练文本位于 `backend/data/scenarios/sample_contracts.json`，不进入法条库，也不替代后续固定工程测试集。
+Day 4 已将起草、Critic 校验和有界重写接入 LangGraph，最多总生成 3 次；图内失败终态为 `needs_review`，保留受控原因并清空未通过的草稿和结果。旧 `/analyze` 将失败适配为 Mock，不返回内部原因或 Trace。Critic 当前检查结构、引用追溯、原句定位和隐私，不代表法律语义依据充分性已验证。两份脱敏合成演练文本位于 `backend/data/scenarios/sample_contracts.json`，不进入法条库，也不替代后续固定工程测试集。
+
+### 详细审查与实际执行记录
+
+`POST /api/review/analyze-detailed` 接收与旧接口相同的输入，返回 `status=success/needs_review`、`results`、`total_risks`、`failure_code`、`reason`、`errors`、`retry_count`、`trace_label` 和 `trace`。成功时结果通过质检、错误字段为空；失败时结果为 `[]`、风险数为0，明确说明缺配置、缺库、无证据、聊天超时或校验失败等原因，不生成 Mock 演示。失败的风险数0表示没有有效结果，不表示合同安全。业务失败仍为 HTTP 200，非法输入仍为422。
+
+Trace 标为“本次执行回放”，包含本次真实执行的节点、生成次数、状态、实测毫秒、法条 ID 和受控反馈。校验失败最多重写两次；最终仍失败保留历次反馈，异常前已完成的记录也保留。准备失败不补造起草或 Critic 节点。历史图节点名 `mock` 在 Trace 中表示失败终止为 `needs_review`，不会让详细版返回演示风险。Trace 不含合同、消息、草稿、原始异常或隐藏思维；当前没有前端回放或实时流式输出。完整字段见 [Spec 02](docs/specs/spec-02-risk-review.md)，离线故障样例见 [回合 2 实测](docs/test-results/day05-round02.md)。
 
 在仓库目录的另一个 PowerShell 窗口运行全量测试：
 
@@ -90,7 +109,9 @@ Day 2 回合 2 全量测试为 43 passed，见[向量维度与知识库 API 实�
 
 Day 3 回合 1 全量结果为 **175 passed in 15.09s**，见[回合 1 报告](docs/test-results/day03-round01.md)；回合 2 增至 **203 passed in 13.31s**，审查模块 **100 passed in 5.59s**，见[回合 2 报告](docs/test-results/day03-round02.md)。均为离线测试，真实聊天调用被拦截。
 
-Day 4 已提交为 `2c007bd`，当时全量 **216 passed, 1 warning in 13.92s**，见[Day 4 实测报告](docs/test-results/day04-round01.md)。Day 5 回合 1 最新全量为 **226 passed, 1 warning in 17.37s**，无失败或跳过；警告为 LangGraph 导入的 `LangChainPendingDeprecationWarning`。本次真实云调用另行记录，两份审查均返回 `success`，原句、引用范围和计数检查通过，但存在正常样例提示风险及转租授权语义待复核，尚未完成全面内容质量或独立语义 Critic 验证。
+Day 4 已提交为 `2c007bd`，当时全量 **216 passed, 1 warning in 13.92s**，见[Day 4 实测报告](docs/test-results/day04-round01.md)。Day 5 回合 1 当时全量为 **226 passed, 1 warning in 17.37s**，无失败或跳过；警告为 LangGraph 导入的 `LangChainPendingDeprecationWarning`。该回合真实云调用另行记录，两份审查均返回 `success`，原句、引用范围和计数检查通过，但存在正常样例提示风险及转租授权语义待复核，尚未完成全面内容质量或独立语义 Critic 验证。
+
+Day 5 回合 2 最新全量为 **267 passed, 1 warning in 16.71s**，退出码0，无失败或跳过；新增41项详细接口与 Trace 离线测试。原有云端拦截机制保持不变，本轮没有真实云调用。详细版失败原因与节点记录通过离线故障注入验证，原始测试输出、兼容核对与实际 Trace 样例见 [回合 2 报告](docs/test-results/day05-round02.md)。
 
 常见问题：提示缺少模块时，确认使用仓库的 `.venv`；端口 8000 被占用时，先停止占用该端口的本地服务。占位密钥显示“尚未配置完整”属于正常状态，不影响健康接口。切换 mock 与云端向量或更换模型时应使用不同集合或目录；错误维度的云端向量会在写入前被拒绝。
 

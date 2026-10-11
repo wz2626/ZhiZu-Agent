@@ -4,6 +4,7 @@ import logging
 import math
 import re
 from typing import Protocol
+from time import perf_counter
 
 import httpx
 from langchain_core.messages import BaseMessage
@@ -11,9 +12,15 @@ from langchain_openai import ChatOpenAI
 
 from backend.app.core.config import Settings, get_settings, has_real_key
 from backend.app.schemas.knowledge import EvidenceItem
-from backend.app.schemas.review import ReviewClauseResult, ReviewRequest, ReviewResponse, RiskLevel
+from backend.app.schemas.review import (
+    ReviewClauseResult, ReviewDetailedResponse, ReviewFailureCode, ReviewRequest,
+    ReviewResponse, ReviewTraceEvent, RiskLevel,
+)
 from backend.app.services.graph import review_graph
-from backend.app.services.vector_store import LawVectorStoreService, load_authoritative_laws, mask_sensitive_text
+from backend.app.services.review_trace import FAILURE_MESSAGES, append_trace, public_feedback
+from backend.app.services.vector_store import (
+    STORAGE_ERRORS, LawVectorStoreService, load_authoritative_laws, mask_sensitive_text,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +40,7 @@ class ContractReviewService:
         self.vector_store = vector_store
         self.llm = llm
         self.mock_mode = not has_real_key(self.settings.chat_api_key)
+        self._chat_initialization_failed = False
         self._owns_vector_store = False
         self._owns_llm = False
         self._http_client: httpx.Client | None = None
@@ -56,6 +64,7 @@ class ContractReviewService:
             except Exception as error:
                 logger.warning("Review client initialization failed (%s)", type(error).__name__)
                 self.mock_mode = True
+                self._chat_initialization_failed = True
                 self._close_http_client()
 
     def _close_http_client(self) -> None:
@@ -121,6 +130,92 @@ class ContractReviewService:
         except Exception as error:
             logger.warning("Review graph execution failed (%s)", type(error).__name__)
         return self._mock_response(safe_text)
+
+    def analyze_contract_detailed(self, text: str, top_k: int = 4) -> ReviewDetailedResponse:
+        request = ReviewRequest(contract_text=text, top_k=top_k)
+        safe_text = mask_sensitive_text(request.contract_text)
+        trace: list[ReviewTraceEvent] = []
+        started = perf_counter()
+        if self.mock_mode:
+            code = (ReviewFailureCode.CHAT_INIT_FAILED if self._chat_initialization_failed
+                    else ReviewFailureCode.CHAT_NOT_CONFIGURED)
+            append_trace(trace, node="configuration", attempt=0, status="failed",
+                         started=started, feedback=[FAILURE_MESSAGES[code]])
+            return self._detailed_failure(code, trace)
+        append_trace(trace, node="configuration", attempt=0, status="completed", started=started)
+
+        started = perf_counter()
+        evidence: list[EvidenceItem] = []
+        retrieval_code = None
+        searching = False
+        try:
+            if self.vector_store is None:
+                self.vector_store = LawVectorStoreService(
+                    persist_directory=self.settings.chroma_path, create_if_missing=False,
+                )
+                self._owns_vector_store = True
+            if not self.vector_store.get_status().is_ready:
+                retrieval_code = ReviewFailureCode.KB_NOT_READY
+            else:
+                searching = True
+                evidence = self._filter_evidence(
+                    self.vector_store.search_evidence(safe_text, top_k=request.top_k), request.top_k,
+                )
+                if not evidence:
+                    retrieval_code = ReviewFailureCode.NO_EVIDENCE
+        except (ValueError, *STORAGE_ERRORS):
+            retrieval_code = ReviewFailureCode.KB_NOT_READY
+        except RuntimeError:
+            retrieval_code = (ReviewFailureCode.UPSTREAM_EMBEDDING_ERROR if searching
+                              else ReviewFailureCode.RETRIEVAL_FAILED)
+        except Exception:
+            retrieval_code = ReviewFailureCode.RETRIEVAL_FAILED
+
+        append_trace(
+            trace, node="retrieval", attempt=0,
+            status="failed" if retrieval_code else "completed", started=started,
+            evidence_ids=[item.evidence_id for item in evidence],
+            feedback=[FAILURE_MESSAGES[retrieval_code]] if retrieval_code else [],
+        )
+        if retrieval_code:
+            return self._detailed_failure(retrieval_code, trace)
+
+        started = perf_counter()
+        try:
+            state = review_graph.invoke({
+                "contract_text": safe_text, "evidence_list": evidence,
+                "current_draft": None, "errors": [], "retry_count": 0,
+                "final_results": [], "status": "drafting", "messages": [],
+                "retry_pending": False, "failure_code": None, "trace": list(trace),
+            }, context={"llm": self.llm, "trace": trace})
+            if state["status"] == "success":
+                results = state["final_results"]
+                return ReviewDetailedResponse(
+                    status="success", results=results,
+                    total_risks=sum(item.risk_level != RiskLevel.NONE for item in results),
+                    retry_count=state["retry_count"], trace=trace,
+                )
+            code = state.get("failure_code") or ReviewFailureCode.VALIDATION_FAILED
+            return self._detailed_failure(code, trace, errors=state["errors"],
+                                          retry_count=state["retry_count"])
+        except Exception:
+            code = ReviewFailureCode.GRAPH_EXECUTION_FAILED
+            append_trace(trace, node="graph", attempt=0, status="failed", started=started,
+                         evidence_ids=[item.evidence_id for item in evidence],
+                         feedback=[FAILURE_MESSAGES[code]])
+            retry_count = max((event.attempt - 1 for event in trace if event.node == "drafting"), default=0)
+            return self._detailed_failure(code, trace, retry_count=retry_count)
+
+    @staticmethod
+    def _detailed_failure(
+        code: ReviewFailureCode, trace: list[ReviewTraceEvent],
+        *, errors: list[str] | None = None, retry_count: int = 0,
+    ) -> ReviewDetailedResponse:
+        return ReviewDetailedResponse(
+            status="needs_review", results=[], total_risks=0, failure_code=code,
+            reason=FAILURE_MESSAGES[code], errors=public_feedback(errors or [FAILURE_MESSAGES[code]]),
+            retry_count=retry_count, trace=trace,
+        )
 
     @staticmethod
     def _filter_evidence(items: list[EvidenceItem], top_k: int) -> list[EvidenceItem]:

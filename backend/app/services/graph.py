@@ -3,15 +3,19 @@
 import json
 import logging
 import re
-from typing import Literal, TypedDict
+from time import perf_counter
+from typing import Literal, NotRequired, TypedDict
 
+import httpx
+from openai import APITimeoutError
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
 from langgraph.graph import END, START, StateGraph
 from langgraph.runtime import Runtime
 from pydantic import TypeAdapter, ValidationError
 
 from backend.app.schemas.knowledge import EvidenceItem
-from backend.app.schemas.review import ReviewClauseResult, RiskLevel
+from backend.app.schemas.review import ReviewClauseResult, ReviewFailureCode, ReviewTraceEvent, RiskLevel
+from backend.app.services.review_trace import FAILURE_MESSAGES, append_trace
 from backend.app.services.vector_store import mask_sensitive_text
 
 logger = logging.getLogger(__name__)
@@ -109,14 +113,36 @@ class ReviewState(TypedDict):
     status: Literal["drafting", "success", "needs_review", "mock"]
     messages: list[BaseMessage]
     retry_pending: bool
+    failure_code: NotRequired[ReviewFailureCode | None]
+    trace: NotRequired[list[ReviewTraceEvent]]
 
 
 class ReviewContext(TypedDict):
     # Runtime-only dependency: never put a client or credentials in graph state.
     llm: object
+    trace: NotRequired[list[ReviewTraceEvent]]
+
+
+def _traced_update(
+    state: ReviewState, runtime: Runtime[ReviewContext], updates: dict,
+    *, node: Literal["drafting", "critic", "mock"], started: float,
+    status: Literal["completed", "failed", "retry", "needs_review"],
+) -> dict:
+    events = list(state.get("trace", []))
+    event = append_trace(
+        events, node=node, attempt=state["retry_count"] + 1, status=status,
+        started=started, evidence_ids=[item.evidence_id for item in state["evidence_list"]],
+        feedback=updates.get("errors", []),
+    )
+    # The request-local sink preserves completed events if graph.invoke raises.
+    sink = runtime.context.get("trace")
+    if sink is not None:
+        sink.append(event)
+    return {**updates, "trace": events}
 
 
 def drafting_node(state: ReviewState, runtime: Runtime[ReviewContext]) -> dict:
+    started = perf_counter()
     messages = list(state.get("messages", []))
     if not messages:
         messages = [
@@ -141,19 +167,23 @@ def drafting_node(state: ReviewState, runtime: Runtime[ReviewContext]) -> dict:
     except Exception as error:
         # Exception messages can contain keys or personal data.
         logger.warning("Review chat call failed (%s)", type(error).__name__)
-        return {
+        failure = (ReviewFailureCode.CHAT_TIMEOUT if isinstance(error, (TimeoutError, httpx.TimeoutException, APITimeoutError))
+                   else ReviewFailureCode.CHAT_CALL_FAILED)
+        return _traced_update(state, runtime, {
             "current_draft": None, "messages": messages, "final_results": [],
-            "errors": ["聊天服务调用失败，已停止生成。"], "status": "mock",
+            "errors": [FAILURE_MESSAGES[failure]], "status": "mock", "failure_code": failure,
             "retry_pending": False,
-        }
-    return {
+        }, node="drafting", started=started, status="failed")
+    return _traced_update(state, runtime, {
         "current_draft": content, "messages": messages,
         "final_results": [], "status": "drafting",
         "retry_pending": False,
-    }
+        "failure_code": None,
+    }, node="drafting", started=started, status="completed")
 
 
-def critic_node(state: ReviewState) -> dict:
+def critic_node(state: ReviewState, runtime: Runtime[ReviewContext]) -> dict:
+    started = perf_counter()
     try:
         results = validate_response(
             state["current_draft"], state["contract_text"],
@@ -177,18 +207,21 @@ def critic_node(state: ReviewState) -> dict:
     except (ValueError, TypeError, AttributeError, RecursionError):
         feedback = "JSON 结构校验失败：请核对字段类型和嵌套结构。"
     else:
-        return {
+        return _traced_update(state, runtime, {
             "final_results": results, "errors": [], "status": "success",
             "retry_pending": False,
-        }
+            "failure_code": None,
+        }, node="critic", started=started, status="completed")
 
     updates = {
         "final_results": [], "errors": [feedback], "status": "needs_review",
         "retry_pending": state["retry_count"] < 2,
+        "failure_code": ReviewFailureCode.VALIDATION_FAILED,
     }
     if state["retry_count"] < 2:
         updates["retry_count"] = state["retry_count"] + 1
-    return updates
+    return _traced_update(state, runtime, updates, node="critic", started=started,
+                          status="retry" if updates["retry_pending"] else "needs_review")
 
 
 def _route_draft(state: ReviewState) -> Literal["critic", "mock"]:
@@ -203,10 +236,14 @@ def _route_critic(state: ReviewState) -> Literal["success", "needs_review", "moc
     return "mock"
 
 
-def mock_node(state: ReviewState) -> dict:
+def mock_node(state: ReviewState, runtime: Runtime[ReviewContext]) -> dict:
     # The service maps this terminal needs_review state to the legacy mock API.
     # Invalid drafts never become final findings; errors survive for inspection.
-    return {"status": "needs_review", "final_results": [], "current_draft": None}
+    started = perf_counter()
+    return _traced_update(state, runtime, {
+        "status": "needs_review", "final_results": [], "current_draft": None,
+        "errors": state["errors"], "retry_pending": False,
+    }, node="mock", started=started, status="needs_review")
 
 
 _builder = StateGraph(ReviewState, context_schema=ReviewContext)

@@ -1,0 +1,324 @@
+{
+  "mode": "offline_fault_injection",
+  "trace_source": "actual FastAPI and LangGraph execution with synthetic dependencies",
+  "cases": [
+    {
+      "case": "rewrite_success",
+      "http_status": 200,
+      "response": {
+        "status": "success",
+        "results": [
+          {
+            "clause_id": "C-01",
+            "original_clause": "租客未经房东同意擅自转租房屋。",
+            "risk_level": "HIGH",
+            "explanation": "未经同意转租存在解除风险。",
+            "evidence_ids": [
+              "LAW-716"
+            ],
+            "negotiation_tip": "请取得明确的转租授权。"
+          }
+        ],
+        "total_risks": 1,
+        "failure_code": null,
+        "reason": null,
+        "errors": [],
+        "retry_count": 1,
+        "trace_label": "本次执行回放",
+        "trace": [
+          {
+            "sequence": 1,
+            "node": "configuration",
+            "attempt": 0,
+            "status": "completed",
+            "duration_ms": 0.003,
+            "evidence_ids": [],
+            "feedback": []
+          },
+          {
+            "sequence": 2,
+            "node": "retrieval",
+            "attempt": 0,
+            "status": "completed",
+            "duration_ms": 0.695,
+            "evidence_ids": [
+              "LAW-716"
+            ],
+            "feedback": []
+          },
+          {
+            "sequence": 3,
+            "node": "drafting",
+            "attempt": 1,
+            "status": "completed",
+            "duration_ms": 0.041,
+            "evidence_ids": [
+              "LAW-716"
+            ],
+            "feedback": []
+          },
+          {
+            "sequence": 4,
+            "node": "critic",
+            "attempt": 1,
+            "status": "retry",
+            "duration_ms": 0.098,
+            "evidence_ids": [
+              "LAW-716"
+            ],
+            "feedback": [
+              "JSON 解析失败：必须输出一个完整的 JSON 数组。"
+            ]
+          },
+          {
+            "sequence": 5,
+            "node": "drafting",
+            "attempt": 2,
+            "status": "completed",
+            "duration_ms": 0.014,
+            "evidence_ids": [
+              "LAW-716"
+            ],
+            "feedback": []
+          },
+          {
+            "sequence": 6,
+            "node": "critic",
+            "attempt": 2,
+            "status": "completed",
+            "duration_ms": 0.062,
+            "evidence_ids": [
+              "LAW-716"
+            ],
+            "feedback": []
+          }
+        ]
+      }
+    },
+    {
+      "case": "invalid_json_exhausted",
+      "http_status": 200,
+      "response": {
+        "status": "needs_review",
+        "results": [],
+        "total_risks": 0,
+        "failure_code": "VALIDATION_FAILED",
+        "reason": "达到最多3次生成，仍未通过校验，需要人工复核。",
+        "errors": [
+          "JSON 解析失败：必须输出一个完整的 JSON 数组。"
+        ],
+        "retry_count": 2,
+        "trace_label": "本次执行回放",
+        "trace": [
+          {
+            "sequence": 1,
+            "node": "configuration",
+            "attempt": 0,
+            "status": "completed",
+            "duration_ms": 0.002,
+            "evidence_ids": [],
+            "feedback": []
+          },
+          {
+            "sequence": 2,
+            "node": "retrieval",
+            "attempt": 0,
+            "status": "completed",
+            "duration_ms": 0.648,
+            "evidence_ids": [
+              "LAW-716"
+            ],
+            "feedback": []
+          },
+          {
+            "sequence": 3,
+            "node": "drafting",
+            "attempt": 1,
+            "status": "completed",
+            "duration_ms": 0.037,
+            "evidence_ids": [
+              "LAW-716"
+            ],
+            "feedback": []
+          },
+          {
+            "sequence": 4,
+            "node": "critic",
+            "attempt": 1,
+            "status": "retry",
+            "duration_ms": 0.027,
+            "evidence_ids": [
+              "LAW-716"
+            ],
+            "feedback": [
+              "JSON 解析失败：必须输出一个完整的 JSON 数组。"
+            ]
+          },
+          {
+            "sequence": 5,
+            "node": "drafting",
+            "attempt": 2,
+            "status": "completed",
+            "duration_ms": 0.01,
+            "evidence_ids": [
+              "LAW-716"
+            ],
+            "feedback": []
+          },
+          {
+            "sequence": 6,
+            "node": "critic",
+            "attempt": 2,
+            "status": "retry",
+            "duration_ms": 0.016,
+            "evidence_ids": [
+              "LAW-716"
+            ],
+            "feedback": [
+              "JSON 解析失败：必须输出一个完整的 JSON 数组。"
+            ]
+          },
+          {
+            "sequence": 7,
+            "node": "drafting",
+            "attempt": 3,
+            "status": "completed",
+            "duration_ms": 0.008,
+            "evidence_ids": [
+              "LAW-716"
+            ],
+            "feedback": []
+          },
+          {
+            "sequence": 8,
+            "node": "critic",
+            "attempt": 3,
+            "status": "needs_review",
+            "duration_ms": 0.014,
+            "evidence_ids": [
+              "LAW-716"
+            ],
+            "feedback": [
+              "JSON 解析失败：必须输出一个完整的 JSON 数组。"
+            ]
+          },
+          {
+            "sequence": 9,
+            "node": "mock",
+            "attempt": 3,
+            "status": "needs_review",
+            "duration_ms": 0.002,
+            "evidence_ids": [
+              "LAW-716"
+            ],
+            "feedback": [
+              "JSON 解析失败：必须输出一个完整的 JSON 数组。"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "case": "chat_timeout",
+      "http_status": 200,
+      "response": {
+        "status": "needs_review",
+        "results": [],
+        "total_risks": 0,
+        "failure_code": "CHAT_TIMEOUT",
+        "reason": "聊天服务调用超时，已停止生成。",
+        "errors": [
+          "聊天服务调用超时，已停止生成。"
+        ],
+        "retry_count": 0,
+        "trace_label": "本次执行回放",
+        "trace": [
+          {
+            "sequence": 1,
+            "node": "configuration",
+            "attempt": 0,
+            "status": "completed",
+            "duration_ms": 0.002,
+            "evidence_ids": [],
+            "feedback": []
+          },
+          {
+            "sequence": 2,
+            "node": "retrieval",
+            "attempt": 0,
+            "status": "completed",
+            "duration_ms": 0.708,
+            "evidence_ids": [
+              "LAW-716"
+            ],
+            "feedback": []
+          },
+          {
+            "sequence": 3,
+            "node": "drafting",
+            "attempt": 1,
+            "status": "failed",
+            "duration_ms": 0.944,
+            "evidence_ids": [
+              "LAW-716"
+            ],
+            "feedback": [
+              "聊天服务调用超时，已停止生成。"
+            ]
+          },
+          {
+            "sequence": 4,
+            "node": "mock",
+            "attempt": 1,
+            "status": "needs_review",
+            "duration_ms": 0.002,
+            "evidence_ids": [
+              "LAW-716"
+            ],
+            "feedback": [
+              "聊天服务调用超时，已停止生成。"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "case": "no_evidence",
+      "http_status": 200,
+      "response": {
+        "status": "needs_review",
+        "results": [],
+        "total_risks": 0,
+        "failure_code": "NO_EVIDENCE",
+        "reason": "未检索到可用法条证据，已停止审查。",
+        "errors": [
+          "未检索到可用法条证据，已停止审查。"
+        ],
+        "retry_count": 0,
+        "trace_label": "本次执行回放",
+        "trace": [
+          {
+            "sequence": 1,
+            "node": "configuration",
+            "attempt": 0,
+            "status": "completed",
+            "duration_ms": 0.001,
+            "evidence_ids": [],
+            "feedback": []
+          },
+          {
+            "sequence": 2,
+            "node": "retrieval",
+            "attempt": 0,
+            "status": "failed",
+            "duration_ms": 0.559,
+            "evidence_ids": [],
+            "feedback": [
+              "未检索到可用法条证据，已停止审查。"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

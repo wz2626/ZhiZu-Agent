@@ -1,4 +1,4 @@
-"""Input and output contracts for the Day 3 contract-review service."""
+"""Legacy and detailed contract-review response contracts."""
 
 from enum import Enum
 from typing import Annotated, Literal
@@ -57,4 +57,57 @@ class ReviewResponse(BaseModel):
         expected = sum(item.risk_level != RiskLevel.NONE for item in self.results)
         if self.total_risks != expected:
             raise ValueError("total_risks must count HIGH, MEDIUM and LOW findings")
+        return self
+
+
+class ReviewFailureCode(str, Enum):
+    CHAT_NOT_CONFIGURED = "CHAT_NOT_CONFIGURED"
+    CHAT_INIT_FAILED = "CHAT_INIT_FAILED"
+    KB_NOT_READY = "KB_NOT_READY"
+    UPSTREAM_EMBEDDING_ERROR = "UPSTREAM_EMBEDDING_ERROR"
+    RETRIEVAL_FAILED = "RETRIEVAL_FAILED"
+    NO_EVIDENCE = "NO_EVIDENCE"
+    CHAT_TIMEOUT = "CHAT_TIMEOUT"
+    CHAT_CALL_FAILED = "CHAT_CALL_FAILED"
+    VALIDATION_FAILED = "VALIDATION_FAILED"
+    GRAPH_EXECUTION_FAILED = "GRAPH_EXECUTION_FAILED"
+
+
+class ReviewTraceEvent(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    sequence: int = Field(ge=1, strict=True)
+    node: Literal["configuration", "retrieval", "drafting", "critic", "mock", "graph"]
+    attempt: int = Field(ge=0, le=3, strict=True)
+    status: Literal["completed", "failed", "retry", "needs_review"]
+    duration_ms: float = Field(ge=0, allow_inf_nan=False)
+    evidence_ids: list[LawId] = Field(default_factory=list)
+    feedback: list[str] = Field(default_factory=list)
+
+
+class ReviewDetailedResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    status: Literal["success", "needs_review"]
+    results: list[ReviewClauseResult]
+    total_risks: int = Field(ge=0, strict=True)
+    failure_code: ReviewFailureCode | None = None
+    reason: str | None = None
+    errors: list[str] = Field(default_factory=list)
+    retry_count: int = Field(default=0, ge=0, le=2, strict=True)
+    trace_label: Literal["本次执行回放"] = "本次执行回放"
+    trace: list[ReviewTraceEvent] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def validate_outcome(self) -> "ReviewDetailedResponse":
+        expected = sum(item.risk_level != RiskLevel.NONE for item in self.results)
+        if self.total_risks != expected:
+            raise ValueError("total_risks must count HIGH, MEDIUM and LOW findings")
+        if self.status == "success":
+            if not self.results or self.failure_code is not None or self.reason is not None or self.errors:
+                raise ValueError("successful review requires findings and no terminal errors")
+        elif self.results or not self.failure_code or not self.reason or not self.errors:
+            raise ValueError("failed review requires a reason and errors, without findings")
+        if [event.sequence for event in self.trace] != list(range(1, len(self.trace) + 1)):
+            raise ValueError("trace sequence must be continuous from one")
         return self
