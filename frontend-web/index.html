@@ -73,10 +73,23 @@
     .role-tab[aria-selected="true"] { color: var(--accent); background: #203338; border-color: #6ce5cd25; }
     .role-card { border: 1px solid var(--line); background: #142031; border-radius: 12px; padding: 16px; }
     .role-avatar { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; color: var(--accent); background: #6ce5cd15; font-size: 12px; }
+    .score-card { flex-shrink: 0; padding: 15px; margin: 16px 20px 0; border: 1px solid #6ce5cd35; border-radius: 12px; background: #6ce5cd08; }
+    .score-track { height: 9px; margin: 12px 0; overflow: hidden; border-radius: 999px; background: #243246; }
+    .score-fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg, #38b6a5, #9cf2e0); transition: width .7s ease; }
+    .term-list { margin: 10px 0 0; padding-left: 18px; font-size: 12px; overflow-wrap: anywhere; }
+    .stopwatch { font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .trace-section { margin-top: 18px; border: 1px solid var(--line); border-radius: 18px; background: var(--panel); overflow: hidden; }
+    .trace-list { list-style: none; margin: 0; padding: 0 20px 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 12px; }
+    .trace-event { padding: 14px; border: 1px solid var(--line); border-radius: 11px; background: #142031; overflow-wrap: anywhere; animation: reveal .25s ease; }
+    .trace-event[data-status="failed"], .trace-event[data-status="needs_review"] { border-color: #fa879060; }
+    .trace-event[data-status="retry"] { border-color: #e8bd6160; }
+    .trace-meta { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 11px; color: var(--muted); margin-top: 8px; }
+    .export-preview { width: 100%; min-height: 200px; margin-top: 12px; font: 12px/1.8 Consolas, "Microsoft YaHei", monospace; }
     .spinner { display: inline-block; width: 24px; height: 24px; border: 2px solid #6ce5cd25; border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
     .boot { max-width: 520px; margin: 12vh auto; padding: 28px; border: 1px solid var(--line); border-radius: 16px; background: var(--panel); }
     footer { display: flex; justify-content: space-between; gap: 20px; padding: 18px 0 24px; font-size: 11px; color: #8294ac; }
     @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes reveal { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     @media (max-width: 1100px) { .shell { padding: 0 20px; } .board { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); } .panel:last-child { grid-column: 1 / -1; height: auto; min-height: 0; } .intro { align-items: flex-start; flex-direction: column; gap: 18px; } }
     @media (max-width: 700px) { .shell { padding: 0 14px; } .topbar { min-height: 78px; flex-wrap: wrap; padding: 16px 0; } .board { grid-template-columns: minmax(0, 1fr); } .panel { height: auto; min-height: 460px; } .panel-body { max-height: 70dvh; } .panel:last-child { grid-column: auto; } .steps { gap: 8px; font-size: 11px; } .intro { padding: 22px 0; } footer { flex-direction: column; gap: 5px; } }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
@@ -97,7 +110,7 @@
       </div>
     </header>
     <section class="intro" aria-labelledby="workspace-title">
-      <div><div class="eyebrow mb-2">CONTRACT INTELLIGENCE · DAY 08</div><h1 id="workspace-title" class="m-0 text-2xl font-semibold tracking-wide">看清条款，从容协商<span class="text-[#6ce5cd]">。</span></h1><p class="muted mt-2 mb-0 text-xs">让每一处风险回到原文，让每一次表达有据可循。</p></div>
+      <div><div class="eyebrow mb-2">CONTRACT INTELLIGENCE · DAY 09</div><h1 id="workspace-title" class="m-0 text-2xl font-semibold tracking-wide">看清条款，从容协商<span class="text-[#6ce5cd]">。</span></h1><p class="muted mt-2 mb-0 text-xs">让每一处风险回到原文，让每一次表达有据可循。</p></div>
       <nav class="steps" aria-label="分析流程">
         <span class="step" :class="{ active: phase === 'input' }" :aria-current="phase === 'input' ? 'step' : null"><span class="step-num">1</span>粘贴合同</span><span aria-hidden="true">/</span>
         <span class="step" :class="{ active: phase === 'preview' }" :aria-current="phase === 'preview' ? 'step' : null"><span class="step-num">2</span>脱敏确认</span><span aria-hidden="true">/</span>
@@ -113,7 +126,7 @@
             <div class="flex items-center justify-between mb-3"><label for="contract-input" class="text-xs font-semibold">粘贴租赁合同</label><button type="button" class="text-btn" @click="loadSample">试用合成合同 ↗</button></div>
             <textarea id="contract-input" v-model="rawText" rows="13" maxlength="20000" autocomplete="off" spellcheck="false" placeholder="在这里粘贴合同条款…&#10;&#10;建议保留完整句子，方便风险卡片精准定位。" aria-describedby="input-hint"></textarea>
             <div id="input-hint" class="muted flex justify-between text-[11px] mt-2"><span>提交的脱敏文本需为 10–5000 字</span><span>{{ charCount(rawText) }} 字</span></div>
-            <button type="button" class="btn btn-primary w-full mt-5" @click="preparePreview" :disabled="!rawText.trim()">分析合同 · 先预览脱敏 <span aria-hidden="true">→</span></button>
+            <button type="button" class="btn btn-primary w-full mt-5" @click="preparePreview" :disabled="!rawText.trim() || negotiation.pending">分析合同 · 先预览脱敏 <span aria-hidden="true">→</span></button>
             <p class="muted text-[11px] mt-4 leading-6">姓名、详细住址、银行卡等信息请在下一步手动检查、删改。原文不会保存到浏览器持久存储。</p>
           </template>
           <template v-else-if="phase === 'preview'">
@@ -122,11 +135,11 @@
             <textarea id="preview-input" v-model="previewText" rows="12" maxlength="20000" autocomplete="off" spellcheck="false" aria-describedby="preview-hint"></textarea>
             <div id="preview-hint" class="muted text-[11px] mt-2">{{ charCount(previewText) }} / 5000 字 · 编辑后需重新勾选确认</div>
             <label class="flex gap-3 mt-5 text-xs leading-6 cursor-pointer"><input id="privacy-confirm" type="checkbox" v-model="privacyConfirmed"><span>我已检查脱敏预览，确认可上传以上内容进行分析。</span></label>
-            <button type="button" class="btn btn-primary w-full mt-4" @click="submitAnalysis" :disabled="!privacyConfirmed || !validPreview">确认并提交分析 <span aria-hidden="true">→</span></button>
-            <button type="button" class="text-btn mt-3" @click="editContract">← 返回编辑合同</button>
+            <button type="button" class="btn btn-primary w-full mt-4" @click="submitAnalysis" :disabled="!privacyConfirmed || !validPreview || negotiation.pending">确认并提交分析 <span aria-hidden="true">→</span></button>
+            <button type="button" class="text-btn mt-3" @click="editContract" :disabled="negotiation.pending">← 返回编辑合同</button>
           </template>
           <template v-else>
-            <div class="flex items-center justify-between gap-3 mb-4"><span class="muted text-[11px]">分析与定位共用此份脱敏文本</span><button type="button" class="text-btn" @click="editContract" :disabled="phase === 'reviewing'">重新编辑</button></div>
+            <div class="flex items-center justify-between gap-3 mb-4"><span class="muted text-[11px]">分析与定位共用此份脱敏文本</span><button type="button" class="text-btn" @click="editContract" :disabled="phase === 'reviewing' || negotiation.pending">重新编辑</button></div>
             <div v-if="selectedClause" class="notice mb-4" aria-live="polite">
               <template v-if="clauseMatches.length"><div class="flex items-center justify-between gap-2"><span>{{ selectedClause.clause_id }} · 原句位置 {{ activeMatch + 1 }} / {{ clauseMatches.length }}</span><div v-if="clauseMatches.length > 1" class="flex gap-3"><button type="button" class="text-btn" @click="moveMatch(-1)" aria-label="上一处原句">↑</button><button type="button" class="text-btn" @click="moveMatch(1)" aria-label="下一处原句">↓</button></div></div></template>
               <template v-else>未找到可精确匹配的原句，请人工核对；未生成推测高亮。</template>
@@ -142,8 +155,8 @@
       <section class="panel" aria-labelledby="risk-title" :aria-busy="phase === 'reviewing'">
         <div class="panel-head"><div class="flex items-center gap-3"><span class="panel-number">02</span><h2 id="risk-title">契光排雷</h2></div><span class="chip muted">风险与证据</span></div>
         <div class="panel-body" aria-live="polite">
-          <div v-if="phase === 'reviewing'" class="empty" role="status"><span class="spinner mb-6" aria-hidden="true"></span><h3 class="text-base font-medium m-0">正在分析已确认的合同</h3><p class="muted text-xs leading-7 mt-3">等待后端返回审查结果，请保持页面打开。<br>仅通过质检的结果会出现在这里。</p></div>
-          <div v-else-if="phase === 'failed'" class="empty"><div class="empty-glyph" aria-hidden="true">!</div><h3 class="text-base font-medium m-0">本次审查未完成</h3><p class="notice notice-error mt-4 w-full" role="alert">{{ reviewError }}</p><p class="muted text-xs leading-6">暂无通过质检的结果，不能据此判定合同无风险。</p><button type="button" class="btn mt-4" @click="retryWithPreview">返回预览后重试</button></div>
+          <div v-if="phase === 'reviewing'" class="empty" role="status"><span class="spinner mb-6" aria-hidden="true"></span><h3 class="text-base font-medium m-0">正在分析已确认的合同</h3><p class="muted text-xs leading-7 mt-3">已提交，正在等待完整执行结果，请保持页面打开。<br>仅通过质检的结果会出现在这里。</p><span class="chip stopwatch" role="timer" aria-live="off">已用时 {{ reviewElapsed }} 秒</span></div>
+          <div v-else-if="phase === 'failed'" class="empty"><div class="empty-glyph" aria-hidden="true">!</div><h3 class="text-base font-medium m-0">本次审查未完成</h3><p class="notice notice-error mt-4 w-full" role="alert">{{ reviewError }}</p><p class="muted text-xs leading-6">暂无通过质检的结果，不能据此判定合同无风险。</p><button type="button" class="btn mt-4" @click="retryWithPreview" :disabled="negotiation.pending">返回预览后重试</button></div>
           <template v-else-if="phase === 'done'">
             <div class="flex items-end justify-between mb-4"><div><span class="eyebrow">REVIEW COMPLETE</span><p class="text-lg font-semibold mt-1 mb-0">{{ totalRisks ? '发现 ' + totalRisks + ' 项待关注风险' : '本次未标出风险项' }}</p></div><span class="muted text-[11px]">{{ results.length }} 个条款</span></div>
             <div class="notice notice-warn mb-4">结论限于本次检索与已覆盖的租赁法条。押金、违约金等问题可能需要补充其他依据。</div>
@@ -161,30 +174,59 @@
         </div>
         <div class="panel-foot">依据范围 · 《民法典》租赁合同第 703–734 条</div>
       </section>
-      <section class="panel" aria-labelledby="negotiation-title">
-        <div class="panel-head"><div class="flex items-center gap-3"><span class="panel-number">03</span><h2 id="negotiation-title">沉浸道场</h2></div><span class="chip muted">协商准备</span></div>
+      <section class="panel" aria-labelledby="negotiation-title" :aria-busy="negotiation.pending">
+        <div class="panel-head"><div class="flex items-center gap-3"><span class="panel-number">03</span><h2 id="negotiation-title">沉浸道场</h2></div><span class="chip muted">已完成 {{ committed.roundCount }} / 5 轮</span></div>
+          <div class="score-card">
+            <div class="flex items-center justify-between gap-3"><span class="text-xs">模拟协商进展分</span><strong id="negotiation-score" class="text-[#6ce5cd]">{{ committed.score === null ? '不可评分' : committed.score + ' / 100' }}</strong></div>
+            <div class="score-track" role="progressbar" aria-label="模拟协商进展分" aria-valuemin="0" aria-valuemax="100" :aria-valuenow="committed.score" :aria-valuetext="committed.score === null ? '不可评分' : committed.score + '分'"><div id="score-fill" class="score-fill" :style="{ width: (committed.score ?? 0) + '%' }"></div></div>
+            <p class="muted text-[11px] m-0">{{ committed.scoreExplanation || (committed.score === null ? '尚无可评分条件；仅展示后端通过质检后提交的分数。' : '根据后端已提交的确认条件展示分数。') }}</p>
+          </div>
         <div class="panel-body">
           <label for="scenario-select" class="block muted text-[11px] mb-2">选择演练场景</label>
-          <select id="scenario-select" v-model="negotiation.scenario"><option value="deposit">押金扣留</option><option value="repair">维修责任</option><option value="termination">提前退租</option></select>
+          <select id="scenario-select" v-model="negotiation.scenario" :disabled="negotiation.pending || !!negotiation.request"><option value="deposit">押金扣留</option><option value="repair">维修责任</option><option value="termination">提前退租</option></select>
+          <p class="muted text-[10px] mt-1">切换场景或重新编辑合同会开始新会话，并清空本地协商清单。</p>
           <div class="flex gap-1 p-1 bg-[#0b1421] rounded-xl my-5" role="tablist" aria-label="协商角色">
             <button v-for="(role, index) in roles" :key="role.id" :id="'tab-' + role.id" type="button" class="role-tab" role="tab" :aria-selected="negotiation.activeRole === role.id" aria-controls="role-panel" :tabindex="negotiation.activeRole === role.id ? 0 : -1" @click="negotiation.activeRole = role.id" @keydown="navigateRoles($event, index)">{{ role.label }}</button>
           </div>
           <div id="role-panel" role="tabpanel" :aria-labelledby="'tab-' + negotiation.activeRole" tabindex="0" class="role-card">
             <div class="flex items-center gap-3 mb-3"><span class="role-avatar" aria-hidden="true">{{ activeRole.label.slice(0, 1) }}</span><div><p class="text-xs font-semibold m-0">{{ activeRole.label }}</p><p class="muted text-[10px] m-0">{{ activeRole.subtitle }}</p></div></div>
-            <template v-if="negotiation.activeRole === 'coach'"><p class="text-xs leading-7 m-0">{{ selectedClause ? selectedClause.negotiation_tip || '本条暂无具体协商建议。' : '先完成合同审查，再选择一张风险卡片。对应的协商建议会同步到这里。' }}</p><span v-if="selectedClause" class="chip muted mt-3">关联条款 {{ selectedClause.clause_id }}</span></template>
+            <template v-if="negotiation.activeRole === 'coach'"><p class="text-xs leading-7 m-0">{{ committed.coachAdvice || (selectedClause ? selectedClause.negotiation_tip || '本条暂无具体协商建议。' : '先完成合同审查，再选择一张风险卡片。对应的协商建议会同步到这里。') }}</p><span v-if="selectedClause" class="chip muted mt-3">关联条款 {{ selectedClause.clause_id }}</span></template>
             <p v-else-if="negotiation.activeRole === 'tenant'" class="text-xs leading-7 m-0">{{ scenarioGuidance[negotiation.scenario] }}可先在下方整理事实、诉求与希望对方明确确认的条件。</p>
-            <p v-else class="text-xs leading-7 m-0">房东角色的回应将在谈判接口接入后展示。目前没有发起谈判，也没有已确认条件。</p>
+            <p v-else class="text-xs leading-7 m-0">{{ committed.landlordResponse || '尚未收到通过质检的模拟房东回应。' }}</p>
           </div>
-          <div class="notice notice-warn mt-4">谈判交互待接入。当前可整理草稿与查看审查建议，尚未启动角色对话。</div>
-          <div class="flex justify-between items-center mt-5 mb-2"><label for="negotiation-draft" class="text-xs font-semibold">我的协商草稿</label><span class="muted text-[10px]">仅在本机</span></div>
-          <textarea id="negotiation-draft" v-model="negotiation.draft" rows="4" maxlength="2000" autocomplete="off" spellcheck="false" placeholder="我想就这条约定进一步确认…"></textarea>
-          <button type="button" class="btn w-full mt-3" disabled aria-describedby="negotiation-pending">发送给模拟房东 <span aria-hidden="true">↗</span></button>
-          <p id="negotiation-pending" class="muted text-[11px] mt-2">谈判接口接入后开放 · 单会话最多 5 轮</p>
-          <div class="flex justify-between gap-3 border-t border-[#243246] pt-4 mt-4 text-xs"><span class="muted">模拟协商进展分</span><span class="text-[#6ce5cd]">未开始 · 不可评分</span></div>
+          <div v-if="negotiationApi.status !== 'ready'" class="notice notice-warn mt-4" role="status">{{ negotiationApi.note }}<button type="button" class="text-btn block mt-1" @click="checkNegotiationApi" :disabled="negotiationApi.checking">{{ negotiationApi.checking ? '正在检查' : '重新检查谈判功能' }}</button></div>
+          <div class="flex justify-between items-center mt-5 mb-2"><label for="negotiation-draft" class="text-xs font-semibold">我的协商消息</label><span class="muted text-[10px]">发送前检查隐私</span></div>
+          <textarea id="negotiation-draft" v-model="negotiation.draft" :disabled="negotiation.pending || !!negotiation.request" rows="4" maxlength="2000" autocomplete="off" spellcheck="false" placeholder="我想就这条约定进一步确认…"></textarea>
+          <label class="flex gap-3 mt-3 text-[11px] leading-6"><input id="message-privacy-confirm" type="checkbox" v-model="negotiation.privacyConfirmed" :disabled="negotiation.pending || !!negotiation.request"><span>我已检查消息，删去姓名、详细住址等敏感信息；号码会在发送前再次遮蔽。</span></label>
+          <button id="send-negotiation" type="button" class="btn btn-primary w-full mt-3" @click="sendNegotiation" :disabled="!canSendNegotiation" aria-describedby="negotiation-pending">{{ negotiation.pending ? '等待完整结果…' : negotiation.request ? '重试同一条消息' : '发送给模拟房东' }} <span aria-hidden="true">↗</span></button>
+          <p id="negotiation-pending" class="muted text-[11px] mt-2">{{ committed.roundCount >= 5 ? '本会话已完成 5 轮，可导出协商清单。' : negotiation.request ? '上次提交结果尚未确认，重试将沿用相同请求编号和消息。' : '单会话最多 5 轮；失败回合保留上一回合条件与分数。' }}</p>
+          <div v-if="negotiation.pending" class="notice mt-3" role="status"><span class="spinner mr-2" style="width:14px;height:14px" aria-hidden="true"></span>已发送，正在等待完整执行结果…<div class="muted mt-1">请保持页面打开，结果返回后才展示节点回放。</div><span class="stopwatch" role="timer" aria-live="off">已用时 {{ negotiationElapsed }} 秒</span></div>
+          <p v-if="negotiation.notice" class="notice notice-warn mt-3" role="status">{{ negotiation.notice }}</p>
+          <div v-if="negotiation.error" class="notice notice-error mt-3" role="alert"><strong>{{ negotiation.request ? '本次提交结果尚未确认' : '本次协商未提交' }}</strong><p class="m-0 mt-1">{{ negotiation.error }}</p><span>页面继续保留上一回合的分数、已确认条件与轮次。</span></div>
+          <div class="border-t border-[#243246] pt-4 mt-5">
+            <h3 class="text-xs font-semibold m-0">已确认条件</h3>
+            <ul v-if="confirmedTermLines.length" id="confirmed-terms" class="term-list"><li v-for="(line, index) in confirmedTermLines" :key="index">{{ line }}</li></ul>
+            <p v-else id="confirmed-terms" class="muted text-[11px]">暂无通过质检的已确认条件，租客诉求不会自动加入。</p>
+            <details v-if="previousCommitted" class="mt-3 text-[11px]"><summary class="muted cursor-pointer">查看上一回合快照 · 第 {{ previousCommitted.roundCount }} 轮</summary><p>模拟协商进展分：{{ previousCommitted.score === null ? '不可评分' : previousCommitted.score }}</p><ul class="term-list"><li v-for="(line, index) in termLines(previousCommitted.confirmedTerms)" :key="index">{{ line }}</li><li v-if="!Object.keys(previousCommitted.confirmedTerms).length">暂无已确认条件</li></ul></details>
+            <template v-if="committed.unresolvedRequests !== null"><h4 class="text-xs mb-1 mt-4">后端返回的未解决诉求</h4><ul class="term-list"><li v-for="(item, index) in committed.unresolvedRequests" :key="index">{{ item }}</li><li v-if="!committed.unresolvedRequests.length">后端未列出项目，请人工核对。</li></ul></template>
+            <template v-if="committed.missingFacts !== null"><h4 class="text-xs mb-1 mt-4">后端返回的待补事实</h4><ul class="term-list"><li v-for="(item, index) in committed.missingFacts" :key="index">{{ item }}</li><li v-if="!committed.missingFacts.length">后端未列出项目，请人工核对。</li></ul></template>
+            <label for="unresolved-requests" class="block text-xs mt-4 mb-2">未解决的诉求 · 自行整理，每行一项</label>
+            <textarea id="unresolved-requests" v-model="negotiation.unresolvedText" rows="2" maxlength="4000" placeholder="例如：尚未就押金返还日期达成一致" :disabled="negotiation.pending"></textarea>
+            <label for="missing-facts" class="block text-xs mt-3 mb-2">待补事实 · 自行整理，每行一项</label>
+            <textarea id="missing-facts" v-model="negotiation.missingFactsText" rows="2" maxlength="4000" placeholder="例如：补充交接记录与费用凭证" :disabled="negotiation.pending"></textarea>
+            <p class="muted text-[10px] mt-2">自行整理内容仅保存在本页，导出时与已确认条件分列。</p>
+            <div v-if="exportState.manualText" class="mt-3"><label for="checklist-copy" class="text-xs">可手动复制的 Markdown 清单</label><textarea id="checklist-copy" class="export-preview" readonly :value="exportState.manualText" @focus="$event.target.select()"></textarea></div>
+          </div>
         </div>
-        <div class="panel-foot">演练用于练习协商，不代表现实房东接受概率。</div>
+        <div class="panel-foot"><button id="export-checklist" type="button" class="btn btn-primary w-full" @click="exportChecklist" :disabled="negotiation.pending || exportState.copying">{{ exportState.copying ? '正在复制…' : '导出协商清单' }} <span aria-hidden="true">↗</span></button><p v-if="exportState.notice" class="notice mt-3" role="status">{{ exportState.notice }}</p><p class="mb-0 mt-2">演练用于练习协商，不代表现实房东接受概率。</p></div>
       </section>
     </main>
+    <section class="trace-section" aria-labelledby="trace-title">
+      <div class="panel-head flex-wrap"><div><h2 id="trace-title">{{ activeTrace && activeTrace.id !== latestTraceId ? '历史执行回放' : '本次执行回放' }}</h2><p class="muted text-[11px] m-0 mt-1">收到完整 JSON 后按返回顺序展示；节点耗时来自响应，回放间隔仅用于浏览。</p></div><div v-if="activeTrace" class="flex flex-wrap gap-3 items-center"><label for="trace-run" class="sr-only">选择执行记录</label><select id="trace-run" style="width:auto;max-width:100%" v-model="selectedTraceId" @change="playTrace"><option v-for="run in traceRuns" :key="run.id" :value="run.id">{{ run.label }}{{ run.id === latestTraceId ? ' · 最新响应' : ' · 历史记录' }}</option></select><button type="button" class="text-btn" @click="playTrace" :disabled="!activeTrace.events.length">重新播放</button><button type="button" class="text-btn" @click="showAllTrace" :disabled="!tracePlaying">显示全部</button></div></div>
+      <div v-if="phase === 'reviewing' || negotiation.pending" class="notice notice-warn mx-5 mt-4" role="status">当前请求仍在等待完整结果。下方如有记录，属于此前已收到的响应。</div>
+      <div v-if="!activeTrace" class="muted text-xs p-5">尚未收到执行记录。不会预先生成节点、反馈或打字机内容。</div>
+      <template v-else><div class="flex flex-wrap justify-between gap-3 text-[11px] muted p-5"><span>{{ activeTrace.label }} · {{ activeTrace.note }}</span><span>{{ traceVisibleCount }} / {{ activeTrace.events.length }} 个实际节点</span></div><ol class="trace-list"><li v-for="event in visibleTraceEvents" :key="event.sequence" class="trace-event" :data-status="event.status"><div class="flex justify-between gap-3"><strong class="text-xs">{{ event.sequence }}. {{ traceNodeLabels[event.node] || event.node }}</strong><span class="chip">{{ traceStatusLabels[event.status] }}</span></div><div class="trace-meta"><span>{{ event.node }}{{ event.attempt == null ? '' : ' · 生成编号 ' + event.attempt }}</span><span>{{ formatDuration(event.duration_ms) }} ms</span></div><p class="text-[11px] leading-6 mb-0">{{ event.node === 'critic' ? 'Critic 反馈摘要' : '反馈摘要' }}：{{ event.feedback.length ? event.feedback.join('；') : '未返回反馈摘要' }}</p><div v-if="event.evidence_ids.length" class="muted text-[10px] mt-2">证据：{{ event.evidence_ids.join('、') }}</div></li></ol></template>
+    </section>
     <footer><span>隐私先行 / 证据可查 / 条款联动</span><span>AI 辅助分析与模拟演练 · 具体争议需结合事实进一步核实</span></footer>
   </div>
   <script>
@@ -213,12 +255,35 @@
           const activeMatch = ref(0);
           const reviewError = ref('');
           const health = reactive({ checking: false, status: 'unknown', note: '连接检查不调用云端分析。' });
-          // 右栏：当前后端未暴露谈判 HTTP 接口，先提供角色、场景与本地草稿。
-          const negotiation = reactive({ scenario: 'deposit', activeRole: 'coach', draft: '' });
+          // 右栏只提交正式响应；候选分数/条件永远不进入 UI 的确认状态。
+          const newId = () => typeof crypto.randomUUID === 'function' ? crypto.randomUUID()
+            : Array.from(crypto.getRandomValues(new Uint8Array(16)), byte => byte.toString(16).padStart(2, '0')).join('');
+          const emptyCommitted = () => ({ score: null, roundCount: 0, confirmedTerms: {}, coachAdvice: '',
+            landlordResponse: '', scoreExplanation: '', unresolvedRequests: null, missingFacts: null });
+          const committed = ref(emptyCommitted());
+          const previousCommitted = ref(null);
+          const negotiation = reactive({ scenario: 'deposit', activeRole: 'coach', draft: '', sessionId: newId(),
+            privacyConfirmed: false, pending: false, error: '', notice: '', request: null, unresolvedText: '', missingFactsText: '' });
+          const negotiationApi = reactive({ checking: false, status: 'unknown', endpoint: '', note: '正在检查服务是否已开放谈判功能…' });
+          const exportState = reactive({ copying: false, notice: '', manualText: '' });
+          const reviewElapsed = ref(0);
+          const negotiationElapsed = ref(0);
+          const traceRuns = ref([]);
+          const selectedTraceId = ref(null);
+          const traceVisibleCount = ref(0);
+          const tracePlaying = ref(false);
+          const latestTraceId = computed(() => traceRuns.value.at(-1)?.id ?? null);
+          const activeTrace = computed(() => traceRuns.value.find(run => run.id === selectedTraceId.value) || null);
+          const visibleTraceEvents = computed(() => activeTrace.value?.events.slice(0, traceVisibleCount.value) || []);
+          const traceNodeLabels = { configuration: '配置检查', retrieval: '法条检索', drafting: '生成审查结果',
+            critic: 'Critic 质检', mock: '失败终止', graph: '执行图异常', tenant_coach: '租客辅导',
+            landlord: '模拟房东', rule_score: '规则试算', retry: '重写', completed: '会话结束' };
+          const traceStatusLabels = { completed: '已完成', failed: '失败', retry: '需重写', needs_review: '待复核' };
+          const scenarioLabels = { deposit: '押金扣留', repair: '维修责任', termination: '提前退租' };
           const roles = [
             { id: 'coach', label: '租客辅导', subtitle: '条款对应的协商建议' },
             { id: 'tenant', label: '我的诉求', subtitle: '整理事实与明确条件' },
-            { id: 'landlord', label: '模拟房东', subtitle: '角色回应 · 待接入' },
+            { id: 'landlord', label: '模拟房东', subtitle: '已通过质检的角色回应' },
           ];
           const riskLabels = { HIGH: '高风险', MEDIUM: '中风险', LOW: '低风险', NONE: '未标出风险' };
           const scenarioGuidance = {
@@ -228,11 +293,19 @@
           };
           let reviewController = null;
           let healthController = null;
+          let negotiationController = null;
+          let discoveryController = null;
+          let traceTimer = null;
+          let exportEpoch = 0;
+          const waitTimers = new Map();
           const charCount = text => Array.from(text).length; // 与 Python 字符数口径一致
           const validText = text => text.trim().length > 0 && charCount(text) >= 10 && charCount(text) <= 5000;
           const validPreview = computed(() => validText(previewText.value));
           const selectedClause = computed(() => results.value.find(item => item.clause_id === selectedClauseId.value) || null);
           const activeRole = computed(() => roles.find(role => role.id === negotiation.activeRole));
+          const canSendNegotiation = computed(() => phase.value !== 'reviewing' && !negotiation.pending && negotiationApi.status === 'ready'
+            && committed.value.roundCount < 5 && (!!negotiation.request || (negotiation.draft.trim() && negotiation.privacyConfirmed)));
+          const confirmedTermLines = computed(() => termLines(committed.value.confirmedTerms));
 
           function redact(text) {
             const counts = { phone: 0, id: 0 };
@@ -243,6 +316,240 @@
             return { text: safe, counts };
           }
           watch(previewText, () => { privacyConfirmed.value = false; inputError.value = ''; }, { flush: 'sync' });
+          watch(() => negotiation.draft, () => { negotiation.privacyConfirmed = false; negotiation.notice = ''; }, { flush: 'sync' });
+          watch(() => negotiation.scenario, resetNegotiation, { flush: 'sync' });
+          watch([committed, () => negotiation.unresolvedText, () => negotiation.missingFactsText], () => {
+            clearExport();
+          });
+
+          function clearExport() {
+            exportEpoch++;
+            Object.assign(exportState, { copying: false, notice: '', manualText: '' });
+          }
+
+          function startWait(key, elapsed) {
+            stopWait(key);
+            elapsed.value = 0;
+            const started = performance.now();
+            const update = () => { elapsed.value = Math.floor((performance.now() - started) / 1000); };
+            waitTimers.set(key, { timer: setInterval(update, 250), update });
+          }
+          function stopWait(key) {
+            const wait = waitTimers.get(key);
+            if (wait) { wait.update(); clearInterval(wait.timer); waitTimers.delete(key); }
+          }
+          function resetNegotiation() {
+            if (negotiation.pending) return;
+            committed.value = emptyCommitted();
+            previousCommitted.value = null;
+            Object.assign(negotiation, { sessionId: newId(), draft: '', privacyConfirmed: false,
+              error: '', notice: '', request: null, activeRole: 'coach', unresolvedText: '', missingFactsText: '' });
+            negotiationElapsed.value = 0;
+            clearExport();
+          }
+          function termLines(terms) {
+            const labels = { deposit_refund: '确认返还押金（元）' };
+            return Object.entries(terms).map(([key, value]) => redact((labels[key] || key) + '：'
+              + (typeof value === 'string' ? value : JSON.stringify(value))).text);
+          }
+          const isRecord = value => value !== null && typeof value === 'object' && !Array.isArray(value);
+          const isStringList = value => Array.isArray(value) && value.every(item => typeof item === 'string');
+          const safeList = list => list.map(item => redact(item).text);
+          function safeJsonValue(value) {
+            if (typeof value === 'string') return redact(value).text;
+            if (typeof value === 'number') return redact(String(value)).text === String(value) ? value : '***';
+            if (Array.isArray(value)) return value.map(safeJsonValue);
+            if (isRecord(value)) return Object.fromEntries(Object.entries(value).map(([key, item]) => [redact(key).text, safeJsonValue(item)]));
+            return value;
+          }
+          const formatDuration = value => value.toLocaleString('zh-CN', { maximumFractionDigits: 2 });
+
+          function recordTrace(data, source) {
+            // 不从 history 或预设节点生成 Trace；原数组不排序，不补齐缺失节点。
+            const valid = Array.isArray(data.trace) && data.trace.every((event, index) => isRecord(event)
+              && event.sequence === index + 1 && typeof event.node === 'string' && event.node.trim()
+              && Object.hasOwn(traceStatusLabels, event.status)
+              && typeof event.duration_ms === 'number' && Number.isFinite(event.duration_ms) && event.duration_ms >= 0
+              && isStringList(event.feedback) && (event.evidence_ids === undefined || isStringList(event.evidence_ids))
+              && (event.attempt === undefined || (Number.isInteger(event.attempt) && event.attempt >= 0 && event.attempt <= 3)));
+            const events = valid ? data.trace.map(event => ({ sequence: event.sequence, node: redact(event.node).text,
+              status: event.status, duration_ms: event.duration_ms, attempt: event.attempt,
+              feedback: safeList(event.feedback), evidence_ids: safeList(event.evidence_ids || []) })) : [];
+            const id = newId();
+            const number = traceRuns.value.filter(run => run.source === source).length + 1;
+            traceRuns.value.push({ id, source, events,
+              label: source + ' · 第 ' + number + ' 次响应 · ' + ({ success: '成功', completed: '已结束', needs_review: '待复核' }[data.status] || '响应异常'),
+              note: !Array.isArray(data.trace) ? '响应未提供 Trace，未生成任何节点。'
+                : !valid ? 'Trace 格式不符合约定，未播放无法核验的记录。'
+                  : !events.length ? '后端返回空 Trace，未补造节点。' : '来自本次完整响应的实际执行记录。' });
+            selectedTraceId.value = id;
+            playTrace();
+          }
+          function playTrace() {
+            clearTimeout(traceTimer);
+            traceVisibleCount.value = 0;
+            const id = activeTrace.value?.id;
+            const count = activeTrace.value?.events.length || 0;
+            tracePlaying.value = count > 0;
+            if (!count) return;
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { showAllTrace(); return; }
+            const reveal = () => {
+              if (activeTrace.value?.id !== id) return;
+              traceVisibleCount.value++;
+              if (traceVisibleCount.value < count) traceTimer = setTimeout(reveal, 220);
+              else tracePlaying.value = false;
+            };
+            traceTimer = setTimeout(reveal, 100);
+          }
+          function showAllTrace() {
+            clearTimeout(traceTimer);
+            traceVisibleCount.value = activeTrace.value?.events.length || 0;
+            tracePlaying.value = false;
+          }
+
+          async function checkNegotiationApi() {
+            if (negotiationApi.checking || negotiation.pending || negotiation.request) return;
+            negotiationApi.checking = true;
+            discoveryController = new AbortController();
+            const timer = setTimeout(() => discoveryController?.abort(), 5000);
+            try {
+              // 当前仓库尚无谈判 HTTP 路由。只使用后端 OpenAPI 实际公布的同源路径，不臆造接口。
+              const response = await fetch('/openapi.json', { cache: 'no-store', signal: discoveryController.signal });
+              if (!response.ok) throw new Error('discovery');
+              const api = await response.json();
+              const matches = Object.entries(api.paths || {}).filter(([path, operations]) => {
+                if (!path.startsWith('/api/') || path.includes('{') || path.includes('?') || path.includes('#')) return false;
+                let schema = operations.post?.requestBody?.content?.['application/json']?.schema;
+                if (schema?.$ref?.startsWith('#/components/schemas/')) schema = api.components?.schemas?.[schema.$ref.split('/').at(-1)];
+                return schema?.properties && ['session_id', 'user_input', 'request_id'].every(key => Object.hasOwn(schema.properties, key));
+              });
+              negotiationApi.endpoint = matches.length === 1 ? matches[0][0] : '';
+              negotiationApi.status = matches.length === 1 ? 'ready' : 'unavailable';
+              negotiationApi.note = matches.length > 1 ? '服务提供了多个谈判入口，尚无法确定当前入口。可先整理并导出清单。'
+                : '当前服务尚未开放谈判功能，可先整理并导出诉求与待补事实。';
+            } catch {
+              negotiationApi.status = 'unavailable';
+              negotiationApi.endpoint = '';
+              negotiationApi.note = '暂时无法确认谈判功能是否可用，请检查服务后重试。可先整理并导出清单。';
+            } finally { clearTimeout(timer); discoveryController = null; negotiationApi.checking = false; }
+          }
+          function readNegotiationResponse(data, request) {
+            if (!isRecord(data) || !['success', 'completed'].includes(data.status)
+              || data.session_id !== request.session_id || data.request_id !== request.request_id
+              || data.round_count !== committed.value.roundCount + 1 || data.round_count > 5
+              || !isRecord(data.confirmed_terms) || (data.errors !== undefined && (!isStringList(data.errors) || data.errors.length))) return null;
+            // Day 7 正式分数名为 trial_score；兼容明确返回 score 的适配层，绝不读 candidate_score。
+            const score = Object.hasOwn(data, 'trial_score') ? data.trial_score : data.score;
+            if (score !== null && (!Number.isInteger(score) || score < 0 || score > 100)) return null;
+            if (Object.hasOwn(data, 'score') && data.score !== score) return null;
+            if (['coach_advice', 'landlord_response', 'score_explanation'].some(key => data[key] !== undefined && typeof data[key] !== 'string')) return null;
+            if (['unresolved_requests', 'missing_facts'].some(key => data[key] !== undefined && !isStringList(data[key]))) return null;
+            return { score, roundCount: data.round_count, confirmedTerms: safeJsonValue(data.confirmed_terms),
+              coachAdvice: redact(data.coach_advice || '').text, landlordResponse: redact(data.landlord_response || '').text,
+              scoreExplanation: redact(data.score_explanation || '').text,
+              unresolvedRequests: data.unresolved_requests === undefined ? null : safeList(data.unresolved_requests),
+              missingFacts: data.missing_facts === undefined ? null : safeList(data.missing_facts) };
+          }
+          async function sendNegotiation() {
+            // 同步锁先于 await，程序化双击与键盘重复触发也只发一次。
+            if (!canSendNegotiation.value) return;
+            if (!['http:', 'https:'].includes(location.protocol)) { negotiation.error = '请通过项目的同源 HTTP 首页打开后再发送。'; return; }
+            if (!negotiation.request) {
+              const safe = redact(negotiation.draft);
+              if (safe.text !== negotiation.draft) {
+                negotiation.draft = safe.text;
+                negotiation.notice = '已再次遮蔽消息中的号码，请检查更新后的消息并重新勾选确认。';
+                return;
+              }
+              if (!safe.text.trim() || charCount(safe.text) > 2000) return;
+              negotiation.request = { session_id: negotiation.sessionId, user_input: safe.text, request_id: newId() };
+            }
+            const request = { ...negotiation.request };
+            negotiation.pending = true;
+            negotiation.error = '';
+            negotiation.notice = '';
+            exportState.notice = '';
+            exportState.manualText = '';
+            startWait('negotiation', negotiationElapsed);
+            negotiationController = new AbortController();
+            const timer = setTimeout(() => negotiationController?.abort(), 420000);
+            try {
+              const response = await fetch(negotiationApi.endpoint, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, cache: 'no-store',
+                credentials: 'same-origin', signal: negotiationController.signal, body: JSON.stringify(request),
+              });
+              if (!response.ok) {
+                if ([404, 405, 422].includes(response.status)) negotiation.request = null;
+                negotiation.error = response.status === 404 || response.status === 405 ? '当前服务尚未开放此谈判入口，请检查后端接入情况。'
+                  : response.status === 422 ? '消息格式校验失败，请检查消息后重新发送。'
+                    : '服务暂时未返回有效结果，请重试同一条消息以确认提交情况。';
+                return;
+              }
+              const data = await response.json();
+              if (!isRecord(data) || data.session_id !== request.session_id || data.request_id !== request.request_id) {
+                negotiation.error = '响应缺少本次会话或请求标识，未应用任何状态。请重试同一条消息。'; return;
+              }
+              recordTrace(data, '协商');
+              if (data.status === 'needs_review') {
+                const reasons = [typeof data.reason === 'string' ? data.reason : '', ...(isStringList(data.errors) ? data.errors : [])].filter(Boolean);
+                negotiation.error = reasons.length ? [...new Set(safeList(reasons))].join('；') : '本轮未通过质检，请调整消息后重试。';
+                negotiation.request = null;
+                return;
+              }
+              const next = readNegotiationResponse(data, request);
+              if (!next) { negotiation.error = '响应的分数、条件或轮次不符合约定，未应用任何状态。请重试同一条消息。'; return; }
+              previousCommitted.value = JSON.parse(JSON.stringify(committed.value));
+              committed.value = next; // 一次替换完整快照，失败分支不修改正式状态。
+              negotiation.request = null;
+              negotiation.draft = '';
+              negotiation.activeRole = 'landlord';
+              negotiation.notice = '本轮结果已通过质检，已更新确认条件与模拟协商进展分。';
+            } catch (error) {
+              negotiation.error = error.name === 'AbortError' ? '等待已超时，提交结果尚未确认。请重试同一条消息。'
+                : '网络或响应解析失败，提交结果尚未确认。请重试同一条消息。';
+            } finally {
+              clearTimeout(timer); stopWait('negotiation'); negotiationController = null; negotiation.pending = false;
+            }
+          }
+          function checklistText() {
+            const list = values => values.length ? values.map(item => '- ' + item).join('\n') : '- 尚未整理，请人工核对。';
+            const manual = text => safeList(text.split(/\r?\n/).map(line => line.trim()).filter(Boolean));
+            const state = committed.value;
+            return redact(['# 智租博弈 · 协商清单', '', '演练场景：' + scenarioLabels[negotiation.scenario],
+              '已完成轮次：' + state.roundCount + ' / 5', '模拟协商进展分：' + (state.score === null ? '不可评分' : state.score + ' / 100'),
+              '仅根据本页最近一次通过质检的正式状态整理；模拟演练不代表现实房东接受或法律结论。',
+              ...(negotiation.request ? ['上次请求结果尚未确认，以下保留此前正式状态。'] : []),
+              '', '## 已确认条件', confirmedTermLines.value.length ? list(confirmedTermLines.value) : '- 暂无通过质检的已确认条件。',
+              '', '## 未解决的诉求', '### 后端返回', state.unresolvedRequests === null ? '- 后端未提供此字段，请人工整理。' : list(state.unresolvedRequests),
+              '### 自行整理（待确认）', list(manual(negotiation.unresolvedText)),
+              '', '## 待补事实', '### 后端返回', state.missingFacts === null ? '- 后端未提供此字段，请人工整理。' : list(state.missingFacts),
+              '### 自行整理（待核实）', list(manual(negotiation.missingFactsText)), '',
+              '未解决诉求和待补事实均不等于已确认条件。',
+            ].join('\n')).text;
+          }
+          async function exportChecklist() {
+            if (negotiation.pending || exportState.copying) return;
+            exportState.copying = true;
+            exportState.notice = '';
+            exportState.manualText = '';
+            const text = checklistText();
+            const epoch = ++exportEpoch;
+            const sessionId = negotiation.sessionId;
+            const stillCurrent = () => epoch === exportEpoch && sessionId === negotiation.sessionId;
+            try {
+              if (!navigator.clipboard?.writeText) throw new Error('clipboard-unavailable');
+              await navigator.clipboard.writeText(text);
+              if (!stillCurrent()) return;
+              exportState.notice = '协商清单已复制到剪贴板，可粘贴为 Markdown 保存。';
+            } catch {
+              if (!stillCurrent()) return;
+              // Clipboard API 被拒绝时仍提供可选中复制的完整文本，不误报复制成功。
+              exportState.manualText = text;
+              exportState.notice = '浏览器未允许自动复制，请选中下方清单手动复制。';
+              await nextTick();
+              document.getElementById('checklist-copy')?.focus();
+            } finally { if (stillCurrent()) exportState.copying = false; }
+          }
 
           function clearReview() {
             results.value = [];
@@ -251,11 +558,10 @@
             activeMatch.value = 0;
             submittedText.value = '';
             reviewError.value = '';
-            negotiation.draft = '';
-            negotiation.activeRole = 'coach';
+            resetNegotiation();
           }
           function preparePreview() {
-            if (phase.value !== 'input') return;
+            if (phase.value !== 'input' || negotiation.pending) return;
             const safe = redact(rawText.value);
             inputError.value = '';
             privacyNotice.value = '';
@@ -268,7 +574,7 @@
             nextTick(() => document.getElementById('preview-input')?.focus());
           }
           function editContract() {
-            if (phase.value === 'reviewing') return;
+            if (phase.value === 'reviewing' || negotiation.pending) return;
             // 保留人工删改后的版本，不重新混入旧原文。
             rawText.value = previewText.value || rawText.value;
             clearReview();
@@ -279,6 +585,7 @@
             nextTick(() => document.getElementById('contract-input')?.focus());
           }
           function retryWithPreview() {
+            if (negotiation.pending || phase.value === 'reviewing') return;
             clearReview();
             privacyConfirmed.value = false;
             phase.value = 'preview';
@@ -356,7 +663,7 @@
 
           async function submitAnalysis() {
             // 状态门禁补充 UI 禁用，双击不会产生重复请求。
-            if (phase.value !== 'preview' || !privacyConfirmed.value) return;
+            if (phase.value !== 'preview' || !privacyConfirmed.value || negotiation.pending) return;
             const safe = redact(previewText.value);
             if (safe.text !== previewText.value) {
               previewText.value = safe.text;
@@ -375,6 +682,7 @@
             privacyNotice.value = '';
             inputError.value = '';
             phase.value = 'reviewing';
+            startWait('review', reviewElapsed);
             reviewController = new AbortController();
             // 最多三次生成，每次后端网络超时可为120秒。
             const timer = setTimeout(() => reviewController?.abort(), 420000);
@@ -391,8 +699,12 @@
                 return;
               }
               const data = await response.json();
+              if (isRecord(data)) recordTrace(data, '合同审查');
               if (!validResponse(data)) { reviewError.value = '审查响应格式不符合约定，请检查后端版本后重试。'; phase.value = 'failed'; return; }
-              if (data.status === 'needs_review') { reviewError.value = redact(data.reason).text; phase.value = 'failed'; return; }
+              if (data.status === 'needs_review') {
+                reviewError.value = [...new Set(safeList([data.reason, ...(isStringList(data.errors) ? data.errors : [])]))].join('；');
+                phase.value = 'failed'; return;
+              }
               // 防御性屏蔽异常响应中可能带回的号码。
               results.value = data.results.map(item => ({ ...item,
                 original_clause: redact(item.original_clause).text,
@@ -404,7 +716,7 @@
             } catch (error) {
               reviewError.value = error.name === 'AbortError' ? '等待后端结果超时，请检查服务后返回预览重试。' : '未能取得有效审查结果，请检查网络与后端服务后重试。';
               phase.value = 'failed';
-            } finally { clearTimeout(timer); reviewController = null; }
+            } finally { clearTimeout(timer); stopWait('review'); reviewController = null; }
           }
           async function checkHealth() {
             if (health.checking) return;
@@ -420,14 +732,22 @@
             } catch { health.status = 'offline'; health.note = '请确认本地服务已启动，并通过同源首页打开。'; }
             finally { clearTimeout(timer); health.checking = false; healthController = null; }
           }
-          onMounted(() => { boot.hidden = true; checkHealth(); });
-          onBeforeUnmount(() => { reviewController?.abort(); healthController?.abort(); });
+          onMounted(() => { boot.hidden = true; checkHealth(); checkNegotiationApi(); });
+          onBeforeUnmount(() => {
+            reviewController?.abort(); healthController?.abort(); negotiationController?.abort(); discoveryController?.abort();
+            clearTimeout(traceTimer);
+            for (const key of waitTimers.keys()) stopWait(key);
+          });
           return {
             rawText, previewText, submittedText, phase, privacyConfirmed, maskCounts, inputError, privacyNotice,
             results, totalRisks, selectedClauseId, selectedClause, activeMatch, clauseMatches, documentParts,
             reviewError, health, negotiation, roles, activeRole, riskLabels, scenarioGuidance, validPreview,
             charCount, preparePreview, submitAnalysis, editContract, retryWithPreview, loadSample,
             selectClause, moveMatch, navigateRoles, checkHealth,
+            committed, previousCommitted, confirmedTermLines, termLines, canSendNegotiation, negotiationApi,
+            reviewElapsed, negotiationElapsed, sendNegotiation, checkNegotiationApi, exportState, exportChecklist,
+            traceRuns, activeTrace, selectedTraceId, latestTraceId, visibleTraceEvents, traceVisibleCount,
+            tracePlaying, playTrace, showAllTrace, traceNodeLabels, traceStatusLabels, formatDuration,
           };
         },
       }).mount('#app');
