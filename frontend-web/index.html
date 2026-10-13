@@ -3,144 +3,435 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="color-scheme" content="light">
-  <title>智租博弈 · 开发起点</title>
+  <meta name="color-scheme" content="dark">
+  <meta name="referrer" content="no-referrer">
+  <title>智租博弈 · 合同协商工作台</title>
+  <!-- 固定版本随仓库保存，由 FastAPI /vendor 同源提供；无需构建或外网。 -->
+  <script src="./vendor/tailwindcss-browser-4.1.13.js"></script>
+  <script src="./vendor/vue-3.5.13.global.prod.js" defer></script>
   <style>
-    :root { --ink: #193a36; --muted: #63736e; --green: #19695b; --paper: #f5f6f0; --line: #dce4dc; }
+    :root { --bg: #0b111b; --panel: #111b29; --line: #243246; --ink: #e6edf6; --muted: #93a4bb; --accent: #6ce5cd; }
     * { box-sizing: border-box; }
-    body { margin: 0; color: var(--ink); background: var(--paper); font-family: "Segoe UI", "Microsoft YaHei", sans-serif; }
-    a { color: inherit; }
-    .shell { max-width: 1120px; margin: auto; padding: 32px 28px; }
-    header { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-bottom: 26px; border-bottom: 1px solid var(--line); }
-    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; }
-    .mark { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; color: white; background: var(--green); font-size: 20px; }
-    .brand small { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; letter-spacing: 2px; }
-    .stage { border: 1px solid var(--line); border-radius: 999px; padding: 8px 13px; color: var(--muted); font-size: 12px; }
-    main { display: grid; grid-template-columns: 1.1fr 1fr; gap: 58px; align-items: center; padding: 68px 0 54px; }
-    .eyebrow { color: var(--green); font-size: 12px; letter-spacing: 2px; font-weight: 700; }
-    h1 { margin: 18px 0; font-size: clamp(32px, 4.2vw, 48px); line-height: 1.3; letter-spacing: -1px; }
-    .intro { max-width: 420px; color: var(--muted); line-height: 1.9; font-size: 15px; }
-    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
-    .button { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 11px 18px; border-radius: 10px; border: 1px solid var(--line); background: white; text-decoration: none; font-size: 14px; }
-    .primary { color: white; background: var(--green); border-color: var(--green); }
-    .button:focus-visible, button:focus-visible { outline: 3px solid #e7b459; outline-offset: 3px; }
-    .status-card { padding: 28px; border: 1px solid var(--line); border-radius: 20px; background: white; box-shadow: 0 16px 40px #193a3608; }
-    .card-head { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
-    h2 { margin: 0; font-size: 18px; }
-    #refresh { background: none; border: 0; color: var(--green); font: inherit; font-size: 13px; cursor: pointer; padding: 8px 0; }
-    #refresh:disabled { opacity: .5; cursor: wait; }
-    dl { margin: 20px 0 0; }
-    .row { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 15px 0; border-bottom: 1px solid #edf0eb; font-size: 14px; }
-    dt { color: var(--muted); flex-shrink: 0; }
-    dd { margin: 0; text-align: right; overflow-wrap: anywhere; }
-    .good { color: var(--green); }
-    .pending { color: #8e621e; }
-    .error { color: #a43c31; }
-    #health-note { margin: 18px 0 0; color: var(--muted); font-size: 12px; line-height: 1.8; }
-    .roadmap { padding: 28px 0; border-top: 1px solid var(--line); }
-    .roadmap-head { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
-    .roadmap-head span { color: var(--muted); font-size: 12px; }
-    .scenarios { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-    .scenario { border: 1px solid var(--line); padding: 22px; border-radius: 14px; }
-    .number { color: #78948a; font-size: 12px; letter-spacing: 2px; }
-    h3 { margin: 12px 0 8px; font-size: 17px; }
-    .scenario p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.8; }
-    footer { margin-top: 18px; color: var(--muted); font-size: 12px; line-height: 1.8; }
-    @media (max-width: 760px) {
-      .shell { padding: 22px 20px; }
-      main { grid-template-columns: 1fr; gap: 30px; padding: 40px 0; }
-      .scenarios { grid-template-columns: 1fr; }
-      .status-card { padding: 22px; }
-      .stage { font-size: 11px; padding: 7px 10px; }
-    }
+    [v-cloak], [hidden] { display: none !important; }
+    body { margin: 0; color: var(--ink); background: var(--bg); font: 14px/1.65 "Segoe UI", "Microsoft YaHei", sans-serif; }
+    body::before { content: ""; position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 48% -20%, #164a5740, transparent 60%); }
+    button, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: .45; }
+    a { color: inherit; text-decoration: none; }
+    button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+    textarea, select { color: var(--ink); background: #0b1421; border: 1px solid var(--line); border-radius: 12px; }
+    textarea { width: 100%; padding: 16px; resize: vertical; line-height: 1.9; }
+    textarea::placeholder { color: #6f829b; }
+    select { width: 100%; padding: 10px 12px; }
+    input[type="checkbox"] { accent-color: var(--accent); width: 17px; height: 17px; flex: 0 0 auto; margin-top: 4px; }
+    .shell { position: relative; max-width: 1720px; margin: auto; padding: 0 32px; }
+    .topbar { min-height: 88px; display: flex; align-items: center; justify-content: space-between; gap: 18px; border-bottom: 1px solid var(--line); }
+    .brand-mark { display: grid; place-items: center; width: 42px; height: 42px; border: 1px solid #6ce5cd60; border-radius: 13px; background: #6ce5cd12; color: var(--accent); font-size: 23px; }
+    .eyebrow { color: var(--accent); font-size: 10px; font-weight: 600; letter-spacing: .2em; }
+    .muted { color: var(--muted); }
+    .chip { display: inline-flex; align-items: center; gap: 7px; padding: 4px 10px; border: 1px solid var(--line); border-radius: 999px; font-size: 11px; white-space: nowrap; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .intro { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; padding: 30px 0 25px; }
+    .steps { display: flex; align-items: center; gap: 15px; font-size: 12px; color: var(--muted); }
+    .step { display: flex; align-items: center; gap: 7px; }
+    .step-num { display: grid; place-items: center; width: 23px; height: 23px; border: 1px solid var(--line); border-radius: 50%; font-size: 11px; }
+    .step.active { color: var(--accent); }
+    .step.active .step-num { border-color: #6ce5cd70; background: #6ce5cd15; }
+    .board { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr) minmax(0, .95fr); gap: 18px; }
+    .panel { display: flex; flex-direction: column; min-width: 0; height: min(760px, calc(100dvh - 290px)); min-height: 560px; border: 1px solid var(--line); border-radius: 18px; background: var(--panel); overflow: hidden; }
+    .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px; border-bottom: 1px solid var(--line); }
+    .panel-head h2 { margin: 0; font-size: 15px; font-weight: 600; }
+    .panel-number { color: #6f829b; font: 11px/1.5 Consolas, monospace; letter-spacing: .12em; }
+    .panel-body { padding: 20px; min-height: 0; flex: 1; overflow: auto; scrollbar-width: thin; scrollbar-color: #35465d transparent; }
+    .panel-foot { padding: 14px 20px; border-top: 1px solid var(--line); font-size: 11px; color: var(--muted); }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 42px; padding: 9px 15px; border: 1px solid var(--line); border-radius: 10px; background: #182436; color: var(--ink); font-size: 12px; font-weight: 600; transition: background .15s, border-color .15s; }
+    .btn:hover:enabled { border-color: #5c718d; background: #213149; }
+    .btn-primary { border-color: var(--accent); color: #09251f; background: var(--accent); }
+    .btn-primary:hover:enabled { background: #9cf2e0; border-color: #9cf2e0; }
+    .text-btn { background: none; border: 0; padding: 4px 0; color: var(--accent); font-size: 12px; }
+    .notice { padding: 12px 14px; border: 1px solid #6ce5cd28; border-radius: 11px; background: #6ce5cd08; font-size: 12px; color: #aecac8; line-height: 1.8; }
+    .notice-warn { color: #e8c389; border-color: #e8bd6130; background: #e8bd6109; }
+    .notice-error { color: #ffb2ba; border-color: #fa879035; background: #fa879009; }
+    .empty { display: flex; min-height: 300px; height: 100%; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 28px 12px; }
+    .empty-glyph { display: grid; place-items: center; width: 64px; height: 64px; border: 1px solid #365268; border-radius: 19px; background: linear-gradient(145deg, #1e3944, #142031); color: var(--accent); margin-bottom: 22px; font-size: 27px; }
+    .risk-card { margin-top: 14px; border: 1px solid var(--line); border-radius: 13px; background: #142031; overflow: hidden; transition: border-color .15s; }
+    .risk-card.selected { border-color: var(--accent); box-shadow: 0 0 0 1px #6ce5cd18; }
+    .risk-select { display: block; width: 100%; padding: 17px; border: 0; background: transparent; color: inherit; text-align: left; }
+    .risk-select:hover { background: #ffffff03; }
+    .risk-level { display: inline-block; border-radius: 5px; padding: 3px 8px; font-size: 10px; font-weight: 600; }
+    .level-HIGH { color: #ffa2ae; background: #ff74851a; }
+    .level-MEDIUM { color: #efc980; background: #efc98018; }
+    .level-LOW { color: #8ec4ff; background: #8ec4ff15; }
+    .level-NONE { color: #83ddc1; background: #83ddc115; }
+    .clause-quote { border-left: 2px solid #41556e; padding-left: 11px; color: #b0bed0; font-size: 12px; line-height: 1.85; overflow-wrap: anywhere; }
+    .evidence { padding: 12px 17px; border-top: 1px solid var(--line); font-size: 11px; }
+    .document { font-size: 13px; line-height: 2.15; white-space: pre-wrap; overflow-wrap: anywhere; color: #c0cede; padding-bottom: 32px; }
+    mark { color: #fff0bb; background: #b78a2d45; border-radius: 3px; padding: 2px 0; scroll-margin-block: 65px; }
+    mark.current { color: #101828; background: #f7d787; box-shadow: 0 0 0 3px #f7d78722; }
+    .role-tab { flex: 1; padding: 9px 5px; border: 1px solid transparent; border-radius: 8px; background: transparent; color: var(--muted); font-size: 12px; }
+    .role-tab[aria-selected="true"] { color: var(--accent); background: #203338; border-color: #6ce5cd25; }
+    .role-card { border: 1px solid var(--line); background: #142031; border-radius: 12px; padding: 16px; }
+    .role-avatar { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; color: var(--accent); background: #6ce5cd15; font-size: 12px; }
+    .spinner { display: inline-block; width: 24px; height: 24px; border: 2px solid #6ce5cd25; border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+    .boot { max-width: 520px; margin: 12vh auto; padding: 28px; border: 1px solid var(--line); border-radius: 16px; background: var(--panel); }
+    footer { display: flex; justify-content: space-between; gap: 20px; padding: 18px 0 24px; font-size: 11px; color: #8294ac; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (max-width: 1100px) { .shell { padding: 0 20px; } .board { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); } .panel:last-child { grid-column: 1 / -1; height: auto; min-height: 0; } .intro { align-items: flex-start; flex-direction: column; gap: 18px; } }
+    @media (max-width: 700px) { .shell { padding: 0 14px; } .topbar { min-height: 78px; flex-wrap: wrap; padding: 16px 0; } .board { grid-template-columns: minmax(0, 1fr); } .panel { height: auto; min-height: 460px; } .panel-body { max-height: 70dvh; } .panel:last-child { grid-column: auto; } .steps { gap: 8px; font-size: 11px; } .intro { padding: 22px 0; } footer { flex-direction: column; gap: 5px; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
   </style>
 </head>
 <body>
-  <div class="shell">
-    <header>
-      <div class="brand"><span class="mark" aria-hidden="true">租</span><div>智租博弈<small>ZHI ZU AGENT</small></div></div>
-      <span class="stage">Day 1 · 最小运行底座</span>
+  <div id="boot-notice" class="boot" role="status">正在载入工作台… 若长时间未打开，请确认本地服务与 vendor 资源完整。合同尚未上传。</div>
+  <noscript><div class="boot">此工作台需要启用 JavaScript 才能在本地脱敏与确认。</div></noscript>
+  <div id="app" class="shell" v-cloak>
+    <header class="topbar">
+      <a href="/" class="flex items-center gap-3" aria-label="智租博弈首页">
+        <span class="brand-mark" aria-hidden="true">租</span>
+        <div><div class="text-lg font-semibold tracking-wide">智租博弈<span class="muted ml-3 text-xs font-normal">合同协商工作台</span></div><div class="eyebrow mt-0.5">ZHI ZU / NEGOTIATION LAB</div></div>
+      </a>
+      <div class="flex items-center gap-4 text-xs">
+        <button class="chip muted" type="button" @click="checkHealth" :disabled="health.checking" :title="health.note" aria-label="重新检查后端连接"><span class="dot" :style="{ color: health.status === 'online' ? '#6ce5cd' : '#e8c389' }"></span>{{ health.checking ? '检查连接中' : health.status === 'online' ? '后端已连接' : '后端未连接' }}</button>
+        <a href="/docs" target="_blank" rel="noopener noreferrer" class="muted hover:text-white">API 文档 ↗</a>
+      </div>
     </header>
-    <main>
-      <section aria-labelledby="intro-title">
-        <div class="eyebrow">从一次清晰的协商开始</div>
-        <h1 id="intro-title">让租房问题，<br>有据可查，有话可谈。</h1>
-        <p class="intro">智租博弈将围绕合同风险审查、实景谈判演练与协商清单，帮助青年租客练习表达诉求。当前版本提供服务健康检查与环境配置状态。</p>
-        <div class="actions">
-          <a class="button primary" href="/docs">打开 API 文档 <span aria-hidden="true">&nbsp;↗</span></a>
-          <a class="button" href="/api/health">查看健康 JSON</a>
+    <section class="intro" aria-labelledby="workspace-title">
+      <div><div class="eyebrow mb-2">CONTRACT INTELLIGENCE · DAY 08</div><h1 id="workspace-title" class="m-0 text-2xl font-semibold tracking-wide">看清条款，从容协商<span class="text-[#6ce5cd]">。</span></h1><p class="muted mt-2 mb-0 text-xs">让每一处风险回到原文，让每一次表达有据可循。</p></div>
+      <nav class="steps" aria-label="分析流程">
+        <span class="step" :class="{ active: phase === 'input' }" :aria-current="phase === 'input' ? 'step' : null"><span class="step-num">1</span>粘贴合同</span><span aria-hidden="true">/</span>
+        <span class="step" :class="{ active: phase === 'preview' }" :aria-current="phase === 'preview' ? 'step' : null"><span class="step-num">2</span>脱敏确认</span><span aria-hidden="true">/</span>
+        <span class="step" :class="{ active: ['reviewing', 'done', 'failed'].includes(phase) }" :aria-current="['reviewing', 'done', 'failed'].includes(phase) ? 'step' : null"><span class="step-num">3</span>风险分析</span>
+      </nav>
+    </section>
+    <main class="board">
+      <section class="panel" aria-labelledby="contract-title">
+        <div class="panel-head"><div class="flex items-center gap-3"><span class="panel-number">01</span><h2 id="contract-title">{{ phase === 'input' ? '合同原文' : '脱敏原文' }}</h2></div><span class="chip text-[#6ce5cd]">{{ phase === 'input' ? '仅在本机' : phase === 'preview' ? '待确认 · 未上传' : '已确认快照' }}</span></div>
+        <div class="panel-body">
+          <template v-if="phase === 'input'">
+            <div class="notice mb-5">隐私护栏已就位。手机号与身份证号会在浏览器内替换为 <strong>***</strong>，确认预览后才上传。</div>
+            <div class="flex items-center justify-between mb-3"><label for="contract-input" class="text-xs font-semibold">粘贴租赁合同</label><button type="button" class="text-btn" @click="loadSample">试用合成合同 ↗</button></div>
+            <textarea id="contract-input" v-model="rawText" rows="13" maxlength="20000" autocomplete="off" spellcheck="false" placeholder="在这里粘贴合同条款…&#10;&#10;建议保留完整句子，方便风险卡片精准定位。" aria-describedby="input-hint"></textarea>
+            <div id="input-hint" class="muted flex justify-between text-[11px] mt-2"><span>提交的脱敏文本需为 10–5000 字</span><span>{{ charCount(rawText) }} 字</span></div>
+            <button type="button" class="btn btn-primary w-full mt-5" @click="preparePreview" :disabled="!rawText.trim()">分析合同 · 先预览脱敏 <span aria-hidden="true">→</span></button>
+            <p class="muted text-[11px] mt-4 leading-6">姓名、详细住址、银行卡等信息请在下一步手动检查、删改。原文不会保存到浏览器持久存储。</p>
+          </template>
+          <template v-else-if="phase === 'preview'">
+            <div class="notice mb-4"><strong class="text-[#6ce5cd]">已遮蔽 {{ maskCounts.phone }} 处手机号、{{ maskCounts.id }} 处身份证号</strong><br>请检查下方预览，删改姓名、地址等其他信息。此时尚未发起分析请求。</div>
+            <label for="preview-input" class="block mb-2 text-xs font-semibold">可编辑的脱敏预览</label>
+            <textarea id="preview-input" v-model="previewText" rows="12" maxlength="20000" autocomplete="off" spellcheck="false" aria-describedby="preview-hint"></textarea>
+            <div id="preview-hint" class="muted text-[11px] mt-2">{{ charCount(previewText) }} / 5000 字 · 编辑后需重新勾选确认</div>
+            <label class="flex gap-3 mt-5 text-xs leading-6 cursor-pointer"><input id="privacy-confirm" type="checkbox" v-model="privacyConfirmed"><span>我已检查脱敏预览，确认可上传以上内容进行分析。</span></label>
+            <button type="button" class="btn btn-primary w-full mt-4" @click="submitAnalysis" :disabled="!privacyConfirmed || !validPreview">确认并提交分析 <span aria-hidden="true">→</span></button>
+            <button type="button" class="text-btn mt-3" @click="editContract">← 返回编辑合同</button>
+          </template>
+          <template v-else>
+            <div class="flex items-center justify-between gap-3 mb-4"><span class="muted text-[11px]">分析与定位共用此份脱敏文本</span><button type="button" class="text-btn" @click="editContract" :disabled="phase === 'reviewing'">重新编辑</button></div>
+            <div v-if="selectedClause" class="notice mb-4" aria-live="polite">
+              <template v-if="clauseMatches.length"><div class="flex items-center justify-between gap-2"><span>{{ selectedClause.clause_id }} · 原句位置 {{ activeMatch + 1 }} / {{ clauseMatches.length }}</span><div v-if="clauseMatches.length > 1" class="flex gap-3"><button type="button" class="text-btn" @click="moveMatch(-1)" aria-label="上一处原句">↑</button><button type="button" class="text-btn" @click="moveMatch(1)" aria-label="下一处原句">↓</button></div></div></template>
+              <template v-else>未找到可精确匹配的原句，请人工核对；未生成推测高亮。</template>
+            </div>
+            <!-- 插值渲染合同，禁止 v-html，输入的 HTML/脚本只会作为纯文本显示。 -->
+            <div id="submitted-document" class="document" aria-label="已提交的脱敏合同"><template v-for="(part, index) in documentParts" :key="index"><mark v-if="part.hit !== null" :id="'clause-hit-' + part.hit" :class="{ current: part.hit === activeMatch }">{{ part.text }}</mark><span v-else>{{ part.text }}</span></template></div>
+          </template>
+          <p v-if="privacyNotice" class="notice notice-warn mt-4" role="status">{{ privacyNotice }}</p>
+          <p v-if="inputError" class="notice notice-error mt-4" role="alert">{{ inputError }}</p>
         </div>
+        <div class="panel-foot flex items-center gap-2"><span class="text-[#6ce5cd]" aria-hidden="true">◇</span>端侧脱敏 → 人工确认 → 后端二次复查</div>
       </section>
-      <section class="status-card" aria-labelledby="status-title">
-        <div class="card-head"><h2 id="status-title">本地服务状态</h2><button id="refresh" type="button">重新检查</button></div>
-        <div aria-live="polite" aria-atomic="true">
-          <dl>
-            <div class="row"><dt>后端连接</dt><dd id="backend-status">检查中…</dd></div>
-            <div class="row"><dt>项目</dt><dd id="project">—</dd></div>
-            <div class="row"><dt>当前版本</dt><dd id="version">—</dd></div>
-            <div class="row"><dt>API 环境配置</dt><dd id="env-status">—</dd></div>
-          </dl>
-          <p id="health-note">正在读取本地服务状态…</p>
+      <section class="panel" aria-labelledby="risk-title" :aria-busy="phase === 'reviewing'">
+        <div class="panel-head"><div class="flex items-center gap-3"><span class="panel-number">02</span><h2 id="risk-title">契光排雷</h2></div><span class="chip muted">风险与证据</span></div>
+        <div class="panel-body" aria-live="polite">
+          <div v-if="phase === 'reviewing'" class="empty" role="status"><span class="spinner mb-6" aria-hidden="true"></span><h3 class="text-base font-medium m-0">正在分析已确认的合同</h3><p class="muted text-xs leading-7 mt-3">等待后端返回审查结果，请保持页面打开。<br>仅通过质检的结果会出现在这里。</p></div>
+          <div v-else-if="phase === 'failed'" class="empty"><div class="empty-glyph" aria-hidden="true">!</div><h3 class="text-base font-medium m-0">本次审查未完成</h3><p class="notice notice-error mt-4 w-full" role="alert">{{ reviewError }}</p><p class="muted text-xs leading-6">暂无通过质检的结果，不能据此判定合同无风险。</p><button type="button" class="btn mt-4" @click="retryWithPreview">返回预览后重试</button></div>
+          <template v-else-if="phase === 'done'">
+            <div class="flex items-end justify-between mb-4"><div><span class="eyebrow">REVIEW COMPLETE</span><p class="text-lg font-semibold mt-1 mb-0">{{ totalRisks ? '发现 ' + totalRisks + ' 项待关注风险' : '本次未标出风险项' }}</p></div><span class="muted text-[11px]">{{ results.length }} 个条款</span></div>
+            <div class="notice notice-warn mb-4">结论限于本次检索与已覆盖的租赁法条。押金、违约金等问题可能需要补充其他依据。</div>
+            <p class="muted text-[11px] m-0">点击卡片，联动左侧原句与右侧协商建议。</p>
+            <article v-for="item in results" :key="item.clause_id" class="risk-card" :class="{ selected: selectedClauseId === item.clause_id }">
+              <button type="button" class="risk-select" @click="selectClause(item.clause_id)" :aria-pressed="selectedClauseId === item.clause_id" :aria-label="'定位条款 ' + item.clause_id">
+                <div class="flex items-center justify-between mb-3"><span class="risk-level" :class="'level-' + item.risk_level">{{ riskLabels[item.risk_level] }}</span><span class="panel-number">{{ item.clause_id }} ↗</span></div>
+                <blockquote class="clause-quote m-0 mb-3">{{ item.original_clause }}</blockquote>
+                <p class="text-xs leading-7 m-0">{{ item.explanation || '本条未标出风险，仍建议结合完整合同核对。' }}</p>
+              </button>
+              <div class="evidence"><div class="flex flex-wrap items-center gap-2"><span class="muted">证据索引</span><span v-for="id in item.evidence_ids" :key="id" class="chip text-[#9cbfe2]">{{ id }}</span><span v-if="!item.evidence_ids.length" class="muted">未提供法条引用</span></div><a v-if="item.evidence_ids.length" href="https://www.court.gov.cn/zixun/xiangqing/233181.html" target="_blank" rel="noopener noreferrer" class="text-[#6ce5cd] inline-block mt-2">核对《民法典》对应条文原文 ↗</a></div>
+            </article>
+          </template>
+          <div v-else class="empty"><div class="empty-glyph" aria-hidden="true">⌕</div><h3 class="text-base font-medium m-0">把风险放回上下文</h3><p class="muted text-xs leading-7 mt-3 max-w-64">完成脱敏确认后，风险等级、条款解释与法条索引将在这里呈现。</p><div class="flex gap-2 mt-4"><span class="chip muted">精确定位</span><span class="chip muted">证据可查</span></div></div>
         </div>
+        <div class="panel-foot">依据范围 · 《民法典》租赁合同第 703–734 条</div>
+      </section>
+      <section class="panel" aria-labelledby="negotiation-title">
+        <div class="panel-head"><div class="flex items-center gap-3"><span class="panel-number">03</span><h2 id="negotiation-title">沉浸道场</h2></div><span class="chip muted">协商准备</span></div>
+        <div class="panel-body">
+          <label for="scenario-select" class="block muted text-[11px] mb-2">选择演练场景</label>
+          <select id="scenario-select" v-model="negotiation.scenario"><option value="deposit">押金扣留</option><option value="repair">维修责任</option><option value="termination">提前退租</option></select>
+          <div class="flex gap-1 p-1 bg-[#0b1421] rounded-xl my-5" role="tablist" aria-label="协商角色">
+            <button v-for="(role, index) in roles" :key="role.id" :id="'tab-' + role.id" type="button" class="role-tab" role="tab" :aria-selected="negotiation.activeRole === role.id" aria-controls="role-panel" :tabindex="negotiation.activeRole === role.id ? 0 : -1" @click="negotiation.activeRole = role.id" @keydown="navigateRoles($event, index)">{{ role.label }}</button>
+          </div>
+          <div id="role-panel" role="tabpanel" :aria-labelledby="'tab-' + negotiation.activeRole" tabindex="0" class="role-card">
+            <div class="flex items-center gap-3 mb-3"><span class="role-avatar" aria-hidden="true">{{ activeRole.label.slice(0, 1) }}</span><div><p class="text-xs font-semibold m-0">{{ activeRole.label }}</p><p class="muted text-[10px] m-0">{{ activeRole.subtitle }}</p></div></div>
+            <template v-if="negotiation.activeRole === 'coach'"><p class="text-xs leading-7 m-0">{{ selectedClause ? selectedClause.negotiation_tip || '本条暂无具体协商建议。' : '先完成合同审查，再选择一张风险卡片。对应的协商建议会同步到这里。' }}</p><span v-if="selectedClause" class="chip muted mt-3">关联条款 {{ selectedClause.clause_id }}</span></template>
+            <p v-else-if="negotiation.activeRole === 'tenant'" class="text-xs leading-7 m-0">{{ scenarioGuidance[negotiation.scenario] }}可先在下方整理事实、诉求与希望对方明确确认的条件。</p>
+            <p v-else class="text-xs leading-7 m-0">房东角色的回应将在谈判接口接入后展示。目前没有发起谈判，也没有已确认条件。</p>
+          </div>
+          <div class="notice notice-warn mt-4">谈判交互待接入。当前可整理草稿与查看审查建议，尚未启动角色对话。</div>
+          <div class="flex justify-between items-center mt-5 mb-2"><label for="negotiation-draft" class="text-xs font-semibold">我的协商草稿</label><span class="muted text-[10px]">仅在本机</span></div>
+          <textarea id="negotiation-draft" v-model="negotiation.draft" rows="4" maxlength="2000" autocomplete="off" spellcheck="false" placeholder="我想就这条约定进一步确认…"></textarea>
+          <button type="button" class="btn w-full mt-3" disabled aria-describedby="negotiation-pending">发送给模拟房东 <span aria-hidden="true">↗</span></button>
+          <p id="negotiation-pending" class="muted text-[11px] mt-2">谈判接口接入后开放 · 单会话最多 5 轮</p>
+          <div class="flex justify-between gap-3 border-t border-[#243246] pt-4 mt-4 text-xs"><span class="muted">模拟协商进展分</span><span class="text-[#6ce5cd]">未开始 · 不可评分</span></div>
+        </div>
+        <div class="panel-foot">演练用于练习协商，不代表现实房东接受概率。</div>
       </section>
     </main>
-    <section class="roadmap" aria-labelledby="roadmap-title">
-      <div class="roadmap-head"><h2 id="roadmap-title">三个核心场景</h2><span>规划中</span></div>
-      <div class="scenarios">
-        <article class="scenario"><span class="number">01 / 押金</span><h3>押金扣留</h3><p>梳理扣款理由与返还诉求，练习有依据的沟通。</p></article>
-        <article class="scenario"><span class="number">02 / 维修</span><h3>维修责任</h3><p>厘清维修事项与责任，构造具体可谈的条件。</p></article>
-        <article class="scenario"><span class="number">03 / 退租</span><h3>提前退租</h3><p>检查退出条款，练习违约金与交接安排的协商。</p></article>
-      </div>
-    </section>
-    <footer>开发占位页 · 合同审查、谈判演练与清单导出将在后续回合实现。</footer>
+    <footer><span>隐私先行 / 证据可查 / 条款联动</span><span>AI 辅助分析与模拟演练 · 具体争议需结合事实进一步核实</span></footer>
   </div>
   <script>
-    const button = document.getElementById("refresh");
-    const backend = document.getElementById("backend-status");
-    const project = document.getElementById("project");
-    const version = document.getElementById("version");
-    const environment = document.getElementById("env-status");
-    const note = document.getElementById("health-note");
-
-    async function checkHealth() {
-      button.disabled = true;
-      backend.textContent = "检查中…";
-      backend.className = "";
-      project.textContent = version.textContent = environment.textContent = "—";
-      environment.className = "";
-      note.textContent = "正在读取本地服务状态…";
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 5000);
-      try {
-        const response = await fetch("/api/health", { signal: controller.signal, cache: "no-store" });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = await response.json();
-        if (typeof data.status !== "string" || typeof data.project !== "string" || typeof data.version !== "string" || typeof data.env_configured !== "boolean") {
-          throw new Error("健康检查响应格式不正确");
-        }
-        backend.textContent = data.status === "ok" ? "正常运行" : data.status;
-        backend.className = data.status === "ok" ? "good" : "pending";
-        project.textContent = data.project;
-        version.textContent = data.version;
-        environment.textContent = data.env_configured ? "已配置" : "尚未配置完整";
-        environment.className = data.env_configured ? "good" : "pending";
-        note.textContent = data.env_configured
-          ? "配置项已齐全；此检查未调用云 API，不代表凭据已通过验证。"
-          : "未配置密钥仍可运行健康检查。后续 AI 功能需要完整配置。";
-      } catch (error) {
-        backend.textContent = "连接失败";
-        backend.className = "error";
-        note.textContent = error.name === "AbortError"
-          ? "健康检查超时，请确认本地服务正在运行后重试。"
-          : `无法读取服务状态：${error.message}。请确认本地服务正在运行。`;
-      } finally {
-        clearTimeout(timer);
-        button.disabled = false;
+    window.addEventListener('DOMContentLoaded', () => {
+      const boot = document.getElementById('boot-notice');
+      if (!window.Vue) {
+        boot.textContent = 'Vue 本地资源加载失败，请确认 vendor 文件完整并通过项目首页打开。合同尚未上传。';
+        return;
       }
-    }
+      const { createApp, ref, reactive, computed, watch, nextTick, onMounted, onBeforeUnmount } = Vue;
+      createApp({
+        setup() {
+          // 左栏：原始输入只驻留内存；submittedText 是固定的分析与定位快照。
+          const rawText = ref('');
+          const previewText = ref('');
+          const submittedText = ref('');
+          const phase = ref('input'); // input → preview → reviewing → done / failed
+          const privacyConfirmed = ref(false);
+          const maskCounts = reactive({ phone: 0, id: 0 });
+          const inputError = ref('');
+          const privacyNotice = ref('');
+          // 中栏：仅承接详细接口的真实结果，不提供 Mock 成功数据。
+          const results = ref([]);
+          const totalRisks = ref(0);
+          const selectedClauseId = ref(null);
+          const activeMatch = ref(0);
+          const reviewError = ref('');
+          const health = reactive({ checking: false, status: 'unknown', note: '连接检查不调用云端分析。' });
+          // 右栏：当前后端未暴露谈判 HTTP 接口，先提供角色、场景与本地草稿。
+          const negotiation = reactive({ scenario: 'deposit', activeRole: 'coach', draft: '' });
+          const roles = [
+            { id: 'coach', label: '租客辅导', subtitle: '条款对应的协商建议' },
+            { id: 'tenant', label: '我的诉求', subtitle: '整理事实与明确条件' },
+            { id: 'landlord', label: '模拟房东', subtitle: '角色回应 · 待接入' },
+          ];
+          const riskLabels = { HIGH: '高风险', MEDIUM: '中风险', LOW: '低风险', NONE: '未标出风险' };
+          const scenarioGuidance = {
+            deposit: '围绕押金扣减理由、费用凭证与返还时间准备沟通。',
+            repair: '围绕损坏原因、维修责任、费用与处理时限准备沟通。',
+            termination: '围绕通知时间、费用依据与房屋交接准备沟通。',
+          };
+          let reviewController = null;
+          let healthController = null;
+          const charCount = text => Array.from(text).length; // 与 Python 字符数口径一致
+          const validText = text => text.trim().length > 0 && charCount(text) >= 10 && charCount(text) <= 5000;
+          const validPreview = computed(() => validText(previewText.value));
+          const selectedClause = computed(() => results.value.find(item => item.clause_id === selectedClauseId.value) || null);
+          const activeRole = computed(() => roles.find(role => role.id === negotiation.activeRole));
 
-    button.addEventListener("click", checkHealth);
-    checkHealth();
+          function redact(text) {
+            const counts = { phone: 0, id: 0 };
+            // 长身份证优先；不依赖生日/校验码有效性，合成或录错的标识也需遮蔽。
+            const safe = text
+              .replace(/(?<!\d)(?:\d{17}[\dXx]|\d{15})(?![\dXx])/g, () => { counts.id++; return '***'; })
+              .replace(/(?<!\d)(?:\+?86[ \t-]*)?1\d{2}[ \t-]?\d{4}[ \t-]?\d{4}(?!\d)/g, () => { counts.phone++; return '***'; });
+            return { text: safe, counts };
+          }
+          watch(previewText, () => { privacyConfirmed.value = false; inputError.value = ''; }, { flush: 'sync' });
+
+          function clearReview() {
+            results.value = [];
+            totalRisks.value = 0;
+            selectedClauseId.value = null;
+            activeMatch.value = 0;
+            submittedText.value = '';
+            reviewError.value = '';
+            negotiation.draft = '';
+            negotiation.activeRole = 'coach';
+          }
+          function preparePreview() {
+            if (phase.value !== 'input') return;
+            const safe = redact(rawText.value);
+            inputError.value = '';
+            privacyNotice.value = '';
+            if (!validText(safe.text)) { inputError.value = '脱敏后的合同需为 10–5000 字，且不能全为空白。请调整后重试。'; return; }
+            clearReview();
+            previewText.value = safe.text;
+            Object.assign(maskCounts, safe.counts);
+            privacyConfirmed.value = false;
+            phase.value = 'preview';
+            nextTick(() => document.getElementById('preview-input')?.focus());
+          }
+          function editContract() {
+            if (phase.value === 'reviewing') return;
+            // 保留人工删改后的版本，不重新混入旧原文。
+            rawText.value = previewText.value || rawText.value;
+            clearReview();
+            privacyConfirmed.value = false;
+            inputError.value = '';
+            privacyNotice.value = '';
+            phase.value = 'input';
+            nextTick(() => document.getElementById('contract-input')?.focus());
+          }
+          function retryWithPreview() {
+            clearReview();
+            privacyConfirmed.value = false;
+            phase.value = 'preview';
+          }
+          function loadSample() {
+            rawText.value = '房屋租赁合同（合成演练文本）\n\n第一条  租客按月支付租金，租期一年。\n\n第二条  房东收取押金2000元，租赁结束后可不说明理由直接扣留全部押金。\n\n第三条  房屋及附属设施发生任何损坏，维修责任和费用均由租客承担。\n\n第四条  租客提前退租时，应提前沟通交接时间及相关费用。\n\n第五条  联系手机号：13800000000。身份证号：110101199001010000。以上号码均为合成测试标识。';
+            inputError.value = '';
+          }
+
+          // original_clause 精确匹配全部出现位置，不模糊匹配或猜测偏移。
+          const clauseMatches = computed(() => {
+            const clause = selectedClause.value?.original_clause;
+            if (!clause) return [];
+            const matches = [];
+            let from = 0;
+            while (from < submittedText.value.length) {
+              const start = submittedText.value.indexOf(clause, from);
+              if (start === -1) break;
+              matches.push({ start, end: start + clause.length });
+              from = start + clause.length;
+            }
+            return matches;
+          });
+          const documentParts = computed(() => {
+            const parts = [];
+            let cursor = 0;
+            clauseMatches.value.forEach((match, hit) => {
+              if (match.start > cursor) parts.push({ text: submittedText.value.slice(cursor, match.start), hit: null });
+              parts.push({ text: submittedText.value.slice(match.start, match.end), hit });
+              cursor = match.end;
+            });
+            if (cursor < submittedText.value.length) parts.push({ text: submittedText.value.slice(cursor), hit: null });
+            return parts;
+          });
+          async function scrollToMatch() {
+            await nextTick();
+            document.getElementById('clause-hit-' + activeMatch.value)?.scrollIntoView({
+              behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+              block: 'center', inline: 'nearest',
+            });
+          }
+          function selectClause(id) {
+            selectedClauseId.value = id;
+            activeMatch.value = 0;
+            negotiation.activeRole = 'coach';
+            scrollToMatch();
+          }
+          function moveMatch(direction) {
+            const count = clauseMatches.value.length;
+            if (!count) return;
+            activeMatch.value = (activeMatch.value + direction + count) % count;
+            scrollToMatch();
+          }
+          function navigateRoles(event, index) {
+            if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+            event.preventDefault();
+            const next = event.key === 'Home' ? 0 : event.key === 'End' ? roles.length - 1 : (index + (event.key === 'ArrowRight' ? 1 : -1) + roles.length) % roles.length;
+            negotiation.activeRole = roles[next].id;
+            nextTick(() => document.getElementById('tab-' + roles[next].id)?.focus());
+          }
+          function validResponse(data) {
+            if (!data || !['success', 'needs_review'].includes(data.status) || !Array.isArray(data.results)) return false;
+            if (data.status === 'needs_review') return data.results.length === 0 && typeof data.reason === 'string' && data.reason.length > 0;
+            if (!data.results.length || !Number.isInteger(data.total_risks)) return false;
+            const ids = new Set();
+            return data.results.every(item => {
+              if (!item || typeof item.clause_id !== 'string' || !/^C-\d{2,}$/.test(item.clause_id) || ids.has(item.clause_id)) return false;
+              ids.add(item.clause_id);
+              return typeof item.original_clause === 'string' && item.original_clause.trim().length > 0
+                && Object.hasOwn(riskLabels, item.risk_level)
+                && typeof item.explanation === 'string' && typeof item.negotiation_tip === 'string'
+                && Array.isArray(item.evidence_ids) && item.evidence_ids.every(id => /^LAW-(70[3-9]|71\d|72\d|73[0-4])$/.test(id));
+            }) && data.total_risks === data.results.filter(item => item.risk_level !== 'NONE').length;
+          }
+
+          async function submitAnalysis() {
+            // 状态门禁补充 UI 禁用，双击不会产生重复请求。
+            if (phase.value !== 'preview' || !privacyConfirmed.value) return;
+            const safe = redact(previewText.value);
+            if (safe.text !== previewText.value) {
+              previewText.value = safe.text;
+              maskCounts.phone += safe.counts.phone;
+              maskCounts.id += safe.counts.id;
+              privacyConfirmed.value = false;
+              privacyNotice.value = '检测到编辑时新增的号码，已再次遮蔽。请检查更新后的预览并重新确认。';
+              return;
+            }
+            if (!validText(safe.text)) { inputError.value = '脱敏后的合同需为 10–5000 字，且不能全为空白。'; return; }
+            if (!['http:', 'https:'].includes(location.protocol)) { inputError.value = '请启动项目后，通过 http://127.0.0.1:8000 打开工作台再提交。'; return; }
+            clearReview();
+            submittedText.value = safe.text;
+            rawText.value = ''; // 不再持有未脱敏原始副本
+            privacyConfirmed.value = false;
+            privacyNotice.value = '';
+            inputError.value = '';
+            phase.value = 'reviewing';
+            reviewController = new AbortController();
+            // 最多三次生成，每次后端网络超时可为120秒。
+            const timer = setTimeout(() => reviewController?.abort(), 420000);
+            try {
+              const response = await fetch('/api/review/analyze-detailed', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, cache: 'no-store',
+                credentials: 'same-origin', signal: reviewController.signal,
+                body: JSON.stringify({ contract_text: submittedText.value, top_k: 4 }),
+              });
+              if (!response.ok) {
+                // 不渲染422的原始 input，也不回显服务端原始错误体。
+                reviewError.value = response.status === 422 ? '合同格式校验失败，请返回预览检查字数与内容。' : '后端暂时无法完成审查，请检查服务状态后重试。';
+                phase.value = 'failed';
+                return;
+              }
+              const data = await response.json();
+              if (!validResponse(data)) { reviewError.value = '审查响应格式不符合约定，请检查后端版本后重试。'; phase.value = 'failed'; return; }
+              if (data.status === 'needs_review') { reviewError.value = redact(data.reason).text; phase.value = 'failed'; return; }
+              // 防御性屏蔽异常响应中可能带回的号码。
+              results.value = data.results.map(item => ({ ...item,
+                original_clause: redact(item.original_clause).text,
+                explanation: redact(item.explanation).text,
+                negotiation_tip: redact(item.negotiation_tip).text,
+              }));
+              totalRisks.value = data.total_risks;
+              phase.value = 'done';
+            } catch (error) {
+              reviewError.value = error.name === 'AbortError' ? '等待后端结果超时，请检查服务后返回预览重试。' : '未能取得有效审查结果，请检查网络与后端服务后重试。';
+              phase.value = 'failed';
+            } finally { clearTimeout(timer); reviewController = null; }
+          }
+          async function checkHealth() {
+            if (health.checking) return;
+            health.checking = true;
+            healthController = new AbortController();
+            const timer = setTimeout(() => healthController?.abort(), 5000);
+            try {
+              const response = await fetch("/api/health", { cache: 'no-store', signal: healthController.signal });
+              if (!response.ok) throw new Error('health');
+              const data = await response.json();
+              health.status = data.status === 'ok' ? 'online' : 'offline';
+              health.note = data.env_configured ? '配置项已齐全；连接检查未验证云端凭据。' : '后端已连接，云端配置尚未齐全。';
+            } catch { health.status = 'offline'; health.note = '请确认本地服务已启动，并通过同源首页打开。'; }
+            finally { clearTimeout(timer); health.checking = false; healthController = null; }
+          }
+          onMounted(() => { boot.hidden = true; checkHealth(); });
+          onBeforeUnmount(() => { reviewController?.abort(); healthController?.abort(); });
+          return {
+            rawText, previewText, submittedText, phase, privacyConfirmed, maskCounts, inputError, privacyNotice,
+            results, totalRisks, selectedClauseId, selectedClause, activeMatch, clauseMatches, documentParts,
+            reviewError, health, negotiation, roles, activeRole, riskLabels, scenarioGuidance, validPreview,
+            charCount, preparePreview, submitAnalysis, editContract, retryWithPreview, loadSample,
+            selectClause, moveMatch, navigateRoles, checkHealth,
+          };
+        },
+      }).mount('#app');
+    });
   </script>
 </body>
 </html>

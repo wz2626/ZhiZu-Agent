@@ -1,0 +1,19 @@
+PASS 01: Cold-cache Vue and Tailwind load from local vendor; external requests blocked
+PASS 02: Desktop has three columns
+PASS 03: Opening preview sends no analysis request
+PASS 04: 11-digit phones including +86 and hyphens are masked
+PASS 05: 15-digit and 18-digit numeric / X-ended IDs are masked
+PASS 06: Unconfirmed preview disables submission
+PASS 07: Editing preview immediately revokes confirmation
+PASS 08: Final rescan masks newly entered phone and requires confirmation again
+PASS 09: Request exactly equals confirmed sanitized snapshot; raw markers absent
+PASS 10: Double click sends one analysis request
+PASS 11: Exact repeated clauses highlight with occurrence navigation
+PASS 12: Selection calls smooth scrollIntoView and scrolls the left panel
+PASS 13: Unmatched original clause shows notice with no guessed highlight
+PASS 14: Risk selection synchronizes negotiation advice
+PASS 15: Injected HTML remains text; synthetic event handler does not execute
+PASS 16: 390px mobile layout has one column and no horizontal overflow
+PASS 17: needs_review, HTTP 422, and invalid JSON show failure without stale results or raw input
+PASS 18: Retry returns to preview and requires confirmation
+18 passed, 0 failed, 0 skipped; external requests: 0; real cloud calls: 0.

@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from backend.app.api.knowledge import router as knowledge_router
 from backend.app.api.review import router as review_router
@@ -19,6 +20,11 @@ app.add_middleware(
 )
 app.include_router(knowledge_router)
 app.include_router(review_router, prefix="/api/review")
+app.mount(
+    "/vendor",
+    StaticFiles(directory=PROJECT_ROOT / "frontend-web" / "vendor"),
+    name="frontend-vendor",
+)
 
 
 @app.get("/api/health", response_model=HealthResponse, tags=["health"])

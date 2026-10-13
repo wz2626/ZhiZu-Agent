@@ -1,0 +1,103 @@
+{
+  "mode": "headless_edge_local_mock_api_external_network_blocked_cold_cache",
+  "node": "v24.14.0",
+  "browser": "Edg/155.0.4283.45",
+  "passed": 18,
+  "failed": 0,
+  "skipped": 0,
+  "externalRequests": 0,
+  "runtimeExceptions": 0,
+  "realCloudCalls": 0,
+  "cases": [
+    {
+      "id": 1,
+      "label": "Cold-cache Vue and Tailwind load from local vendor; external requests blocked",
+      "status": "passed"
+    },
+    {
+      "id": 2,
+      "label": "Desktop has three columns",
+      "status": "passed"
+    },
+    {
+      "id": 3,
+      "label": "Opening preview sends no analysis request",
+      "status": "passed"
+    },
+    {
+      "id": 4,
+      "label": "11-digit phones including +86 and hyphens are masked",
+      "status": "passed"
+    },
+    {
+      "id": 5,
+      "label": "15-digit and 18-digit numeric / X-ended IDs are masked",
+      "status": "passed"
+    },
+    {
+      "id": 6,
+      "label": "Unconfirmed preview disables submission",
+      "status": "passed"
+    },
+    {
+      "id": 7,
+      "label": "Editing preview immediately revokes confirmation",
+      "status": "passed"
+    },
+    {
+      "id": 8,
+      "label": "Final rescan masks newly entered phone and requires confirmation again",
+      "status": "passed"
+    },
+    {
+      "id": 9,
+      "label": "Request exactly equals confirmed sanitized snapshot; raw markers absent",
+      "status": "passed"
+    },
+    {
+      "id": 10,
+      "label": "Double click sends one analysis request",
+      "status": "passed"
+    },
+    {
+      "id": 11,
+      "label": "Exact repeated clauses highlight with occurrence navigation",
+      "status": "passed"
+    },
+    {
+      "id": 12,
+      "label": "Selection calls smooth scrollIntoView and scrolls the left panel",
+      "status": "passed"
+    },
+    {
+      "id": 13,
+      "label": "Unmatched original clause shows notice with no guessed highlight",
+      "status": "passed"
+    },
+    {
+      "id": 14,
+      "label": "Risk selection synchronizes negotiation advice",
+      "status": "passed"
+    },
+    {
+      "id": 15,
+      "label": "Injected HTML remains text; synthetic event handler does not execute",
+      "status": "passed"
+    },
+    {
+      "id": 16,
+      "label": "390px mobile layout has one column and no horizontal overflow",
+      "status": "passed"
+    },
+    {
+      "id": 17,
+      "label": "needs_review, HTTP 422, and invalid JSON show failure without stale results or raw input",
+      "status": "passed"
+    },
+    {
+      "id": 18,
+      "label": "Retry returns to preview and requires confirmation",
+      "status": "passed"
+    }
+  ]
+}
