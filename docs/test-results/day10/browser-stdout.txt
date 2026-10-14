@@ -1,0 +1,19 @@
+PASS 1: Cold-cache local assets mount; real OpenAPI is available
+PASS 2: Contract input is masked in editable preview before any submit
+PASS 3: Waiting timer advances while no unfinished Trace nodes are displayed
+PASS 4: Real review route/graph accepts sanitized snapshot; exact clause highlight and evidence card render
+PASS 5: Negotiation message final scan masks new phone and revokes confirmation before uploading
+PASS 6: Pending negotiation prevents duplicate submit, scene changes and export; keeps prior actual Trace
+PASS 7: Deposit commits 1000 yuan / 50 with exact real node order, durations and Critic feedback
+PASS 8: Deposit second turn reaches 1500 / 75; animated progress and previous snapshot agree
+PASS 9: Injected Critic failure stops after three generations; score, conditions and round remain unchanged
+PASS 10: Lost response retry reuses exact request ID, commits once and explicitly labels cached replay
+PASS 11: Checklist copy exports only official terms plus separately marked unresolved items and masks manual PII
+PASS 12: Denied clipboard shows exact manual-copy fallback without claiming copy success
+PASS 13: Previously received response is labelled history, distinct from latest/cached execution
+PASS 14: 维修责任 repeats input/preview/review/highlight, three turns (50/75/100), real Trace and export; sessions isolate terms
+PASS 15: 提前退租 repeats input/preview/review/highlight, three turns (50/75/100), real Trace and export; sessions isolate terms
+PASS 16: Injected discontinuous Trace is rejected without fabricating replacement nodes
+PASS 17: Mobile replay/export layout has no horizontal overflow
+PASS 18: Browser and local server make zero external/cloud calls; no runtime exceptions or unmasked request identifiers
+18 passed, 0 failed, 0 skipped; Day 9 supplemental groups: 11; external/cloud calls: 0.

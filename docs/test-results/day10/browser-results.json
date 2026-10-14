@@ -1,0 +1,107 @@
+{
+  "verifiedAt": "2026-10-14T03:37:24.938Z",
+  "mode": "real_local_fastapi_and_graphs_review_doubles_fixed_negotiation_policy",
+  "browser": "Edg/155.0.4283.45",
+  "node": "v24.14.0",
+  "passed": 18,
+  "failed": 0,
+  "skipped": 0,
+  "externalRequests": 0,
+  "runtimeExceptions": 0,
+  "blocked_external_calls": 0,
+  "real_cloud_calls": 0,
+  "review": "explicit_chat_and_retrieval_doubles_with_real_graph",
+  "negotiation": "real_graph_fixed_offline_policy",
+  "cases": [
+    {
+      "id": 1,
+      "label": "Cold-cache local assets mount; real OpenAPI is available",
+      "status": "passed"
+    },
+    {
+      "id": 2,
+      "label": "Contract input is masked in editable preview before any submit",
+      "status": "passed"
+    },
+    {
+      "id": 3,
+      "label": "Waiting timer advances while no unfinished Trace nodes are displayed",
+      "status": "passed"
+    },
+    {
+      "id": 4,
+      "label": "Real review route/graph accepts sanitized snapshot; exact clause highlight and evidence card render",
+      "status": "passed"
+    },
+    {
+      "id": 5,
+      "label": "Negotiation message final scan masks new phone and revokes confirmation before uploading",
+      "status": "passed"
+    },
+    {
+      "id": 6,
+      "label": "Pending negotiation prevents duplicate submit, scene changes and export; keeps prior actual Trace",
+      "status": "passed"
+    },
+    {
+      "id": 7,
+      "label": "Deposit commits 1000 yuan / 50 with exact real node order, durations and Critic feedback",
+      "status": "passed"
+    },
+    {
+      "id": 8,
+      "label": "Deposit second turn reaches 1500 / 75; animated progress and previous snapshot agree",
+      "status": "passed"
+    },
+    {
+      "id": 9,
+      "label": "Injected Critic failure stops after three generations; score, conditions and round remain unchanged",
+      "status": "passed"
+    },
+    {
+      "id": 10,
+      "label": "Lost response retry reuses exact request ID, commits once and explicitly labels cached replay",
+      "status": "passed"
+    },
+    {
+      "id": 11,
+      "label": "Checklist copy exports only official terms plus separately marked unresolved items and masks manual PII",
+      "status": "passed"
+    },
+    {
+      "id": 12,
+      "label": "Denied clipboard shows exact manual-copy fallback without claiming copy success",
+      "status": "passed"
+    },
+    {
+      "id": 13,
+      "label": "Previously received response is labelled history, distinct from latest/cached execution",
+      "status": "passed"
+    },
+    {
+      "id": 14,
+      "label": "维修责任 repeats input/preview/review/highlight, three turns (50/75/100), real Trace and export; sessions isolate terms",
+      "status": "passed"
+    },
+    {
+      "id": 15,
+      "label": "提前退租 repeats input/preview/review/highlight, three turns (50/75/100), real Trace and export; sessions isolate terms",
+      "status": "passed"
+    },
+    {
+      "id": 16,
+      "label": "Injected discontinuous Trace is rejected without fabricating replacement nodes",
+      "status": "passed"
+    },
+    {
+      "id": 17,
+      "label": "Mobile replay/export layout has no horizontal overflow",
+      "status": "passed"
+    },
+    {
+      "id": 18,
+      "label": "Browser and local server make zero external/cloud calls; no runtime exceptions or unmasked request identifiers",
+      "status": "passed"
+    }
+  ]
+}

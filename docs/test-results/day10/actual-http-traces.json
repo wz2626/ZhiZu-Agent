@@ -1,0 +1,1148 @@
+[
+  {
+    "path": "/api/review/analyze-detailed",
+    "data": {
+      "status": "success",
+      "results": [
+        {
+          "clause_id": "C-01",
+          "original_clause": "租赁结束后可不说明理由直接扣留全部押金。",
+          "risk_level": "MEDIUM",
+          "explanation": "离线浏览器测试样例：请结合合同事实核对，需补充具体依据。",
+          "evidence_ids": [],
+          "negotiation_tip": "测试样例建议：核对费用凭证，明确协商条件。"
+        },
+        {
+          "clause_id": "C-02",
+          "original_clause": "维修责任和费用均由租客承担。",
+          "risk_level": "MEDIUM",
+          "explanation": "离线浏览器测试样例：请结合合同事实核对，需补充具体依据。",
+          "evidence_ids": [
+            "LAW-712"
+          ],
+          "negotiation_tip": "测试样例建议：核对费用凭证，明确协商条件。"
+        },
+        {
+          "clause_id": "C-03",
+          "original_clause": "提前退租须支付固定违约金2000元。",
+          "risk_level": "MEDIUM",
+          "explanation": "离线浏览器测试样例：请结合合同事实核对，需补充具体依据。",
+          "evidence_ids": [],
+          "negotiation_tip": "测试样例建议：核对费用凭证，明确协商条件。"
+        }
+      ],
+      "total_risks": 3,
+      "failure_code": null,
+      "reason": null,
+      "errors": [],
+      "retry_count": 0,
+      "trace_label": "本次执行回放",
+      "trace": [
+        {
+          "sequence": 1,
+          "node": "configuration",
+          "attempt": 0,
+          "status": "completed",
+          "duration_ms": 0.003,
+          "evidence_ids": [],
+          "feedback": []
+        },
+        {
+          "sequence": 2,
+          "node": "retrieval",
+          "attempt": 0,
+          "status": "completed",
+          "duration_ms": 1.306,
+          "evidence_ids": [
+            "LAW-712"
+          ],
+          "feedback": []
+        },
+        {
+          "sequence": 3,
+          "node": "drafting",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 50.231,
+          "evidence_ids": [
+            "LAW-712"
+          ],
+          "feedback": []
+        },
+        {
+          "sequence": 4,
+          "node": "critic",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.216,
+          "evidence_ids": [
+            "LAW-712"
+          ],
+          "feedback": []
+        }
+      ]
+    }
+  },
+  {
+    "path": "/api/negotiation/turn",
+    "data": {
+      "session_id": "7469e3b8-4242-450b-9514-21b8eabeb4d5",
+      "request_id": "455c0857-8d96-4c38-af33-10341acc1f81",
+      "scenario": "deposit",
+      "status": "success",
+      "round_count": 1,
+      "confirmed_terms": {
+        "deposit_refund": 1000
+      },
+      "confirmed_evidence_ids": [],
+      "trial_score": 50,
+      "score_explanation": "模拟协商进展分：50；按已确认条件的适用权重归一化计算。",
+      "coach_advice": "【模拟辅导】请明确诉求、依据和可接受的协商范围。",
+      "landlord_response": "【模拟房东】我确认返还押金1000元。",
+      "retry_count": 0,
+      "errors": [],
+      "trace_label": "本次执行回放",
+      "trace": [
+        {
+          "sequence": 1,
+          "node": "tenant_coach",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.0024999972083605826,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 2,
+          "node": "landlord",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.1145999995060265,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 3,
+          "node": "rule_score",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.04760000592796132,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 4,
+          "node": "critic",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.09730000601848587,
+          "feedback": [
+            "候选结构、明确确认、规则边界与引用身份校验通过。"
+          ],
+          "evidence_ids": []
+        }
+      ],
+      "unresolved_requests": [
+        "返还或付款日期、交接安排仍需明确确认。"
+      ],
+      "missing_facts": [
+        "核对押金收据、扣减明细与交接记录。"
+      ],
+      "replayed": false
+    }
+  },
+  {
+    "path": "/api/negotiation/turn",
+    "data": {
+      "session_id": "7469e3b8-4242-450b-9514-21b8eabeb4d5",
+      "request_id": "1b4ea4cc-6642-4b78-9f6e-d2beda9af8ce",
+      "scenario": "deposit",
+      "status": "success",
+      "round_count": 2,
+      "confirmed_terms": {
+        "deposit_refund": 1500
+      },
+      "confirmed_evidence_ids": [],
+      "trial_score": 75,
+      "score_explanation": "模拟协商进展分：75；按已确认条件的适用权重归一化计算。",
+      "coach_advice": "【模拟辅导】请明确诉求、依据和可接受的协商范围。",
+      "landlord_response": "【模拟房东】我确认返还押金1500元。",
+      "retry_count": 0,
+      "errors": [],
+      "trace_label": "本次执行回放",
+      "trace": [
+        {
+          "sequence": 1,
+          "node": "tenant_coach",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.001500004145782441,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 2,
+          "node": "landlord",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.07769999501761049,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 3,
+          "node": "rule_score",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.03560000186553225,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 4,
+          "node": "critic",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.10299999848939478,
+          "feedback": [
+            "候选结构、明确确认、规则边界与引用身份校验通过。"
+          ],
+          "evidence_ids": []
+        }
+      ],
+      "unresolved_requests": [
+        "返还或付款日期、交接安排仍需明确确认。"
+      ],
+      "missing_facts": [
+        "核对押金收据、扣减明细与交接记录。"
+      ],
+      "replayed": false
+    }
+  },
+  {
+    "path": "/api/negotiation/turn",
+    "data": {
+      "session_id": "7469e3b8-4242-450b-9514-21b8eabeb4d5",
+      "request_id": "fcc36290-023b-42f6-9329-859da66c3451",
+      "scenario": "deposit",
+      "status": "needs_review",
+      "round_count": 2,
+      "confirmed_terms": {
+        "deposit_refund": 1500
+      },
+      "confirmed_evidence_ids": [],
+      "trial_score": 75,
+      "score_explanation": "模拟协商进展分：75；按已确认条件的适用权重归一化计算。",
+      "coach_advice": "",
+      "landlord_response": "",
+      "retry_count": 2,
+      "errors": [
+        "候选数值无效或碰撞协商底线。"
+      ],
+      "trace_label": "本次执行回放",
+      "trace": [
+        {
+          "sequence": 1,
+          "node": "tenant_coach",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.0021000014385208488,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 2,
+          "node": "landlord",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.08359999628737569,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 3,
+          "node": "rule_score",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.03170000127283856,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 4,
+          "node": "critic",
+          "attempt": 1,
+          "status": "retry",
+          "duration_ms": 0.04389999958220869,
+          "feedback": [
+            "候选数值无效或碰撞协商底线。"
+          ],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 5,
+          "node": "retry",
+          "attempt": 2,
+          "status": "retry",
+          "duration_ms": 0.0018999999156221747,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 6,
+          "node": "landlord",
+          "attempt": 2,
+          "status": "completed",
+          "duration_ms": 0.08620000153314322,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 7,
+          "node": "rule_score",
+          "attempt": 2,
+          "status": "completed",
+          "duration_ms": 0.027399997634347528,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 8,
+          "node": "critic",
+          "attempt": 2,
+          "status": "retry",
+          "duration_ms": 0.03930000093532726,
+          "feedback": [
+            "候选数值无效或碰撞协商底线。"
+          ],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 9,
+          "node": "retry",
+          "attempt": 3,
+          "status": "retry",
+          "duration_ms": 0.0013000026228837669,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 10,
+          "node": "landlord",
+          "attempt": 3,
+          "status": "completed",
+          "duration_ms": 0.2556000035838224,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 11,
+          "node": "rule_score",
+          "attempt": 3,
+          "status": "completed",
+          "duration_ms": 0.06240000220714137,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 12,
+          "node": "critic",
+          "attempt": 3,
+          "status": "needs_review",
+          "duration_ms": 0.0790999984019436,
+          "feedback": [
+            "候选数值无效或碰撞协商底线。"
+          ],
+          "evidence_ids": []
+        }
+      ],
+      "unresolved_requests": [
+        "本轮未提交，需人工复核后重新协商。"
+      ],
+      "missing_facts": [
+        "核对押金收据、扣减明细与交接记录。"
+      ],
+      "replayed": false
+    }
+  },
+  {
+    "path": "/api/negotiation/turn",
+    "data": {
+      "session_id": "7469e3b8-4242-450b-9514-21b8eabeb4d5",
+      "request_id": "29ab5b68-5dcc-4ffc-a8dd-b8f2ec558a74",
+      "scenario": "deposit",
+      "status": "success",
+      "round_count": 3,
+      "confirmed_terms": {
+        "deposit_refund": 2000
+      },
+      "confirmed_evidence_ids": [],
+      "trial_score": 100,
+      "score_explanation": "模拟协商进展分：100；按已确认条件的适用权重归一化计算。",
+      "coach_advice": "【模拟辅导】请明确诉求、依据和可接受的协商范围。",
+      "landlord_response": "【模拟房东】我确认返还押金2000元。",
+      "retry_count": 0,
+      "errors": [],
+      "trace_label": "本次执行回放",
+      "trace": [
+        {
+          "sequence": 1,
+          "node": "tenant_coach",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.0013999961083754897,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 2,
+          "node": "landlord",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.07289999484783038,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 3,
+          "node": "rule_score",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.033200005418621004,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 4,
+          "node": "critic",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.10280000424245372,
+          "feedback": [
+            "候选结构、明确确认、规则边界与引用身份校验通过。"
+          ],
+          "evidence_ids": []
+        }
+      ],
+      "unresolved_requests": [
+        "返还或付款日期、交接安排仍需明确确认。"
+      ],
+      "missing_facts": [
+        "核对押金收据、扣减明细与交接记录。"
+      ],
+      "replayed": false
+    }
+  },
+  {
+    "path": "/api/negotiation/turn",
+    "data": {
+      "session_id": "7469e3b8-4242-450b-9514-21b8eabeb4d5",
+      "request_id": "29ab5b68-5dcc-4ffc-a8dd-b8f2ec558a74",
+      "scenario": "deposit",
+      "status": "success",
+      "round_count": 3,
+      "confirmed_terms": {
+        "deposit_refund": 2000
+      },
+      "confirmed_evidence_ids": [],
+      "trial_score": 100,
+      "score_explanation": "模拟协商进展分：100；按已确认条件的适用权重归一化计算。",
+      "coach_advice": "【模拟辅导】请明确诉求、依据和可接受的协商范围。",
+      "landlord_response": "【模拟房东】我确认返还押金2000元。",
+      "retry_count": 0,
+      "errors": [],
+      "trace_label": "本次执行回放",
+      "trace": [
+        {
+          "sequence": 1,
+          "node": "tenant_coach",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.0013999961083754897,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 2,
+          "node": "landlord",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.07289999484783038,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 3,
+          "node": "rule_score",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.033200005418621004,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 4,
+          "node": "critic",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.10280000424245372,
+          "feedback": [
+            "候选结构、明确确认、规则边界与引用身份校验通过。"
+          ],
+          "evidence_ids": []
+        }
+      ],
+      "unresolved_requests": [
+        "返还或付款日期、交接安排仍需明确确认。"
+      ],
+      "missing_facts": [
+        "核对押金收据、扣减明细与交接记录。"
+      ],
+      "replayed": true
+    }
+  },
+  {
+    "path": "/api/review/analyze-detailed",
+    "data": {
+      "status": "success",
+      "results": [
+        {
+          "clause_id": "C-01",
+          "original_clause": "租赁结束后可不说明理由直接扣留全部押金。",
+          "risk_level": "MEDIUM",
+          "explanation": "离线浏览器测试样例：请结合合同事实核对，需补充具体依据。",
+          "evidence_ids": [],
+          "negotiation_tip": "测试样例建议：核对费用凭证，明确协商条件。"
+        },
+        {
+          "clause_id": "C-02",
+          "original_clause": "维修责任和费用均由租客承担。",
+          "risk_level": "MEDIUM",
+          "explanation": "离线浏览器测试样例：请结合合同事实核对，需补充具体依据。",
+          "evidence_ids": [
+            "LAW-712"
+          ],
+          "negotiation_tip": "测试样例建议：核对费用凭证，明确协商条件。"
+        },
+        {
+          "clause_id": "C-03",
+          "original_clause": "提前退租须支付固定违约金2000元。",
+          "risk_level": "MEDIUM",
+          "explanation": "离线浏览器测试样例：请结合合同事实核对，需补充具体依据。",
+          "evidence_ids": [],
+          "negotiation_tip": "测试样例建议：核对费用凭证，明确协商条件。"
+        }
+      ],
+      "total_risks": 3,
+      "failure_code": null,
+      "reason": null,
+      "errors": [],
+      "retry_count": 0,
+      "trace_label": "本次执行回放",
+      "trace": [
+        {
+          "sequence": 1,
+          "node": "configuration",
+          "attempt": 0,
+          "status": "completed",
+          "duration_ms": 0.003,
+          "evidence_ids": [],
+          "feedback": []
+        },
+        {
+          "sequence": 2,
+          "node": "retrieval",
+          "attempt": 0,
+          "status": "completed",
+          "duration_ms": 1.169,
+          "evidence_ids": [
+            "LAW-712"
+          ],
+          "feedback": []
+        },
+        {
+          "sequence": 3,
+          "node": "drafting",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 50.21,
+          "evidence_ids": [
+            "LAW-712"
+          ],
+          "feedback": []
+        },
+        {
+          "sequence": 4,
+          "node": "critic",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.112,
+          "evidence_ids": [
+            "LAW-712"
+          ],
+          "feedback": []
+        }
+      ]
+    }
+  },
+  {
+    "path": "/api/negotiation/turn",
+    "data": {
+      "session_id": "a13bb130-eaf5-4e33-826f-e1929ad9ea3f",
+      "request_id": "787e1ba6-e50c-4740-ad36-5947c0cbfcce",
+      "scenario": "maintenance",
+      "status": "success",
+      "round_count": 1,
+      "confirmed_terms": {
+        "repair_cost_share": 50
+      },
+      "confirmed_evidence_ids": [],
+      "trial_score": 50,
+      "score_explanation": "模拟协商进展分：50；按已确认条件的适用权重归一化计算。",
+      "coach_advice": "【模拟辅导】请明确诉求、依据和可接受的协商范围。",
+      "landlord_response": "【模拟房东】我确认承担维修费用50%。",
+      "retry_count": 0,
+      "errors": [],
+      "trace_label": "本次执行回放",
+      "trace": [
+        {
+          "sequence": 1,
+          "node": "tenant_coach",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.0012999953469261527,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 2,
+          "node": "landlord",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.05360000068321824,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 3,
+          "node": "rule_score",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.0335000004270114,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 4,
+          "node": "critic",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.08350000280188397,
+          "feedback": [
+            "候选结构、明确确认、规则边界与引用身份校验通过。"
+          ],
+          "evidence_ids": []
+        }
+      ],
+      "unresolved_requests": [
+        "返还或付款日期、交接安排仍需明确确认。"
+      ],
+      "missing_facts": [
+        "核对损坏原因、报修记录与维修费用凭证。"
+      ],
+      "replayed": false
+    }
+  },
+  {
+    "path": "/api/negotiation/turn",
+    "data": {
+      "session_id": "a13bb130-eaf5-4e33-826f-e1929ad9ea3f",
+      "request_id": "b567ef83-6422-492b-acb5-a398ac859816",
+      "scenario": "maintenance",
+      "status": "success",
+      "round_count": 2,
+      "confirmed_terms": {
+        "repair_cost_share": 75
+      },
+      "confirmed_evidence_ids": [],
+      "trial_score": 75,
+      "score_explanation": "模拟协商进展分：75；按已确认条件的适用权重归一化计算。",
+      "coach_advice": "【模拟辅导】请明确诉求、依据和可接受的协商范围。",
+      "landlord_response": "【模拟房东】我确认承担维修费用75%。",
+      "retry_count": 0,
+      "errors": [],
+      "trace_label": "本次执行回放",
+      "trace": [
+        {
+          "sequence": 1,
+          "node": "tenant_coach",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.0016999983927235007,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 2,
+          "node": "landlord",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.07190000178525224,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 3,
+          "node": "rule_score",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.03619999915827066,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 4,
+          "node": "critic",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.0990999978967011,
+          "feedback": [
+            "候选结构、明确确认、规则边界与引用身份校验通过。"
+          ],
+          "evidence_ids": []
+        }
+      ],
+      "unresolved_requests": [
+        "返还或付款日期、交接安排仍需明确确认。"
+      ],
+      "missing_facts": [
+        "核对损坏原因、报修记录与维修费用凭证。"
+      ],
+      "replayed": false
+    }
+  },
+  {
+    "path": "/api/negotiation/turn",
+    "data": {
+      "session_id": "a13bb130-eaf5-4e33-826f-e1929ad9ea3f",
+      "request_id": "d381e86a-3bcc-4eb2-9a37-f00508daa1fe",
+      "scenario": "maintenance",
+      "status": "success",
+      "round_count": 3,
+      "confirmed_terms": {
+        "repair_cost_share": 100
+      },
+      "confirmed_evidence_ids": [],
+      "trial_score": 100,
+      "score_explanation": "模拟协商进展分：100；按已确认条件的适用权重归一化计算。",
+      "coach_advice": "【模拟辅导】请明确诉求、依据和可接受的协商范围。",
+      "landlord_response": "【模拟房东】我确认承担维修费用100%。",
+      "retry_count": 0,
+      "errors": [],
+      "trace_label": "本次执行回放",
+      "trace": [
+        {
+          "sequence": 1,
+          "node": "tenant_coach",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.0015999976312741637,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 2,
+          "node": "landlord",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.07849999383324757,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 3,
+          "node": "rule_score",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.03270000161137432,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 4,
+          "node": "critic",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.08949999755714089,
+          "feedback": [
+            "候选结构、明确确认、规则边界与引用身份校验通过。"
+          ],
+          "evidence_ids": []
+        }
+      ],
+      "unresolved_requests": [
+        "返还或付款日期、交接安排仍需明确确认。"
+      ],
+      "missing_facts": [
+        "核对损坏原因、报修记录与维修费用凭证。"
+      ],
+      "replayed": false
+    }
+  },
+  {
+    "path": "/api/review/analyze-detailed",
+    "data": {
+      "status": "success",
+      "results": [
+        {
+          "clause_id": "C-01",
+          "original_clause": "租赁结束后可不说明理由直接扣留全部押金。",
+          "risk_level": "MEDIUM",
+          "explanation": "离线浏览器测试样例：请结合合同事实核对，需补充具体依据。",
+          "evidence_ids": [],
+          "negotiation_tip": "测试样例建议：核对费用凭证，明确协商条件。"
+        },
+        {
+          "clause_id": "C-02",
+          "original_clause": "维修责任和费用均由租客承担。",
+          "risk_level": "MEDIUM",
+          "explanation": "离线浏览器测试样例：请结合合同事实核对，需补充具体依据。",
+          "evidence_ids": [
+            "LAW-712"
+          ],
+          "negotiation_tip": "测试样例建议：核对费用凭证，明确协商条件。"
+        },
+        {
+          "clause_id": "C-03",
+          "original_clause": "提前退租须支付固定违约金2000元。",
+          "risk_level": "MEDIUM",
+          "explanation": "离线浏览器测试样例：请结合合同事实核对，需补充具体依据。",
+          "evidence_ids": [],
+          "negotiation_tip": "测试样例建议：核对费用凭证，明确协商条件。"
+        }
+      ],
+      "total_risks": 3,
+      "failure_code": null,
+      "reason": null,
+      "errors": [],
+      "retry_count": 0,
+      "trace_label": "本次执行回放",
+      "trace": [
+        {
+          "sequence": 1,
+          "node": "configuration",
+          "attempt": 0,
+          "status": "completed",
+          "duration_ms": 0.003,
+          "evidence_ids": [],
+          "feedback": []
+        },
+        {
+          "sequence": 2,
+          "node": "retrieval",
+          "attempt": 0,
+          "status": "completed",
+          "duration_ms": 1.81,
+          "evidence_ids": [
+            "LAW-712"
+          ],
+          "feedback": []
+        },
+        {
+          "sequence": 3,
+          "node": "drafting",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 50.386,
+          "evidence_ids": [
+            "LAW-712"
+          ],
+          "feedback": []
+        },
+        {
+          "sequence": 4,
+          "node": "critic",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.117,
+          "evidence_ids": [
+            "LAW-712"
+          ],
+          "feedback": []
+        }
+      ]
+    }
+  },
+  {
+    "path": "/api/negotiation/turn",
+    "data": {
+      "session_id": "6df5b94f-484e-4060-a111-5058b2f29753",
+      "request_id": "73ea5d57-5cbf-4eb2-b9c9-f691c7732062",
+      "scenario": "early_termination",
+      "status": "success",
+      "round_count": 1,
+      "confirmed_terms": {
+        "termination_fee": 1000
+      },
+      "confirmed_evidence_ids": [],
+      "trial_score": 50,
+      "score_explanation": "模拟协商进展分：50；按已确认条件的适用权重归一化计算。",
+      "coach_advice": "【模拟辅导】请明确诉求、依据和可接受的协商范围。",
+      "landlord_response": "【模拟房东】我确认提前退租违约金为1000元。",
+      "retry_count": 0,
+      "errors": [],
+      "trace_label": "本次执行回放",
+      "trace": [
+        {
+          "sequence": 1,
+          "node": "tenant_coach",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.0017999991541728377,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 2,
+          "node": "landlord",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.0714999987394549,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 3,
+          "node": "rule_score",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.03580000338843092,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 4,
+          "node": "critic",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.0838999985717237,
+          "feedback": [
+            "候选结构、明确确认、规则边界与引用身份校验通过。"
+          ],
+          "evidence_ids": []
+        }
+      ],
+      "unresolved_requests": [
+        "返还或付款日期、交接安排仍需明确确认。"
+      ],
+      "missing_facts": [
+        "核对通知日期、费用约定与房屋交接安排。"
+      ],
+      "replayed": false
+    }
+  },
+  {
+    "path": "/api/negotiation/turn",
+    "data": {
+      "session_id": "6df5b94f-484e-4060-a111-5058b2f29753",
+      "request_id": "8f0aed56-7b28-4c00-a9a8-f17b0f22e90e",
+      "scenario": "early_termination",
+      "status": "success",
+      "round_count": 2,
+      "confirmed_terms": {
+        "termination_fee": 500
+      },
+      "confirmed_evidence_ids": [],
+      "trial_score": 75,
+      "score_explanation": "模拟协商进展分：75；按已确认条件的适用权重归一化计算。",
+      "coach_advice": "【模拟辅导】请明确诉求、依据和可接受的协商范围。",
+      "landlord_response": "【模拟房东】我确认提前退租违约金为500元。",
+      "retry_count": 0,
+      "errors": [],
+      "trace_label": "本次执行回放",
+      "trace": [
+        {
+          "sequence": 1,
+          "node": "tenant_coach",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.0012999953469261527,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 2,
+          "node": "landlord",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.06969999958528206,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 3,
+          "node": "rule_score",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.03759999526664615,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 4,
+          "node": "critic",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.0973999995039776,
+          "feedback": [
+            "候选结构、明确确认、规则边界与引用身份校验通过。"
+          ],
+          "evidence_ids": []
+        }
+      ],
+      "unresolved_requests": [
+        "返还或付款日期、交接安排仍需明确确认。"
+      ],
+      "missing_facts": [
+        "核对通知日期、费用约定与房屋交接安排。"
+      ],
+      "replayed": false
+    }
+  },
+  {
+    "path": "/api/negotiation/turn",
+    "data": {
+      "session_id": "6df5b94f-484e-4060-a111-5058b2f29753",
+      "request_id": "df7a2daa-2ca9-4e8e-bc76-01ba0bf4f626",
+      "scenario": "early_termination",
+      "status": "success",
+      "round_count": 3,
+      "confirmed_terms": {
+        "termination_fee": 0
+      },
+      "confirmed_evidence_ids": [],
+      "trial_score": 100,
+      "score_explanation": "模拟协商进展分：100；按已确认条件的适用权重归一化计算。",
+      "coach_advice": "【模拟辅导】请明确诉求、依据和可接受的协商范围。",
+      "landlord_response": "【模拟房东】我确认提前退租违约金为0元。",
+      "retry_count": 0,
+      "errors": [],
+      "trace_label": "本次执行回放",
+      "trace": [
+        {
+          "sequence": 1,
+          "node": "tenant_coach",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.0013999961083754897,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 2,
+          "node": "landlord",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.07199999527074397,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 3,
+          "node": "rule_score",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.03499999729683623,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 4,
+          "node": "critic",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.09340000542579219,
+          "feedback": [
+            "候选结构、明确确认、规则边界与引用身份校验通过。"
+          ],
+          "evidence_ids": []
+        }
+      ],
+      "unresolved_requests": [
+        "返还或付款日期、交接安排仍需明确确认。"
+      ],
+      "missing_facts": [
+        "核对通知日期、费用约定与房屋交接安排。"
+      ],
+      "replayed": false
+    }
+  },
+  {
+    "path": "/api/negotiation/turn",
+    "data": {
+      "session_id": "6df5b94f-484e-4060-a111-5058b2f29753",
+      "request_id": "d0a1d314-09d0-4d71-bc13-91d4555e78b3",
+      "scenario": "early_termination",
+      "status": "success",
+      "round_count": 4,
+      "confirmed_terms": {
+        "termination_fee": 0
+      },
+      "confirmed_evidence_ids": [],
+      "trial_score": 100,
+      "score_explanation": "模拟协商进展分：100；按已确认条件的适用权重归一化计算。",
+      "coach_advice": "【模拟辅导】请明确诉求、依据和可接受的协商范围。",
+      "landlord_response": "【模拟房东】我确认提前退租违约金为0元。",
+      "retry_count": 0,
+      "errors": [],
+      "trace_label": "本次执行回放",
+      "trace": [
+        {
+          "sequence": 1,
+          "node": "tenant_coach",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.0018999999156221747,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 2,
+          "node": "landlord",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.09780000254977494,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 3,
+          "node": "rule_score",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.03459999425103888,
+          "feedback": [],
+          "evidence_ids": []
+        },
+        {
+          "sequence": 4,
+          "node": "critic",
+          "attempt": 1,
+          "status": "completed",
+          "duration_ms": 0.10599999950500205,
+          "feedback": [
+            "候选结构、明确确认、规则边界与引用身份校验通过。"
+          ],
+          "evidence_ids": []
+        }
+      ],
+      "unresolved_requests": [
+        "返还或付款日期、交接安排仍需明确确认。"
+      ],
+      "missing_facts": [
+        "核对通知日期、费用约定与房屋交接安排。"
+      ],
+      "replayed": false
+    }
+  }
+]

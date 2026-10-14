@@ -1,0 +1,7 @@
+Error: {"exceptionId":1,"text":"Uncaught","lineNumber":0,"columnNumber":31,"scriptId":"3","stackTrace":{"callFrames":[{"functionName":"","scriptId":"3","url":"","lineNumber":0,"columnNumber":31}]},"exception":{"type":"object","subtype":"error","className":"TypeError","description":"TypeError: Cannot read properties of null (reading 'hasAttribute')\n    at <anonymous>:1:32","objectId":"5974925681023829691.2.2"}}
+    at CDP.evaluate (D:\AgentDev\ZhiZu-Agent\scripts\check_day10_frontend.cjs:70:35)
+    at async until (D:\AgentDev\ZhiZu-Agent\scripts\check_day10_frontend.cjs:75:39)
+    at async D:\AgentDev\ZhiZu-Agent\scripts\check_day10_frontend.cjs:143:3
+D:\AgentDev\ZhiZu-Agent\.venv\Lib\site-packages\langgraph\cache\base\__init__.py:8: LangChainPendingDeprecationWarning: The default value of `allowed_objects` will change in a future version. Pass an explicit value (e.g., allowed_objects='messages' or allowed_objects='core') to suppress this warning.
+  from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
+

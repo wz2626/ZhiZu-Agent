@@ -4,6 +4,8 @@
 
 当前归档状态：已补 Day 6、Day 7 Prompt 转录、过程摘要与实测报告，**待补完整原始记录**。摘要与工具结果摘录不替代完整原始对话；归档时遵循[通用说明](../README.md)。
 
+Day10经明确授权扩展三场景、HTTP和实际节点Trace，跨链过程见 [链3 Day10摘要](../chain-03-web-board/day10-v01-integration.md)；契约见 [Spec04](../../specs/spec-04-negotiation-api-and-scenarios.md)，最终 [465项与18组实测](../../test-results/day10-round01.md)。关联代码待提交，完整原始聊天待归档。
+
 ## 迭代索引
 
 | 迭代 | 时间（北京时间） | 工具/模型 | 意图与结果 | 原始记录 | 测试证据 | 关联代码 Commit |

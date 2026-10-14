@@ -110,7 +110,7 @@
       </div>
     </header>
     <section class="intro" aria-labelledby="workspace-title">
-      <div><div class="eyebrow mb-2">CONTRACT INTELLIGENCE · DAY 09</div><h1 id="workspace-title" class="m-0 text-2xl font-semibold tracking-wide">看清条款，从容协商<span class="text-[#6ce5cd]">。</span></h1><p class="muted mt-2 mb-0 text-xs">让每一处风险回到原文，让每一次表达有据可循。</p></div>
+      <div><div class="eyebrow mb-2">CONTRACT INTELLIGENCE · V0.1</div><h1 id="workspace-title" class="m-0 text-2xl font-semibold tracking-wide">看清条款，从容协商<span class="text-[#6ce5cd]">。</span></h1><p class="muted mt-2 mb-0 text-xs">让每一处风险回到原文，让每一次表达有据可循。</p></div>
       <nav class="steps" aria-label="分析流程">
         <span class="step" :class="{ active: phase === 'input' }" :aria-current="phase === 'input' ? 'step' : null"><span class="step-num">1</span>粘贴合同</span><span aria-hidden="true">/</span>
         <span class="step" :class="{ active: phase === 'preview' }" :aria-current="phase === 'preview' ? 'step' : null"><span class="step-num">2</span>脱敏确认</span><span aria-hidden="true">/</span>
@@ -183,8 +183,9 @@
           </div>
         <div class="panel-body">
           <label for="scenario-select" class="block muted text-[11px] mb-2">选择演练场景</label>
-          <select id="scenario-select" v-model="negotiation.scenario" :disabled="negotiation.pending || !!negotiation.request"><option value="deposit">押金扣留</option><option value="repair">维修责任</option><option value="termination">提前退租</option></select>
+          <select id="scenario-select" v-model="negotiation.scenario" :disabled="negotiation.pending || !!negotiation.request"><option value="deposit">押金扣留</option><option value="maintenance">维修责任</option><option value="early_termination">提前退租</option></select>
           <p class="muted text-[10px] mt-1">切换场景或重新编辑合同会开始新会话，并清空本地协商清单。</p>
+          <p class="notice text-[11px] mt-2">v0.1 固定策略离线演练：模拟房东按轮次给出预设条件，不作真实法律责任判断。</p>
           <div class="flex gap-1 p-1 bg-[#0b1421] rounded-xl my-5" role="tablist" aria-label="协商角色">
             <button v-for="(role, index) in roles" :key="role.id" :id="'tab-' + role.id" type="button" class="role-tab" role="tab" :aria-selected="negotiation.activeRole === role.id" aria-controls="role-panel" :tabindex="negotiation.activeRole === role.id ? 0 : -1" @click="negotiation.activeRole = role.id" @keydown="navigateRoles($event, index)">{{ role.label }}</button>
           </div>
@@ -222,7 +223,7 @@
       </section>
     </main>
     <section class="trace-section" aria-labelledby="trace-title">
-      <div class="panel-head flex-wrap"><div><h2 id="trace-title">{{ activeTrace && activeTrace.id !== latestTraceId ? '历史执行回放' : '本次执行回放' }}</h2><p class="muted text-[11px] m-0 mt-1">收到完整 JSON 后按返回顺序展示；节点耗时来自响应，回放间隔仅用于浏览。</p></div><div v-if="activeTrace" class="flex flex-wrap gap-3 items-center"><label for="trace-run" class="sr-only">选择执行记录</label><select id="trace-run" style="width:auto;max-width:100%" v-model="selectedTraceId" @change="playTrace"><option v-for="run in traceRuns" :key="run.id" :value="run.id">{{ run.label }}{{ run.id === latestTraceId ? ' · 最新响应' : ' · 历史记录' }}</option></select><button type="button" class="text-btn" @click="playTrace" :disabled="!activeTrace.events.length">重新播放</button><button type="button" class="text-btn" @click="showAllTrace" :disabled="!tracePlaying">显示全部</button></div></div>
+      <div class="panel-head flex-wrap"><div><h2 id="trace-title">{{ activeTrace?.replayed ? '缓存响应回放' : activeTrace && activeTrace.id !== latestTraceId ? '历史执行回放' : '本次执行回放' }}</h2><p class="muted text-[11px] m-0 mt-1">收到完整 JSON 后按返回顺序展示；节点耗时来自响应，回放间隔仅用于浏览。</p></div><div v-if="activeTrace" class="flex flex-wrap gap-3 items-center"><label for="trace-run" class="sr-only">选择执行记录</label><select id="trace-run" style="width:auto;max-width:100%" v-model="selectedTraceId" @change="playTrace"><option v-for="run in traceRuns" :key="run.id" :value="run.id">{{ run.label }}{{ run.id === latestTraceId ? ' · 最新响应' : ' · 历史记录' }}</option></select><button type="button" class="text-btn" @click="playTrace" :disabled="!activeTrace.events.length">重新播放</button><button type="button" class="text-btn" @click="showAllTrace" :disabled="!tracePlaying">显示全部</button></div></div>
       <div v-if="phase === 'reviewing' || negotiation.pending" class="notice notice-warn mx-5 mt-4" role="status">当前请求仍在等待完整结果。下方如有记录，属于此前已收到的响应。</div>
       <div v-if="!activeTrace" class="muted text-xs p-5">尚未收到执行记录。不会预先生成节点、反馈或打字机内容。</div>
       <template v-else><div class="flex flex-wrap justify-between gap-3 text-[11px] muted p-5"><span>{{ activeTrace.label }} · {{ activeTrace.note }}</span><span>{{ traceVisibleCount }} / {{ activeTrace.events.length }} 个实际节点</span></div><ol class="trace-list"><li v-for="event in visibleTraceEvents" :key="event.sequence" class="trace-event" :data-status="event.status"><div class="flex justify-between gap-3"><strong class="text-xs">{{ event.sequence }}. {{ traceNodeLabels[event.node] || event.node }}</strong><span class="chip">{{ traceStatusLabels[event.status] }}</span></div><div class="trace-meta"><span>{{ event.node }}{{ event.attempt == null ? '' : ' · 生成编号 ' + event.attempt }}</span><span>{{ formatDuration(event.duration_ms) }} ms</span></div><p class="text-[11px] leading-6 mb-0">{{ event.node === 'critic' ? 'Critic 反馈摘要' : '反馈摘要' }}：{{ event.feedback.length ? event.feedback.join('；') : '未返回反馈摘要' }}</p><div v-if="event.evidence_ids.length" class="muted text-[10px] mt-2">证据：{{ event.evidence_ids.join('、') }}</div></li></ol></template>
@@ -279,7 +280,7 @@
             critic: 'Critic 质检', mock: '失败终止', graph: '执行图异常', tenant_coach: '租客辅导',
             landlord: '模拟房东', rule_score: '规则试算', retry: '重写', completed: '会话结束' };
           const traceStatusLabels = { completed: '已完成', failed: '失败', retry: '需重写', needs_review: '待复核' };
-          const scenarioLabels = { deposit: '押金扣留', repair: '维修责任', termination: '提前退租' };
+          const scenarioLabels = { deposit: '押金扣留', maintenance: '维修责任', early_termination: '提前退租' };
           const roles = [
             { id: 'coach', label: '租客辅导', subtitle: '条款对应的协商建议' },
             { id: 'tenant', label: '我的诉求', subtitle: '整理事实与明确条件' },
@@ -288,8 +289,8 @@
           const riskLabels = { HIGH: '高风险', MEDIUM: '中风险', LOW: '低风险', NONE: '未标出风险' };
           const scenarioGuidance = {
             deposit: '围绕押金扣减理由、费用凭证与返还时间准备沟通。',
-            repair: '围绕损坏原因、维修责任、费用与处理时限准备沟通。',
-            termination: '围绕通知时间、费用依据与房屋交接准备沟通。',
+            maintenance: '围绕损坏原因、维修责任、费用与处理时限准备沟通。',
+            early_termination: '围绕通知时间、费用依据与房屋交接准备沟通。',
           };
           let reviewController = null;
           let healthController = null;
@@ -348,7 +349,7 @@
             clearExport();
           }
           function termLines(terms) {
-            const labels = { deposit_refund: '确认返还押金（元）' };
+            const labels = { deposit_refund: '确认返还押金（元）', repair_cost_share: '房东承担维修费用（%）', termination_fee: '确认提前退租违约金（元）' };
             return Object.entries(terms).map(([key, value]) => redact((labels[key] || key) + '：'
               + (typeof value === 'string' ? value : JSON.stringify(value))).text);
           }
@@ -377,9 +378,10 @@
               feedback: safeList(event.feedback), evidence_ids: safeList(event.evidence_ids || []) })) : [];
             const id = newId();
             const number = traceRuns.value.filter(run => run.source === source).length + 1;
-            traceRuns.value.push({ id, source, events,
+            traceRuns.value.push({ id, source, events, replayed: data.replayed === true,
               label: source + ' · 第 ' + number + ' 次响应 · ' + ({ success: '成功', completed: '已结束', needs_review: '待复核' }[data.status] || '响应异常'),
-              note: !Array.isArray(data.trace) ? '响应未提供 Trace，未生成任何节点。'
+              note: data.replayed === true ? '同请求编号的缓存响应；未再次执行节点或提交状态。'
+                : !Array.isArray(data.trace) ? '响应未提供 Trace，未生成任何节点。'
                 : !valid ? 'Trace 格式不符合约定，未播放无法核验的记录。'
                   : !events.length ? '后端返回空 Trace，未补造节点。' : '来自本次完整响应的实际执行记录。' });
             selectedTraceId.value = id;
@@ -413,7 +415,7 @@
             discoveryController = new AbortController();
             const timer = setTimeout(() => discoveryController?.abort(), 5000);
             try {
-              // 当前仓库尚无谈判 HTTP 路由。只使用后端 OpenAPI 实际公布的同源路径，不臆造接口。
+              // 只使用后端 OpenAPI 实际公布的唯一同源提交路径。
               const response = await fetch('/openapi.json', { cache: 'no-store', signal: discoveryController.signal });
               if (!response.ok) throw new Error('discovery');
               const api = await response.json();
@@ -436,6 +438,7 @@
           function readNegotiationResponse(data, request) {
             if (!isRecord(data) || !['success', 'completed'].includes(data.status)
               || data.session_id !== request.session_id || data.request_id !== request.request_id
+              || data.scenario !== request.scenario
               || data.round_count !== committed.value.roundCount + 1 || data.round_count > 5
               || !isRecord(data.confirmed_terms) || (data.errors !== undefined && (!isStringList(data.errors) || data.errors.length))) return null;
             // Day 7 正式分数名为 trial_score；兼容明确返回 score 的适配层，绝不读 candidate_score。
@@ -462,7 +465,7 @@
                 return;
               }
               if (!safe.text.trim() || charCount(safe.text) > 2000) return;
-              negotiation.request = { session_id: negotiation.sessionId, user_input: safe.text, request_id: newId() };
+              negotiation.request = { session_id: negotiation.sessionId, user_input: safe.text, request_id: newId(), scenario: negotiation.scenario };
             }
             const request = { ...negotiation.request };
             negotiation.pending = true;
@@ -479,9 +482,10 @@
                 credentials: 'same-origin', signal: negotiationController.signal, body: JSON.stringify(request),
               });
               if (!response.ok) {
-                if ([404, 405, 422].includes(response.status)) negotiation.request = null;
+                if ([404, 405, 409, 422].includes(response.status)) negotiation.request = null;
                 negotiation.error = response.status === 404 || response.status === 405 ? '当前服务尚未开放此谈判入口，请检查后端接入情况。'
                   : response.status === 422 ? '消息格式校验失败，请检查消息后重新发送。'
+                    : response.status === 409 ? '会话或请求编号冲突，请切换场景开始新会话。'
                     : '服务暂时未返回有效结果，请重试同一条消息以确认提交情况。';
                 return;
               }

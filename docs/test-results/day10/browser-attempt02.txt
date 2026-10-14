@@ -1,0 +1,20 @@
+PASS 1: Cold-cache local assets mount; real OpenAPI is available
+PASS 2: Contract input is masked in editable preview before any submit
+PASS 3: Waiting timer advances while no unfinished Trace nodes are displayed
+PASS 4: Real review route/graph accepts sanitized snapshot; exact clause highlight and evidence card render
+PASS 5: Negotiation message final scan masks new phone and revokes confirmation before uploading
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+4 !== 2
+
+    at D:\AgentDev\ZhiZu-Agent\scripts\check_day10_frontend.cjs:174:10 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 4,
+  expected: 2,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+D:\AgentDev\ZhiZu-Agent\.venv\Lib\site-packages\langgraph\cache\base\__init__.py:8: LangChainPendingDeprecationWarning: The default value of `allowed_objects` will change in a future version. Pass an explicit value (e.g., allowed_objects='messages' or allowed_objects='core') to suppress this warning.
+  from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
+

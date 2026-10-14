@@ -51,6 +51,16 @@ def default_scoring_rules() -> dict[str, ScoringRule]:
     return {"deposit_refund": ScoringRule(0, 2000, minimum=0, maximum=2000)}
 
 
+def scenario_scoring_rules(scenario: str) -> dict[str, ScoringRule]:
+    if scenario == "deposit":
+        return default_scoring_rules()
+    if scenario == "maintenance":
+        return {"repair_cost_share": ScoringRule(0, 100, minimum=0, maximum=100)}
+    if scenario == "early_termination":
+        return {"termination_fee": ScoringRule(2000, 0, minimum=0, maximum=2000)}
+    raise ValueError("unknown negotiation scenario")
+
+
 def progress(confirmed: Number, start: Number, target: Number) -> Fraction | None:
     """Equal start and target is inapplicable, even when already achieved."""
     value, initial, goal = _number(confirmed), _number(start), _number(target)
