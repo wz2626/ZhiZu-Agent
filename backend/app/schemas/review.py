@@ -61,6 +61,8 @@ class ReviewResponse(BaseModel):
 
 
 class ReviewFailureCode(str, Enum):
+    OUT_OF_SCOPE = "OUT_OF_SCOPE"
+    INVALID_CONTRACT_TEXT = "INVALID_CONTRACT_TEXT"
     CHAT_NOT_CONFIGURED = "CHAT_NOT_CONFIGURED"
     CHAT_INIT_FAILED = "CHAT_INIT_FAILED"
     KB_NOT_READY = "KB_NOT_READY"
@@ -77,7 +79,7 @@ class ReviewTraceEvent(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     sequence: int = Field(ge=1, strict=True)
-    node: Literal["configuration", "retrieval", "drafting", "critic", "mock", "graph"]
+    node: Literal["input_guard", "configuration", "retrieval", "drafting", "critic", "mock", "graph"]
     attempt: int = Field(ge=0, le=3, strict=True)
     status: Literal["completed", "failed", "retry", "needs_review"]
     duration_ms: float = Field(ge=0, allow_inf_nan=False)

@@ -6,6 +6,8 @@ from typing import Literal
 from backend.app.schemas.review import ReviewFailureCode, ReviewTraceEvent
 
 FAILURE_MESSAGES = {
+    ReviewFailureCode.OUT_OF_SCOPE: "该输入不属于租赁合同审查范围，请补充租赁条款或适用法律依据。",
+    ReviewFailureCode.INVALID_CONTRACT_TEXT: "未识别到可审查的合同内容，请提供有效、可读的租赁条款。",
     ReviewFailureCode.CHAT_NOT_CONFIGURED: "未配置有效聊天密钥，未执行真实审查。",
     ReviewFailureCode.CHAT_INIT_FAILED: "聊天客户端初始化失败，未执行真实审查。",
     ReviewFailureCode.KB_NOT_READY: "法条知识库未就绪或校验失败，请检查匹配配置并完成入库。",
@@ -51,7 +53,7 @@ def public_feedback(errors: list[str]) -> list[str]:
 
 def append_trace(
     trace: list[ReviewTraceEvent], *,
-    node: Literal["configuration", "retrieval", "drafting", "critic", "mock", "graph"],
+    node: Literal["input_guard", "configuration", "retrieval", "drafting", "critic", "mock", "graph"],
     attempt: int, status: Literal["completed", "failed", "retry", "needs_review"],
     started: float, evidence_ids: list[str] | None = None,
     feedback: list[str] | None = None,

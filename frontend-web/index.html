@@ -276,7 +276,7 @@
           const latestTraceId = computed(() => traceRuns.value.at(-1)?.id ?? null);
           const activeTrace = computed(() => traceRuns.value.find(run => run.id === selectedTraceId.value) || null);
           const visibleTraceEvents = computed(() => activeTrace.value?.events.slice(0, traceVisibleCount.value) || []);
-          const traceNodeLabels = { configuration: '配置检查', retrieval: '法条检索', drafting: '生成审查结果',
+          const traceNodeLabels = { input_guard: '输入与范围检查', configuration: '配置检查', retrieval: '法条检索', drafting: '生成审查结果',
             critic: 'Critic 质检', mock: '失败终止', graph: '执行图异常', tenant_coach: '租客辅导',
             landlord: '模拟房东', rule_score: '规则试算', retry: '重写', completed: '会话结束' };
           const traceStatusLabels = { completed: '已完成', failed: '失败', retry: '需重写', needs_review: '待复核' };

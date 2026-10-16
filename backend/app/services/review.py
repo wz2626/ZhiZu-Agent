@@ -17,6 +17,7 @@ from backend.app.schemas.review import (
     ReviewResponse, ReviewTraceEvent, RiskLevel,
 )
 from backend.app.services.graph import review_graph
+from backend.app.services.review_input_guard import classify_review_input
 from backend.app.services.review_trace import FAILURE_MESSAGES, append_trace, public_feedback
 from backend.app.services.vector_store import (
     STORAGE_ERRORS, LawVectorStoreService, load_authoritative_laws, mask_sensitive_text,
@@ -35,6 +36,8 @@ class ContractReviewService:
         vector_store: LawVectorStoreService | None = None,
         llm: ReviewLLM | None = None,
         settings: Settings | None = None,
+        *,
+        defer_chat_init: bool = False,
     ) -> None:
         self.settings = settings if settings is not None else get_settings()
         self.vector_store = vector_store
@@ -44,6 +47,10 @@ class ContractReviewService:
         self._owns_vector_store = False
         self._owns_llm = False
         self._http_client: httpx.Client | None = None
+        if not defer_chat_init:
+            self._initialize_chat_if_needed()
+
+    def _initialize_chat_if_needed(self) -> None:
         if not self.mock_mode and self.llm is None:
             try:
                 # LangChain caches its default transport. A request-scoped
@@ -93,6 +100,7 @@ class ContractReviewService:
     def analyze_contract(self, text: str, top_k: int = 4) -> ReviewResponse:
         request = ReviewRequest(contract_text=text, top_k=top_k)
         safe_text = mask_sensitive_text(request.contract_text)
+        self._initialize_chat_if_needed()
         # An absent chat key must not depend on storage or embedding credentials.
         if self.mock_mode:
             return self._mock_response(safe_text)
@@ -136,6 +144,14 @@ class ContractReviewService:
         safe_text = mask_sensitive_text(request.contract_text)
         trace: list[ReviewTraceEvent] = []
         started = perf_counter()
+        guard_code = classify_review_input(safe_text)
+        if guard_code is not None:
+            append_trace(trace, node="input_guard", attempt=0, status="needs_review",
+                         started=started, feedback=[FAILURE_MESSAGES[guard_code]])
+            return self._detailed_failure(guard_code, trace)
+
+        started = perf_counter()
+        self._initialize_chat_if_needed()
         if self.mock_mode:
             code = (ReviewFailureCode.CHAT_INIT_FAILED if self._chat_initialization_failed
                     else ReviewFailureCode.CHAT_NOT_CONFIGURED)
