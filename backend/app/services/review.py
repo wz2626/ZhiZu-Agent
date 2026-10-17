@@ -100,6 +100,10 @@ class ContractReviewService:
     def analyze_contract(self, text: str, top_k: int = 4) -> ReviewResponse:
         request = ReviewRequest(contract_text=text, top_k=top_k)
         safe_text = mask_sensitive_text(request.contract_text)
+        # Keep the legacy success/mock shape, but reject through the same local
+        # guard as the detailed API before clients, retrieval or cloud calls.
+        if classify_review_input(safe_text) is not None:
+            return self._mock_response(safe_text)
         self._initialize_chat_if_needed()
         # An absent chat key must not depend on storage or embedding credentials.
         if self.mock_mode:

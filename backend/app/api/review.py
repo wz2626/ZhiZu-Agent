@@ -15,7 +15,7 @@ router = APIRouter(tags=["review"])
 def get_review_service(
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> Iterator[ContractReviewService]:
-    # Delay client creation until the detailed API has checked masked input.
+    # Both APIs check masked input before creating any cloud client.
     service = ContractReviewService(settings=settings, defer_chat_init=True)
     try:
         yield service
