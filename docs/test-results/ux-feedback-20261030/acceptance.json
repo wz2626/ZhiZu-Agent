@@ -1,0 +1,923 @@
+{
+  "date": "2026-10-30",
+  "frontend_sha256": "7423FF50DAC1037EA39AD1994768175A88ECDB21965848EC6FD30E912D17B197",
+  "pytest": {
+    "skipped": 0,
+    "failed": 0,
+    "warnings": 1,
+    "passed": 769
+  },
+  "day8": {
+    "passed": 13,
+    "failed": 0,
+    "skipped": 0,
+    "cases": [
+      {
+        "id": 1,
+        "label": "Stable workspace and one mounted Composer",
+        "status": "passed"
+      },
+      {
+        "id": 2,
+        "label": "Submit-time new masking requires a second explicit confirmation of the displayed replacement",
+        "status": "passed"
+      },
+      {
+        "id": 3,
+        "label": "Local masking occurs in the original editor, without upload or second preview",
+        "status": "passed"
+      },
+      {
+        "id": 4,
+        "label": "One explicit consent action submits exactly the displayed sanitized text; duplicate blocked; HTML remains text",
+        "status": "passed"
+      },
+      {
+        "id": 5,
+        "label": "Risk selection preserves full source and mounted Composer",
+        "status": "passed"
+      },
+      {
+        "id": 6,
+        "label": "Missing scenario has an actionable explanation; first selection preserves message and consent and enables available service",
+        "status": "passed"
+      },
+      {
+        "id": 7,
+        "label": "A/B drafts and consent are record-local; rebinding is not an edit",
+        "status": "passed"
+      },
+      {
+        "id": 8,
+        "label": "IME composition defers navigation until the real composition end event",
+        "status": "passed"
+      },
+      {
+        "id": 9,
+        "label": "Keyboard: trusted Ctrl+Enter requires consent; IME/repeated shortcuts do not send; mounted Composer and accessibility references survive",
+        "status": "passed"
+      },
+      {
+        "id": 10,
+        "label": "Law text, source and date equal the canonical library; repeated occurrences preserve exact source",
+        "status": "passed"
+      },
+      {
+        "id": 11,
+        "label": "Unlocated source is honest; missing service retry and all review failures preserve prior source without leaking raw errors",
+        "status": "passed"
+      },
+      {
+        "id": 12,
+        "label": "Cross-paragraph and self-overlapping matches preserve exact source without nested marks",
+        "status": "passed"
+      },
+      {
+        "id": 13,
+        "label": "1440 desktop, 200% reflow, mobile and short viewport: one scroll reaches uncovered send button; Composer identity retained",
+        "status": "passed"
+      }
+    ],
+    "external": 0
+  },
+  "day10": {
+    "passed": 33,
+    "failed": 0,
+    "skipped": 0,
+    "cases": [
+      {
+        "id": 1,
+        "label": "Stable workspace and one mounted Composer",
+        "status": "passed"
+      },
+      {
+        "id": 2,
+        "label": "Submit-time new masking requires a second explicit confirmation of the displayed replacement",
+        "status": "passed"
+      },
+      {
+        "id": 3,
+        "label": "Local masking occurs in the original editor, without upload or second preview",
+        "status": "passed"
+      },
+      {
+        "id": 4,
+        "label": "One explicit consent action submits exactly the displayed sanitized text; duplicate blocked; HTML remains text",
+        "status": "passed"
+      },
+      {
+        "id": 5,
+        "label": "Risk selection preserves full source and mounted Composer",
+        "status": "passed"
+      },
+      {
+        "id": 6,
+        "label": "Missing scenario has an actionable explanation; first selection preserves message and consent and enables available service",
+        "status": "passed"
+      },
+      {
+        "id": 7,
+        "label": "A/B drafts and consent are record-local; rebinding is not an edit",
+        "status": "passed"
+      },
+      {
+        "id": 8,
+        "label": "IME composition defers navigation until the real composition end event",
+        "status": "passed"
+      },
+      {
+        "id": 9,
+        "label": "Keyboard: trusted Ctrl+Enter requires consent; IME/repeated shortcuts do not send; mounted Composer and accessibility references survive",
+        "status": "passed"
+      },
+      {
+        "id": 10,
+        "label": "Final message and goal masking revoke their own consent and upload nothing until explicitly reconfirmed",
+        "status": "passed"
+      },
+      {
+        "id": 11,
+        "label": "Editing the goal retains prior draft and questions, marks them stale and revokes only its consent",
+        "status": "passed"
+      },
+      {
+        "id": 12,
+        "label": "Explicit old-draft adoption confirms replacement and never sends or consumes a round",
+        "status": "passed"
+      },
+      {
+        "id": 13,
+        "label": "Rejected draft generation retains old reference and never exposes unvalidated PII",
+        "status": "passed"
+      },
+      {
+        "id": 14,
+        "label": "In-flight A response commits to A while B stays untouched; duplicate click submits once",
+        "status": "passed"
+      },
+      {
+        "id": 15,
+        "label": "Polish: real 1000→1500 improvement alone is struck through; five chips follow official rounds and numeric columns remain tabular",
+        "status": "passed"
+      },
+      {
+        "id": 16,
+        "label": "Polish: trusted desktop press moves exactly 1px without reflow; release, reduced-motion and touch are static",
+        "status": "passed"
+      },
+      {
+        "id": 17,
+        "label": "Critic failure preserves official round, score and terms",
+        "status": "passed"
+      },
+      {
+        "id": 18,
+        "label": "Lost response locks its message and retries the same request, accepting cached success once",
+        "status": "passed"
+      },
+      {
+        "id": 19,
+        "label": "Five successful rounds disable sixth submission",
+        "status": "passed"
+      },
+      {
+        "id": 20,
+        "label": "Independent scenario scores and per-session exports never merge conditions",
+        "status": "passed"
+      },
+      {
+        "id": 21,
+        "label": "Standalone practice has its own session and decreasing-fee improvement uses real rule output",
+        "status": "passed"
+      },
+      {
+        "id": 22,
+        "label": "New local analysis version isolates reused clause IDs and preserves concurrent edits",
+        "status": "passed"
+      },
+      {
+        "id": 23,
+        "label": "Returning to a previous analysis restores its own completed practice",
+        "status": "passed"
+      },
+      {
+        "id": 24,
+        "label": "Owner-local Trace renders actual node sequences, bounded attempts and nonnegative measured durations",
+        "status": "passed"
+      },
+      {
+        "id": 25,
+        "label": "Late clipboard denial retains the frozen original-session payload without focus theft or cross-session export",
+        "status": "passed"
+      },
+      {
+        "id": 26,
+        "label": "Changing target invalidates its in-flight generation without deleting its accepted reference",
+        "status": "passed"
+      },
+      {
+        "id": 27,
+        "label": "Lost drafting response uses same independent request ID and preserves formal practice state",
+        "status": "passed"
+      },
+      {
+        "id": 28,
+        "label": "Explicit drafting quota rejection explains recovery and clears unusable retry metadata",
+        "status": "passed"
+      },
+      {
+        "id": 29,
+        "label": "Contradictory turn-effect metadata is rejected; canonical replay commits once",
+        "status": "passed"
+      },
+      {
+        "id": 30,
+        "label": "Malformed Trace is not fabricated or substituted, independently of valid official results",
+        "status": "passed"
+      },
+      {
+        "id": 31,
+        "label": "Older review response cannot overwrite a newer submitted version",
+        "status": "passed"
+      },
+      {
+        "id": 32,
+        "label": "An explicit fresh practice uses a new session while the prior standalone practice stays selectable and unchanged",
+        "status": "passed"
+      },
+      {
+        "id": 33,
+        "label": "1440 desktop, 200% reflow, mobile and short viewport: one scroll reaches uncovered send button; Composer identity retained",
+        "status": "passed"
+      }
+    ],
+    "external": 0
+  },
+  "visual": {
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0,
+    "cases": [
+      {
+        "id": 1,
+        "label": "Real waiting state runs decorative animation; reduced motion stops it; completion removes it without blocking text",
+        "status": "passed"
+      },
+      {
+        "id": 2,
+        "label": "Short and long contracts retain exact full text with stable navigation and contextual evidence",
+        "status": "passed"
+      },
+      {
+        "id": 3,
+        "label": "Send remains accessible without overlapping fixed surfaces at all six viewport/reflow sizes",
+        "status": "passed"
+      },
+      {
+        "id": 4,
+        "label": "Real offline draft generation and retained reference remain accessible within the same task",
+        "status": "passed"
+      }
+    ],
+    "measurements": [
+      {
+        "label": "input",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "zoom": "1",
+        "documentHeight": 900,
+        "overflow": false,
+        "dossier": {
+          "x": 20,
+          "y": 129.796875,
+          "width": 912.65625,
+          "height": 474.578125,
+          "right": 932.65625,
+          "bottom": 604.375,
+          "visible": true
+        },
+        "workspace": {
+          "x": 20,
+          "y": 129.796875,
+          "width": 1385,
+          "height": 709.703125,
+          "right": 1405,
+          "bottom": 839.5,
+          "visible": true
+        },
+        "primary": {
+          "x": 41,
+          "y": 499.875,
+          "width": 152,
+          "height": 40,
+          "right": 193,
+          "bottom": 539.875,
+          "visible": true
+        },
+        "negotiation": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "right": 0,
+          "bottom": 0,
+          "visible": false
+        },
+        "composer": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "right": 0,
+          "bottom": 0,
+          "visible": false
+        },
+        "trace": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "right": 0,
+          "bottom": 0,
+          "visible": false
+        }
+      },
+      {
+        "label": "short",
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "zoom": "1",
+        "documentHeight": 1225,
+        "overflow": false,
+        "dossier": {
+          "x": 268.5,
+          "y": 129.796875,
+          "width": 1088,
+          "height": 433.578125,
+          "right": 1356.5,
+          "bottom": 563.375,
+          "visible": true
+        },
+        "workspace": {
+          "x": 52.5,
+          "y": 129.796875,
+          "width": 1800,
+          "height": 1034.703125,
+          "right": 1852.5,
+          "bottom": 1164.5,
+          "visible": true
+        },
+        "primary": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "right": 0,
+          "bottom": 0,
+          "visible": false
+        },
+        "negotiation": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "right": 0,
+          "bottom": 0,
+          "visible": false
+        },
+        "composer": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "right": 0,
+          "bottom": 0,
+          "visible": false
+        },
+        "trace": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "right": 0,
+          "bottom": 0,
+          "visible": false
+        }
+      },
+      {
+        "label": "long-selected",
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "zoom": "1",
+        "documentHeight": 3541,
+        "overflow": false,
+        "dossier": {
+          "x": 268.5,
+          "y": 127.796875,
+          "width": 1088,
+          "height": 3351.078125,
+          "right": 1356.5,
+          "bottom": 3478.875,
+          "visible": true
+        },
+        "workspace": {
+          "x": 52.5,
+          "y": 127.796875,
+          "width": 1800,
+          "height": 3351.078125,
+          "right": 1852.5,
+          "bottom": 3478.875,
+          "visible": true
+        },
+        "primary": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "right": 0,
+          "bottom": 0,
+          "visible": false
+        },
+        "negotiation": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "right": 0,
+          "bottom": 0,
+          "visible": false
+        },
+        "composer": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "right": 0,
+          "bottom": 0,
+          "visible": false
+        },
+        "trace": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "right": 0,
+          "bottom": 0,
+          "visible": false
+        }
+      },
+      {
+        "label": "communication-1440-900-1",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "zoom": "1",
+        "documentHeight": 3541,
+        "overflow": false,
+        "dossier": {
+          "x": 236,
+          "y": -1665.203125,
+          "width": 673,
+          "height": 3351.078125,
+          "right": 909,
+          "bottom": 1685.875,
+          "visible": true
+        },
+        "workspace": {
+          "x": 20,
+          "y": -1665.203125,
+          "width": 1385,
+          "height": 3351.078125,
+          "right": 1405,
+          "bottom": 1685.875,
+          "visible": true
+        },
+        "primary": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "right": 0,
+          "bottom": 0,
+          "visible": false
+        },
+        "negotiation": {
+          "x": 926,
+          "y": 17,
+          "width": 478,
+          "height": 764.390625,
+          "right": 1404,
+          "bottom": 781.390625,
+          "visible": true
+        },
+        "composer": {
+          "x": 926,
+          "y": 327.546875,
+          "width": 478,
+          "height": 453.84375,
+          "right": 1404,
+          "bottom": 781.390625,
+          "visible": true
+        },
+        "trace": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "right": 0,
+          "bottom": 0,
+          "visible": false
+        }
+      },
+      {
+        "label": "communication-1280-560-1",
+        "viewport": {
+          "width": 1280,
+          "height": 560
+        },
+        "zoom": "1",
+        "documentHeight": 5000,
+        "overflow": false,
+        "dossier": {
+          "x": 236,
+          "y": -1855.203125,
+          "width": 513,
+          "height": 4809.828125,
+          "right": 749,
+          "bottom": 2954.625,
+          "visible": true
+        },
+        "workspace": {
+          "x": 20,
+          "y": -1855.203125,
+          "width": 1225,
+          "height": 4809.828125,
+          "right": 1245,
+          "bottom": 2954.625,
+          "visible": true
+        },
+        "primary": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "right": 0,
+          "bottom": 0,
+          "visible": false
+        },
+        "negotiation": {
+          "x": 766,
+          "y": -1854.203125,
+          "width": 478,
+          "height": 764.390625,
+          "right": 1244,
+          "bottom": -1089.8125,
+          "visible": true
+        },
+        "composer": {
+          "x": 766,
+          "y": -1543.65625,
+          "width": 478,
+          "height": 453.84375,
+          "right": 1244,
+          "bottom": -1089.8125,
+          "visible": true
+        },
+        "trace": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "right": 0,
+          "bottom": 0,
+          "visible": false
+        }
+      },
+      {
+        "label": "communication-1440-900-1.25",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "zoom": "1.25",
+        "documentHeight": 6470,
+        "overflow": false,
+        "dossier": {
+          "x": 25,
+          "y": -91.75,
+          "width": 677.5,
+          "height": 6012.0625,
+          "right": 702.5,
+          "bottom": 5920.3125,
+          "visible": true
+        },
+        "workspace": {
+          "x": 25,
+          "y": -311.75,
+          "width": 1375,
+          "height": 6232.0625,
+          "right": 1400,
+          "bottom": 5920.3125,
+          "visible": true
+        },
+        "primary": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "right": 0,
+          "bottom": 0,
+          "visible": false
+        },
+        "negotiation": {
+          "x": 723.5,
+          "y": 21,
+          "width": 675.5,
+          "height": 895.875,
+          "right": 1399,
+          "bottom": 916.875,
+          "visible": true
+        },
+        "composer": {
+          "x": 723.5,
+          "y": 380.5,
+          "width": 675.5,
+          "height": 536.375,
+          "right": 1399,
+          "bottom": 916.875,
+          "visible": true
+        },
+        "trace": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "right": 0,
+          "bottom": 0,
+          "visible": false
+        }
+      },
+      {
+        "label": "communication-1440-900-1.5",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "zoom": "1.5",
+        "documentHeight": 7761,
+        "overflow": false,
+        "dossier": {
+          "x": 30,
+          "y": -194.3125,
+          "width": 670.5,
+          "height": 7211.921875,
+          "right": 700.5,
+          "bottom": 7017.609375,
+          "visible": true
+        },
+        "workspace": {
+          "x": 30,
+          "y": -458.3125,
+          "width": 1365,
+          "height": 7475.921875,
+          "right": 1395,
+          "bottom": 7017.609375,
+          "visible": true
+        },
+        "primary": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "right": 0,
+          "bottom": 0,
+          "visible": false
+        },
+        "negotiation": {
+          "x": 725.5,
+          "y": -193.3125,
+          "width": 668.5,
+          "height": 1139.65625,
+          "right": 1394,
+          "bottom": 946.34375,
+          "visible": true
+        },
+        "composer": {
+          "x": 725.5,
+          "y": 269.046875,
+          "width": 668.5,
+          "height": 677.296875,
+          "right": 1394,
+          "bottom": 946.34375,
+          "visible": true
+        },
+        "trace": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "right": 0,
+          "bottom": 0,
+          "visible": false
+        }
+      },
+      {
+        "label": "communication-1440-900-2",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "zoom": "2",
+        "documentHeight": 9027,
+        "overflow": false,
+        "dossier": {
+          "x": 40,
+          "y": -327.40625,
+          "width": 1345,
+          "height": 6703.765625,
+          "right": 1385,
+          "bottom": 6376.359375,
+          "visible": true
+        },
+        "workspace": {
+          "x": 40,
+          "y": -679.40625,
+          "width": 1345,
+          "height": 8646.265625,
+          "right": 1385,
+          "bottom": 7966.859375,
+          "visible": true
+        },
+        "primary": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "right": 0,
+          "bottom": 0,
+          "visible": false
+        },
+        "negotiation": {
+          "x": 42,
+          "y": 6410.359375,
+          "width": 1341,
+          "height": 1438.90625,
+          "right": 1383,
+          "bottom": 7849.265625,
+          "visible": true
+        },
+        "composer": {
+          "x": 42,
+          "y": 6988.3125,
+          "width": 1341,
+          "height": 860.953125,
+          "right": 1383,
+          "bottom": 7849.265625,
+          "visible": true
+        },
+        "trace": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "right": 0,
+          "bottom": 0,
+          "visible": false
+        }
+      },
+      {
+        "label": "communication-390-844-1",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "zoom": "1",
+        "documentHeight": 6053,
+        "overflow": false,
+        "dossier": {
+          "x": 12,
+          "y": -4903.203125,
+          "width": 366,
+          "height": 4814.328125,
+          "right": 378,
+          "bottom": -88.875,
+          "visible": true
+        },
+        "workspace": {
+          "x": 12,
+          "y": -5079.203125,
+          "width": 366,
+          "height": 5830.515625,
+          "right": 378,
+          "bottom": 751.3125,
+          "visible": true
+        },
+        "primary": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "right": 0,
+          "bottom": 0,
+          "visible": false
+        },
+        "negotiation": {
+          "x": 13,
+          "y": -71.875,
+          "width": 364,
+          "height": 764.390625,
+          "right": 377,
+          "bottom": 692.515625,
+          "visible": true
+        },
+        "composer": {
+          "x": 13,
+          "y": 238.671875,
+          "width": 364,
+          "height": 453.84375,
+          "right": 377,
+          "bottom": 692.515625,
+          "visible": true
+        },
+        "trace": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "right": 0,
+          "bottom": 0,
+          "visible": false
+        }
+      }
+    ],
+    "screenshots": [
+      {
+        "filename": "01-input.png",
+        "fullPage": false
+      },
+      {
+        "filename": "02-input-wide.png",
+        "fullPage": false
+      },
+      {
+        "filename": "02a-analysis-wait.png",
+        "fullPage": false
+      },
+      {
+        "filename": "03-short.png",
+        "fullPage": false
+      },
+      {
+        "filename": "04-evidence.png",
+        "fullPage": false
+      },
+      {
+        "filename": "05-long-selected.png",
+        "fullPage": false
+      },
+      {
+        "filename": "06-result.png",
+        "fullPage": false
+      },
+      {
+        "filename": "communication-1440-900-1.png",
+        "fullPage": false
+      },
+      {
+        "filename": "communication-1280-560-1.png",
+        "fullPage": false
+      },
+      {
+        "filename": "communication-1440-900-1.25.png",
+        "fullPage": false
+      },
+      {
+        "filename": "communication-1440-900-1.5.png",
+        "fullPage": false
+      },
+      {
+        "filename": "communication-1440-900-2.png",
+        "fullPage": false
+      },
+      {
+        "filename": "communication-390-844-1.png",
+        "fullPage": false
+      },
+      {
+        "filename": "13-draft.png",
+        "fullPage": false
+      },
+      {
+        "filename": "14-reference-retained.png",
+        "fullPage": false
+      }
+    ]
+  }
+}

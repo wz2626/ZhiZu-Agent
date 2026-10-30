@@ -6,7 +6,6 @@ legal semantic support. User demands never become landlord agreements.
 
 from collections.abc import Callable
 from copy import deepcopy
-import json
 import re
 from typing import Literal
 
@@ -91,9 +90,26 @@ def rule_score_node(state: NegotiationState) -> dict:
     return {"candidate_score": score}
 
 
+def _contains_sensitive_numbers(values: list) -> bool:
+    # Inspect decoded JSON leaves and keys. Serializing first escapes tabs,
+    # concealing phone separators that the shared masker explicitly supports.
+    pending = list(values)
+    while pending:
+        value = pending.pop()
+        if isinstance(value, dict):
+            pending.extend(value.keys())
+            pending.extend(value.values())
+        elif isinstance(value, list):
+            pending.extend(value)
+        elif isinstance(value, (str, int, float)):
+            text = str(value)
+            if redact_pii(text) != text:
+                return True
+    return False
+
+
 def _check_candidate(state: NegotiationState) -> str:
-    public_text = json.dumps([state.landlord_response, state.coach_advice, state.candidate_terms], ensure_ascii=False)
-    if redact_pii(public_text) != public_text:
+    if _contains_sensitive_numbers([state.landlord_response, state.coach_advice, state.candidate_terms]):
         return "候选回复或条件含未脱敏信息。"
     try:
         terms = _TERMS_ADAPTER.validate_python(state.candidate_terms, strict=True)

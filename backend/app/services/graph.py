@@ -116,7 +116,7 @@ def validate_response(content: str, text: str, evidence_ids: set[str]) -> list[R
             raise ReviewValidationError("duplicate clause ID")
         if item.original_clause not in text:
             raise ReviewValidationError("original clause is not a substring of the masked contract")
-        for value in (item.original_clause, item.explanation, item.negotiation_tip):
+        for value in (item.clause_id, item.original_clause, item.explanation, item.negotiation_tip):
             if mask_sensitive_text(value) != value:
                 raise ReviewValidationError("review output contains unmasked sensitive numbers")
         if item.risk_level == RiskLevel.HIGH and not item.evidence_ids:

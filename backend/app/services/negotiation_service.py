@@ -11,11 +11,14 @@ from time import perf_counter
 from typing import Protocol
 from uuid import uuid4
 
-from backend.app.schemas.negotiation import MAX_ROUNDS, NegotiationState, NegotiationTraceEvent, normalize_scenario
+from backend.app.schemas.negotiation import (
+    MAX_ROUNDS, NegotiationState, NegotiationTraceEvent, NegotiationTurnEffect, normalize_scenario,
+)
 from backend.app.core.privacy import redact_pii
 from backend.app.services.negotiation_graph import negotiation_graph
 from backend.app.services.scoring import ScoringRule, scenario_scoring_rules
 from backend.app.services.negotiation_trace import GRAPH_FAILURE, public_feedback, trace_collector
+from backend.app.services.negotiation_effect import describe_turn
 from backend.app.schemas.knowledge import LawId
 from pydantic import TypeAdapter
 
@@ -28,11 +31,26 @@ class NegotiationConflict(ValueError):
     pass
 
 
+@dataclass(frozen=True)
+class NegotiationTurnResult:
+    """One request's frozen comparison and detached execution snapshot."""
+
+    state: NegotiationState
+    turn_effect: NegotiationTurnEffect
+
+    def detached(self, *, replayed: bool | None = None) -> "NegotiationTurnResult":
+        updates = {} if replayed is None else {"replayed": replayed}
+        return NegotiationTurnResult(
+            self.state.model_copy(deep=True, update=updates),
+            self.turn_effect.model_copy(deep=True),
+        )
+
+
 @dataclass
 class _Session:
     state: NegotiationState
     lock: object = field(default_factory=Lock)
-    requests: dict[str, tuple[str, NegotiationState]] = field(default_factory=dict)
+    requests: dict[str, tuple[str, NegotiationTurnResult]] = field(default_factory=dict)
 
 
 class NegotiationService:
@@ -75,7 +93,16 @@ class NegotiationService:
         self, session_id: str, user_input: str, *, request_id: str | None = None,
         scenario: str | None = None,
     ) -> NegotiationState:
-        """Run at most one committed round; reuse request_id for safe retries."""
+        """Preserve the existing Python snapshot interface."""
+        return self.negotiate_with_effect(
+            session_id, user_input, request_id=request_id, scenario=scenario,
+        ).state
+
+    def negotiate_with_effect(
+        self, session_id: str, user_input: str, *, request_id: str | None = None,
+        scenario: str | None = None,
+    ) -> NegotiationTurnResult:
+        """Commit at most one turn and cache its original comparison atomically."""
         if not isinstance(user_input, str) or not user_input.strip():
             raise ValueError("user_input must contain text")
         user_input = redact_pii(user_input)
@@ -88,13 +115,15 @@ class NegotiationService:
                 previous_input, response = session.requests[request_id]
                 if previous_input != user_input:
                     raise NegotiationConflict("request_id already used for different input")
-                return response.model_copy(deep=True, update={"replayed": self._public_api})
+                return response.detached(replayed=self._public_api)
             if session.state.round_count >= MAX_ROUNDS:
+                effect = describe_turn(session.state, session.state, round_limit=True)
                 if self._public_api:
                     result = session.state.model_copy(deep=True, update={"request_id": request_id, "trace": [], "replayed": False})
-                    session.requests[request_id] = (user_input, result.model_copy(deep=True))
-                    return result
-                return session.state.model_copy(deep=True)
+                    response = NegotiationTurnResult(result, effect)
+                    session.requests[request_id] = (user_input, response.detached())
+                    return response.detached()
+                return NegotiationTurnResult(session.state.model_copy(deep=True), effect)
 
             # The graph receives no mutable references to the canonical session.
             working = session.state.model_copy(deep=True)
@@ -112,6 +141,7 @@ class NegotiationService:
             working.trace = []
             working.replayed = False
             collected: list[NegotiationTraceEvent] = []
+            effect = None
             token = trace_collector.set(collected)
             started = perf_counter()
             try:
@@ -120,6 +150,7 @@ class NegotiationService:
                     raise ValueError("graph returned a different session_id or scenario")
                 if result.status in {"success", "completed"} and result.round_count != session.state.round_count + 1:
                     raise ValueError("graph must commit exactly one round")
+                effect = describe_turn(session.state, result)
             except Exception:
                 if not self._public_api:
                     raise
@@ -146,7 +177,12 @@ class NegotiationService:
                     "errors": public_feedback(result.errors),
                 })
             if result.status in {"success", "completed"}:
+                # Comparison was made against the execution's original baseline,
+                # before this replacement and while holding the same lock.
                 session.state = result.model_copy(deep=True)
+            if effect is None:
+                effect = describe_turn(session.state, result)
+            response = NegotiationTurnResult(result, effect)
             if self._public_api or result.status in {"success", "completed"}:
-                session.requests[request_id] = (user_input, result.model_copy(deep=True))
-            return result.model_copy(deep=True)
+                session.requests[request_id] = (user_input, response.detached())
+            return response.detached()

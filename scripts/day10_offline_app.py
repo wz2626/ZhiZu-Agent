@@ -49,7 +49,7 @@ socket.getaddrinfo = local_dns
 
 import httpx
 import uvicorn
-from backend.app.api.review import get_review_service
+from backend.app.api.review import get_review_service, get_proposal_service
 from backend.app.api.negotiation import get_negotiation_service
 from backend.app.core.config import get_settings
 from backend.app.core.privacy import redact_pii
@@ -57,6 +57,7 @@ from backend.app.main import app
 from backend.app.services.negotiation_graph import build_negotiation_graph, scenario_landlord_responder
 from backend.app.services.negotiation_service import NegotiationService
 from backend.app.services.review import ContractReviewService
+from backend.app.services.proposal import ProposalService
 from backend.app.services.vector_store import LawVectorStoreService, load_authoritative_laws
 
 
@@ -107,6 +108,29 @@ def review_dependency():
 
 
 mode = {"value": "normal"}
+proposal_calls = 0
+
+
+class ProposalChatDouble:
+    """Explicit expression fixture; production proposal validation still runs."""
+
+    def invoke(self, messages):
+        global proposal_calls
+        proposal_calls += 1
+        payload = json.loads(messages[1].content)
+        assert redact_pii(payload["goal_text"]) == payload["goal_text"]
+        sleep(0.08)
+        if mode["value"] == "proposal_invalid":
+            return SimpleNamespace(content='{"proposed_message":"13800000000","evidence_ids":[],"questions":[]}')
+        if mode["value"] == "proposal_timeout":
+            raise TimeoutError("synthetic private timeout")
+        ids = list(payload["evidence_by_id"])
+        prefix = "依据" + "、".join(ids) + "，" if ids else ""
+        return SimpleNamespace(content=json.dumps({
+            "proposed_message": prefix + "合成反提案：请核对相关凭证，明确责任、具体金额和处理日期。",
+            "evidence_ids": ids,
+            "questions": ["请补充费用凭证与交接记录。"],
+        }, ensure_ascii=False))
 
 
 def test_responder(state):
@@ -120,18 +144,19 @@ def test_responder(state):
 app.dependency_overrides[get_review_service] = review_dependency
 practice = NegotiationService(build_negotiation_graph(landlord_responder=test_responder), public_api=True)
 app.dependency_overrides[get_negotiation_service] = lambda: practice
+app.dependency_overrides[get_proposal_service] = lambda: ProposalService(llm=ProposalChatDouble())
 
 
 @app.middleware("http")
 async def test_wait(request, call_next):
-    if request.method == "POST" and request.url.path in {"/api/negotiation/turn", "/api/review/analyze-detailed"}:
+    if request.method == "POST" and request.url.path in {"/api/negotiation/turn", "/api/review/analyze-detailed", "/api/review/proposal"}:
         await asyncio.sleep(1.25)  # Explicit latency injection to test waiting UI.
     return await call_next(request)
 
 
 @app.post("/_test/mode", include_in_schema=False)
 def set_mode(body: dict):
-    assert body["value"] in {"normal", "critic_failure", "node_exception"}
+    assert body["value"] in {"normal", "critic_failure", "node_exception", "proposal_invalid", "proposal_timeout"}
     mode["value"] = body["value"]
     return {"ok": True}
 
@@ -140,7 +165,9 @@ def set_mode(body: dict):
 def diagnostics():
     return {"blocked_external_calls": blocked_external_calls, "real_cloud_calls": 0,
             "review": "explicit_chat_and_retrieval_doubles_with_real_graph",
-            "negotiation": "real_graph_fixed_offline_policy"}
+            "negotiation": "real_graph_fixed_offline_policy",
+            "proposal": "explicit_chat_double_with_real_service_validation_and_cache",
+            "proposal_model_calls": proposal_calls}
 
 
 if __name__ == "__main__":

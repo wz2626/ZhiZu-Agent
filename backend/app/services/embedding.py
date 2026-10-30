@@ -58,7 +58,13 @@ class SiliconFlowEmbeddings(Embeddings):
             )
             response.raise_for_status()
             payload = response.json()
-            indexed = sorted(payload["data"], key=lambda item: item["index"])
+            entries = payload["data"]
+            if not isinstance(entries, list) or any(
+                not isinstance(item, dict) or type(item.get("index")) is not int
+                for item in entries
+            ):
+                raise ValueError("embedding response indices must be integers")
+            indexed = sorted(entries, key=lambda item: item["index"])
             raw_vectors = [item["embedding"] for item in indexed]
         except (httpx.HTTPError, KeyError, TypeError, ValueError, IndexError, AttributeError):
             raise RuntimeError("embedding service request failed; check endpoint, model and credentials") from None
@@ -66,6 +72,10 @@ class SiliconFlowEmbeddings(Embeddings):
             raise ValueError(
                 f"embedding response count mismatch: expected {len(texts)}, got {len(raw_vectors)}"
             )
+        # Sorting alone accepts duplicate/shifted indices and can silently bind
+        # a vector to the wrong input article during ingestion or retrieval.
+        if [item["index"] for item in indexed] != list(range(len(texts))):
+            raise ValueError("embedding response indices must uniquely cover input positions")
         vectors = []
         for vector_index, raw_vector in enumerate(raw_vectors):
             if not isinstance(raw_vector, list):

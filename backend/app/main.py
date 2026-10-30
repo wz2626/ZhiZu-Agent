@@ -28,9 +28,18 @@ app.include_router(negotiation_router)
 
 
 @app.exception_handler(RequestValidationError)
-async def safe_negotiation_validation(request, exc):
-    if request.url.path == "/api/negotiation/turn":
-        return JSONResponse(status_code=422, content={"detail": "谈判请求格式无效，请检查字段、长度与标识。"})
+async def safe_request_validation(request, exc):
+    if request.url.path in {"/api/negotiation/turn", "/api/review/proposal"}:
+        label = "草稿" if request.url.path == "/api/review/proposal" else "谈判"
+        return JSONResponse(status_code=422, content={"detail": f"{label}请求格式无效，请检查字段、长度与标识。"})
+    if request.url.path in {"/api/review/analyze", "/api/review/analyze-detailed", "/api/kb/search"}:
+        # Preserve field/type diagnostics without echoing raw contracts, search
+        # text, or validator exception payloads before the masking boundary.
+        errors = [{
+            "type": error["type"], "loc": error["loc"],
+            "msg": "请求字段格式无效，请检查类型、长度与取值范围。",
+        } for error in exc.errors()]
+        return JSONResponse(status_code=422, content={"detail": errors})
     return await request_validation_exception_handler(request, exc)
 
 

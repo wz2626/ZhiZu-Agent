@@ -59,6 +59,55 @@ class NegotiationMessage(BaseModel):
     content: str = Field(min_length=1, strict=True)
 
 
+class NegotiationTermChange(BaseModel):
+    """A factual change between two committed snapshots, never a stance."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    term: str = Field(min_length=1, strict=True)
+    change_type: Literal["added", "updated"]
+    before: JsonValue
+    after: JsonValue
+    direction: Literal["improved", "worsened", "adjusted"]
+
+    @model_validator(mode="after")
+    def validate_added_term(self):
+        if self.change_type == "added" and (self.before is not None or self.direction != "adjusted"):
+            raise ValueError("new confirmations have no previous value or inferred direction")
+        return self
+
+
+class NegotiationTurnEffect(BaseModel):
+    """Request-scoped comparison; excluded from the graph and score inputs."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    kind: Literal[
+        "first_confirmation", "improved", "worsened", "adjusted", "unchanged",
+        "not_committed", "round_limit",
+    ]
+    score_before: int | None = Field(ge=0, le=100, strict=True)
+    score_after: int | None = Field(ge=0, le=100, strict=True)
+    score_delta: int | None = Field(ge=-100, le=100, strict=True)
+    changes: list[NegotiationTermChange] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def validate_comparison(self):
+        if len({change.term for change in self.changes}) != len(self.changes):
+            raise ValueError("term changes must be unique")
+        if self.kind in {"not_committed", "round_limit"}:
+            if self.changes or self.score_delta is not None or self.score_before != self.score_after:
+                raise ValueError("uncommitted requests have no changes or score delta")
+        else:
+            expected = (self.score_after - self.score_before
+                        if self.score_before is not None and self.score_after is not None else None)
+            if self.score_delta != expected:
+                raise ValueError("score delta must compare the recorded official scores")
+        if self.kind == "unchanged" and self.changes:
+            raise ValueError("unchanged outcomes cannot contain term changes")
+        return self
+
+
 class NegotiationState(BaseModel):
     model_config = ConfigDict(extra="forbid", validate_assignment=True)
 
@@ -134,6 +183,7 @@ class NegotiationResponse(BaseModel):
     trace: list[NegotiationTraceEvent]
     unresolved_requests: list[str]
     missing_facts: list[str]
+    turn_effect: NegotiationTurnEffect
     replayed: bool = False
 
     @model_validator(mode="after")

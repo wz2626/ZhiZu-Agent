@@ -14,8 +14,9 @@ from backend.app.core.config import Settings, get_settings, has_real_key
 from backend.app.schemas.knowledge import EvidenceItem
 from backend.app.schemas.review import (
     ReviewClauseResult, ReviewDetailedResponse, ReviewFailureCode, ReviewRequest,
-    ReviewResponse, ReviewTraceEvent, RiskLevel,
+    ReviewResponse, ReviewTraceEvent, ReviewEvidence, RiskLevel,
 )
+from backend.app.services.review_context import ReviewContextStore, review_context_store
 from backend.app.services.graph import review_graph
 from backend.app.services.review_input_guard import classify_review_input
 from backend.app.services.review_trace import FAILURE_MESSAGES, append_trace, public_feedback
@@ -38,8 +39,10 @@ class ContractReviewService:
         settings: Settings | None = None,
         *,
         defer_chat_init: bool = False,
+        context_store: ReviewContextStore | None = None,
     ) -> None:
         self.settings = settings if settings is not None else get_settings()
+        self.context_store = context_store if context_store is not None else review_context_store
         self.vector_store = vector_store
         self.llm = llm
         self.mock_mode = not has_real_key(self.settings.chat_api_key)
@@ -210,10 +213,22 @@ class ContractReviewService:
             }, context={"llm": self.llm, "trace": trace})
             if state["status"] == "success":
                 results = state["final_results"]
+                cited = {law_id for item in results for law_id in item.evidence_ids}
+                retrieved = {item.evidence_id for item in evidence}
+                evidence_by_id = {
+                    law.law_id: ReviewEvidence(
+                        article_no=law.article_no, law_name=law.law_name, content=law.content,
+                        source_url=law.source_url, verified_date=law.verified_date,
+                    )
+                    for law in load_authoritative_laws()
+                    if law.law_id in cited and law.law_id in retrieved
+                }
+                context_id = self.context_store.create(safe_text, results, evidence_by_id)
                 return ReviewDetailedResponse(
                     status="success", results=results,
                     total_risks=sum(item.risk_level != RiskLevel.NONE for item in results),
                     retry_count=state["retry_count"], trace=trace,
+                    evidence_by_id=evidence_by_id, review_context_id=context_id,
                 )
             code = state.get("failure_code") or ReviewFailureCode.VALIDATION_FAILED
             return self._detailed_failure(code, trace, errors=state["errors"],

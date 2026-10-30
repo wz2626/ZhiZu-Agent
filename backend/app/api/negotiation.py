@@ -34,12 +34,13 @@ def negotiate_turn(
 ) -> NegotiationResponse:
     # Defense in depth: direct service users receive the same masking guard.
     try:
-        state = service.negotiate(
+        result = service.negotiate_with_effect(
             request.session_id, redact_pii(request.user_input), request_id=request.request_id,
             scenario=request.scenario,
         )
     except NegotiationConflict:
         raise HTTPException(status_code=409, detail="会话场景或请求编号冲突，请开始新会话或使用新请求编号。") from None
+    state = result.state
     failed = state.status == "needs_review"
     return NegotiationResponse(
         session_id=state.session_id, request_id=request.request_id, scenario=state.scenario,
@@ -50,5 +51,5 @@ def negotiate_turn(
         landlord_response="" if failed else state.landlord_response,
         retry_count=state.retry_count, errors=public_feedback(state.errors), trace=state.trace,
         unresolved_requests=["本轮未提交，需人工复核后重新协商。"] if failed else ["返还或付款日期、交接安排仍需明确确认。"],
-        missing_facts=_FACTS[state.scenario], replayed=state.replayed,
+        missing_facts=_FACTS[state.scenario], turn_effect=result.turn_effect, replayed=state.replayed,
     )

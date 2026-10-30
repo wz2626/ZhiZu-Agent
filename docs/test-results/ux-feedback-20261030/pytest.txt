@@ -1,0 +1,40 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.13, pytest-8.4.2, pluggy-1.6.0
+cachedir: .runtime\ux-repair\cache-full
+rootdir: D:\AgentDev\ZhiZu-Agent
+configfile: pytest.ini
+plugins: anyio-4.15.1, langsmith-0.14.4
+collected 769 items
+
+tests\test_api_privacy_audit.py ...........                              [  1%]
+tests\test_eval_20.py .................................................. [  7%]
+............................................................             [ 15%]
+tests\test_frontend_static.py .....                                      [ 16%]
+tests\test_health.py ..................                                  [ 18%]
+tests\test_kb_api.py ........................................            [ 23%]
+tests\test_kb_ingestion.py ............................................. [ 29%]
+.......                                                                  [ 30%]
+tests\test_negotiation.py .............................................. [ 36%]
+..............                                                           [ 38%]
+tests\test_negotiation_api.py .......................................... [ 43%]
+..........................................                               [ 49%]
+tests\test_negotiation_audit.py .....                                    [ 50%]
+tests\test_negotiation_effect.py ..................................      [ 54%]
+tests\test_proposal.py ..........................................        [ 59%]
+tests\test_proposal_audit.py ......                                      [ 60%]
+tests\test_review.py ................................................... [ 67%]
+.................................................................        [ 75%]
+tests\test_review_audit.py ............                                  [ 77%]
+tests\test_review_detailed.py .........................................  [ 82%]
+tests\test_review_evidence.py .......                                    [ 83%]
+tests\test_review_input_guard.py ....................................... [ 88%]
+......................................                                   [ 93%]
+tests\test_scoring.py .................................................  [100%]
+
+============================== warnings summary ===============================
+.venv\Lib\site-packages\langgraph\cache\base\__init__.py:8
+  D:\AgentDev\ZhiZu-Agent\.venv\Lib\site-packages\langgraph\cache\base\__init__.py:8: LangChainPendingDeprecationWarning: The default value of `allowed_objects` will change in a future version. Pass an explicit value (e.g., allowed_objects='messages' or allowed_objects='core') to suppress this warning.
+    from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 769 passed, 1 warning in 31.33s =======================

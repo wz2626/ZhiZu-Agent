@@ -1,9 +1,10 @@
 """Legacy and detailed contract-review response contracts."""
 
 from enum import Enum
+from datetime import date
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, StringConstraints, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, StringConstraints, field_validator, model_validator
 
 from backend.app.schemas.knowledge import LawId
 
@@ -87,6 +88,18 @@ class ReviewTraceEvent(BaseModel):
     feedback: list[str] = Field(default_factory=list)
 
 
+class ReviewEvidence(BaseModel):
+    """Server-populated authoritative text, never part of the model draft."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    article_no: str = Field(min_length=1, strict=True)
+    law_name: str = Field(min_length=1, strict=True)
+    content: str = Field(min_length=1, strict=True)
+    source_url: HttpUrl
+    verified_date: date
+
+
 class ReviewDetailedResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -99,6 +112,8 @@ class ReviewDetailedResponse(BaseModel):
     retry_count: int = Field(default=0, ge=0, le=2, strict=True)
     trace_label: Literal["本次执行回放"] = "本次执行回放"
     trace: list[ReviewTraceEvent] = Field(default_factory=list)
+    evidence_by_id: dict[LawId, ReviewEvidence] = Field(default_factory=dict)
+    review_context_id: str | None = None
 
     @model_validator(mode="after")
     def validate_outcome(self) -> "ReviewDetailedResponse":
@@ -110,6 +125,11 @@ class ReviewDetailedResponse(BaseModel):
                 raise ValueError("successful review requires findings and no terminal errors")
         elif self.results or not self.failure_code or not self.reason or not self.errors:
             raise ValueError("failed review requires a reason and errors, without findings")
+        if self.status != "success" and (self.evidence_by_id or self.review_context_id is not None):
+            raise ValueError("failed review cannot expose evidence or a draft context")
+        cited = {law_id for item in self.results for law_id in item.evidence_ids}
+        if not set(self.evidence_by_id).issubset(cited):
+            raise ValueError("evidence must belong to the accepted findings")
         if [event.sequence for event in self.trace] != list(range(1, len(self.trace) + 1)):
             raise ValueError("trace sequence must be continuous from one")
         return self
