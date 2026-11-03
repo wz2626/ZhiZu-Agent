@@ -139,6 +139,8 @@ def test_acquired_context_finishes_after_expiry_but_cannot_start_another_request
         finally:
             release.set()
         assert pending.result(timeout=5).status == "success"
+    # Accepted receipt recovery outlives the input context; new operations do not.
+    assert service.generate(request(context_id)).replayed
     with pytest.raises(ReviewContextMissing):
-        service.generate(request(context_id))
+        service.generate(request(context_id).model_copy(update={"draft_request_id": "new-operation"}))
     assert len(model.calls) == 1

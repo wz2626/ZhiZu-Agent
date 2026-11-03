@@ -141,28 +141,33 @@ async function reachable(selector) {
   async function analyze(text){await click('#edit-contract');await fill('contract-input',text);await click('#analyze-contract');await until('document.getElementById("submitted-document").textContent==='+JSON.stringify(text)+' && document.querySelectorAll("#risk-navigation [data-clause]").length>0','analysis');}
   await fill('contract-input',shortContract);await click('#analyze-contract');
   await until('!!document.querySelector(".analysis-wait")','waiting decoration mounted');
-  assert.ok(await cdp.evaluate('document.querySelector(".skeleton-bar").getAnimations().some(a=>a.playState==="running")'));
+  const waitingMotion=await cdp.evaluate('(()=>{const e=document.querySelector(".skeleton-bar"),style=getComputedStyle(e,"::after");return {name:style.animationName,iterations:style.animationIterationCount,beaconIterations:getComputedStyle(document.querySelector(".wait-beacon")).animationIterationCount,running:e.getAnimations({subtree:true}).some(a=>a.playState==="running"),motion:document.getElementById("app").classList.contains("motion-ready")}})()');
+  assert.equal(waitingMotion.name,'wait-sweep',JSON.stringify(waitingMotion));assert.ok(waitingMotion.running,JSON.stringify(waitingMotion));
+  assert.equal(waitingMotion.iterations,'infinite','Long cloud waits must not exhaust a fixed number of sweeps');
+  assert.equal(waitingMotion.beaconIterations,'infinite','The waiting beacon remains active until completion');
   assert.equal(await cdp.evaluate('getComputedStyle(document.querySelector(".dossier-body"),"::after").pointerEvents'),'none');
   await shot('02a-analysis-wait');
   await cdp.send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});
   assert.equal(await cdp.evaluate('getComputedStyle(document.querySelector(".skeleton-bar")).animationName'),'none');
+  assert.equal(await cdp.evaluate('getComputedStyle(document.querySelector(".skeleton-bar"),"::after").animationName'),'none');
   await cdp.send('Emulation.setEmulatedMedia',{features:[]});
   await until('!document.querySelector(".analysis-wait") && document.querySelectorAll("#risk-navigation [data-clause]").length>0','waiting ends');
   pass('Real waiting state runs decorative animation; reduced motion stops it; completion removes it without blocking text');
   await click('[data-clause="C-01"]');await geometry('short');await shot('03-short');
   await click('#task-panel .task-explanation details:last-child > summary');await shot('04-evidence');
+  await click('#advice-summary');await shot('04a-advice-and-evidence');await click('#advice-summary');
   await analyze(longContract);await click('[data-clause="C-02"]');await geometry('long-selected');await shot('05-long-selected');
   assert.ok(await cdp.evaluate('(()=>{const r=document.getElementById("prepare-communication").getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight})()'),'Long-contract selection keeps its contextual action in view');
   assert.equal(await cdp.evaluate('document.getElementById("submitted-document").textContent'),longContract);
   pass('Short and long contracts retain exact full text with stable navigation and contextual evidence');
-  await click('#prepare-communication');await fill('scenario-select','maintenance','change');await fill('negotiation-draft','请核对维修费用并明确责任。');await click('#message-privacy-confirm');await click('#send-negotiation');await until('document.getElementById("round-count").dataset.round==="1"','round');await shot('06-result');
-  await cdp.evaluate('[...document.querySelectorAll(".task-tabs button")].find(b=>b.textContent==="写沟通消息").click()');
+  await click('#prepare-communication');await fill('scenario-select','maintenance','change');await fill('negotiation-draft','请核对维修费用并明确责任。');await click('#send-negotiation');await until('document.getElementById("round-count").dataset.round==="1"','round');await shot('06-result');
+  await cdp.evaluate('[...document.querySelectorAll(".task-tabs button")].find(b=>b.textContent==="准备沟通消息").click()');
   for(const [w,h,z] of [[1440,900,1],[1280,560,1],[1440,900,1.25],[1440,900,1.5],[1440,900,2],[390,844,1]]){
     await viewport(w,h,w===390);await cdp.evaluate('document.body.style.zoom='+JSON.stringify(String(z)));await geometry('communication-'+w+'-'+h+'-'+z);await reachable('#send-negotiation');await shot('communication-'+w+'-'+h+'-'+z);
   }
   pass('Send remains accessible without overlapping fixed surfaces at all six viewport/reflow sizes');
   await viewport(1440,900);await cdp.evaluate('document.body.style.zoom="1"');useRealReview=true;
-  await analyze(shortContract);await click('[data-clause="C-02"]');await click('#prepare-communication');await fill('scenario-select','maintenance','change');await click('#proposal-tool > summary');await fill('proposal-goal','希望明确维修责任、费用凭证和完成时间。');await click('#proposal-privacy-confirm');await click('#generate-proposal');await until('!!document.getElementById("proposed-message")','real proposal');await reachable('#generate-proposal');await shot('13-draft');
+  await analyze(shortContract);await click('[data-clause="C-02"]');await click('#prepare-communication');await fill('scenario-select','maintenance','change');await click('#proposal-tool > summary');await fill('proposal-goal','希望明确维修责任、费用凭证和完成时间。');await click('#generate-proposal');await until('!!document.getElementById("proposed-message")','real proposal');await reachable('#generate-proposal');await shot('13-draft');
   await click('#supplement-goal');assert.equal(await cdp.evaluate('document.activeElement.id'),'proposal-goal');
   const reference=await cdp.evaluate('document.getElementById("proposed-message").textContent');
   await fill('proposal-goal','希望补充处理日期。');

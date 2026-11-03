@@ -31,7 +31,7 @@ def test_cloud_dimension_mismatch_is_clear_and_secret_safe(monkeypatch, actual_d
         def json(self):
             return {"data": [{"index": 0, "embedding": [0.1] * actual_dimension}]}
 
-    monkeypatch.setattr("backend.app.services.embedding.httpx.post", lambda *args, **kwargs: FakeResponse())
+    monkeypatch.setattr("backend.app.services.embedding.post_embeddings", lambda *args, **kwargs: FakeResponse())
     embeddings = SiliconFlowEmbeddings(
         base_url="https://example.invalid/v1", model="BAAI/bge-m3", api_key=secret,
     )

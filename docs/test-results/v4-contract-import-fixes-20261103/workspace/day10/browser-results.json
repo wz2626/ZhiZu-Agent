@@ -1,0 +1,773 @@
+{
+  "passed": 103,
+  "failed": 0,
+  "skipped": 0,
+  "cases": [
+    {
+      "id": 1,
+      "label": "Stable workspace and one mounted Composer",
+      "status": "passed"
+    },
+    {
+      "id": 2,
+      "label": "App shell: empty input stays within the viewport at desktop, tablet, phone, short height and 200% reflow; mobile panes share one mounted Composer",
+      "status": "passed"
+    },
+    {
+      "id": 3,
+      "label": "Editor focus: trusted mouse click uses only the rounded outer surface feedback; no inner rectangle or layout shift",
+      "status": "passed"
+    },
+    {
+      "id": 4,
+      "label": "Editor placeholder: prompt is smaller, lighter and never input data; native typing and clearing preserve the empty state",
+      "status": "passed"
+    },
+    {
+      "id": 5,
+      "label": "Editor focus: native Tab navigation retains a clear full-editor indicator; forced-color mode also has an outline",
+      "status": "passed"
+    },
+    {
+      "id": 6,
+      "label": "Editor focus: touch uses the same soft outer feedback, keeps 16px input and does not break the fixed App Shell",
+      "status": "passed"
+    },
+    {
+      "id": 7,
+      "label": "Light theme initial input: 34 rendered text samples meet contrast thresholds; minimum 4.65:1",
+      "status": "passed"
+    },
+    {
+      "id": 8,
+      "label": "Submit-time new masking requires a second explicit confirmation of the displayed replacement",
+      "status": "passed"
+    },
+    {
+      "id": 9,
+      "label": "Local masking occurs in the original editor, without upload or second preview",
+      "status": "passed"
+    },
+    {
+      "id": 10,
+      "label": "One explicit consent action submits exactly the displayed sanitized text; duplicate blocked; HTML remains text",
+      "status": "passed"
+    },
+    {
+      "id": 11,
+      "label": "Risk selection preserves full source and mounted Composer",
+      "status": "passed"
+    },
+    {
+      "id": 12,
+      "label": "Explicit clause recommends its fixed direction before writing; recommendation does not generate or submit a message",
+      "status": "passed"
+    },
+    {
+      "id": 13,
+      "label": "Standalone keeps an explicit direction choice; first selection preserves message and enables available service",
+      "status": "passed"
+    },
+    {
+      "id": 14,
+      "label": "A/B drafts are record-local; rebinding is not an edit",
+      "status": "passed"
+    },
+    {
+      "id": 15,
+      "label": "IME composition defers navigation until the real composition end event",
+      "status": "passed"
+    },
+    {
+      "id": 16,
+      "label": "Keyboard: IME and repeated shortcuts do not submit; checkbox-free Composer and accessibility references survive",
+      "status": "passed"
+    },
+    {
+      "id": 17,
+      "label": "Final message and goal masking update the visible snapshot and upload nothing until explicitly reconfirmed",
+      "status": "passed"
+    },
+    {
+      "id": 18,
+      "label": "Draft wait is a single timed status; legal references use verified law titles with accessible full text",
+      "status": "passed"
+    },
+    {
+      "id": 19,
+      "label": "Editing the goal retains prior draft and questions, marks them stale and requires no checkbox",
+      "status": "passed"
+    },
+    {
+      "id": 20,
+      "label": "Explicit old-draft adoption confirms replacement and never sends or consumes a round",
+      "status": "passed"
+    },
+    {
+      "id": 21,
+      "label": "Rejected draft generation retains old reference and never exposes unvalidated PII",
+      "status": "passed"
+    },
+    {
+      "id": 22,
+      "label": "In-flight A response commits to A while B stays untouched; duplicate click submits once",
+      "status": "passed"
+    },
+    {
+      "id": 23,
+      "label": "Polish: real 1000→1500 improvement alone is struck through; five chips follow official rounds and numeric columns remain tabular",
+      "status": "passed"
+    },
+    {
+      "id": 24,
+      "label": "Polish: trusted desktop press moves exactly 1px without reflow; release, reduced-motion and touch are static",
+      "status": "passed"
+    },
+    {
+      "id": 25,
+      "label": "Critic failure preserves official round, score and terms",
+      "status": "passed"
+    },
+    {
+      "id": 26,
+      "label": "Light theme unknown recovery: 75 rendered text samples meet contrast thresholds; minimum 4.65:1",
+      "status": "passed"
+    },
+    {
+      "id": 27,
+      "label": "Unknown dirty shows the old snapshot in a separate recovery control; same-ID replay preserves new input",
+      "status": "passed"
+    },
+    {
+      "id": 28,
+      "label": "Five successful rounds disable sixth submission",
+      "status": "passed"
+    },
+    {
+      "id": 29,
+      "label": "Independent scenario scores and per-session exports never merge conditions",
+      "status": "passed"
+    },
+    {
+      "id": 30,
+      "label": "Standalone practice has its own session and decreasing-fee improvement uses real rule output",
+      "status": "passed"
+    },
+    {
+      "id": 31,
+      "label": "New local analysis version isolates reused clause IDs and preserves concurrent edits",
+      "status": "passed"
+    },
+    {
+      "id": 32,
+      "label": "Returning to a previous analysis restores its own completed practice",
+      "status": "passed"
+    },
+    {
+      "id": 33,
+      "label": "Owner-local Trace renders actual node sequences, bounded attempts and nonnegative measured durations",
+      "status": "passed"
+    },
+    {
+      "id": 34,
+      "label": "Late clipboard denial retains the frozen original-session payload without focus theft or cross-session export",
+      "status": "passed"
+    },
+    {
+      "id": 35,
+      "label": "Changing target invalidates its in-flight generation without deleting its accepted reference",
+      "status": "passed"
+    },
+    {
+      "id": 36,
+      "label": "Lost drafting response uses same independent request ID and preserves formal practice state",
+      "status": "passed"
+    },
+    {
+      "id": 37,
+      "label": "Explicit drafting quota rejection explains recovery and clears unusable retry metadata",
+      "status": "passed"
+    },
+    {
+      "id": 38,
+      "label": "Contradictory turn-effect metadata is rejected; canonical replay commits once",
+      "status": "passed"
+    },
+    {
+      "id": 39,
+      "label": "Malformed Trace is not fabricated or substituted, independently of valid official results",
+      "status": "passed"
+    },
+    {
+      "id": 40,
+      "label": "Older review response cannot overwrite a newer submitted version",
+      "status": "passed"
+    },
+    {
+      "id": 41,
+      "label": "An explicit fresh practice uses a new session while the prior standalone practice stays selectable and unchanged",
+      "status": "passed"
+    },
+    {
+      "id": 42,
+      "label": "1440px: combined/single/both limits explain the disabled action in-view, preserve text and block requests; exact 2000-character boundary enables the single action",
+      "status": "passed"
+    },
+    {
+      "id": 43,
+      "label": "390px: combined/single/both limits explain the disabled action in-view, preserve text and block requests; exact 2000-character boundary enables the single action",
+      "status": "passed"
+    },
+    {
+      "id": 44,
+      "label": "900-character goal plus three 200-character answers generates; changed questions retain old answer IDs exactly once",
+      "status": "passed"
+    },
+    {
+      "id": 45,
+      "label": "Persistent privacy and separate condition/draft cloud labels remain available after first use",
+      "status": "passed"
+    },
+    {
+      "id": 46,
+      "label": "Negotiation in flight permits independent drafting and preserves the next edited message",
+      "status": "passed"
+    },
+    {
+      "id": 47,
+      "label": "Unknown permits read-only service recheck; IME blocks recovery; explicit archive carries input without sending and late replay stays with old session",
+      "status": "passed"
+    },
+    {
+      "id": 48,
+      "label": "Formal numeric terms require scenario field/type/range validation before rendering or committing",
+      "status": "passed"
+    },
+    {
+      "id": 49,
+      "label": "Expired operation preserves goal/answers and regenerates under a new ID without requiring a new analysis",
+      "status": "passed"
+    },
+    {
+      "id": 50,
+      "label": "Real practice instance reset preserves old snapshot/epoch and starts a new practice without page refresh",
+      "status": "passed"
+    },
+    {
+      "id": 51,
+      "label": "REQUEST_CONFLICT retains the live practice and input; next explicit action uses a new request ID",
+      "status": "passed"
+    },
+    {
+      "id": 52,
+      "label": "INTERACTION_VERSION requests a service/protocol recheck without invalidating the practice",
+      "status": "passed"
+    },
+    {
+      "id": 53,
+      "label": "A pristine practice created before restart binds the current instance on first dispatch",
+      "status": "passed"
+    },
+    {
+      "id": 54,
+      "label": "428 uses the active policy version, reveals safe content and requires a second explicit action",
+      "status": "passed"
+    },
+    {
+      "id": 55,
+      "label": "Compatible policy version/data upgrade is consumed in-page; new masking is visible before any POST",
+      "status": "passed"
+    },
+    {
+      "id": 56,
+      "label": "An incompatible privacy engine blocks transmission with upgrade guidance and preserves the input",
+      "status": "passed"
+    },
+    {
+      "id": 57,
+      "label": "1440 desktop, 200% reflow, mobile and short viewport: one scroll reaches uncovered send button; Composer identity retained",
+      "status": "passed"
+    },
+    {
+      "id": 58,
+      "label": "Visual: risk totals exclude NONE and the complete source remains exact",
+      "status": "passed"
+    },
+    {
+      "id": 59,
+      "label": "Risk filter: grade toggles filter only the list; a repeated click or total restores all items including NONE; counts stay global",
+      "status": "passed"
+    },
+    {
+      "id": 60,
+      "label": "Risk filter: zero-count choices provide an explicit reset; native keyboard activation works on filter buttons",
+      "status": "passed"
+    },
+    {
+      "id": 61,
+      "label": "Risk filter: excluding the selected clause preserves source, explanation, input and round; restoring all retains the selection",
+      "status": "passed"
+    },
+    {
+      "id": 62,
+      "label": "Risk filter: mobile filtering stays in the risk pane with no viewport overflow, data loss or HTTP POST",
+      "status": "passed"
+    },
+    {
+      "id": 63,
+      "label": "Visual: rapid next-match navigation scrolls/highlights only the final occurrence; source click never recenters",
+      "status": "passed"
+    },
+    {
+      "id": 64,
+      "label": "Visual: switching analysis versions cancels queued old-match scrolling and emphasis",
+      "status": "passed"
+    },
+    {
+      "id": 65,
+      "label": "Visual: consecutive accepted drafts restart the 260ms pulse; text is complete, adoption cancels it and consumes no round",
+      "status": "passed"
+    },
+    {
+      "id": 66,
+      "label": "Visual: background completion, history return and replay display full drafts without replaying arrival effects",
+      "status": "passed"
+    },
+    {
+      "id": 67,
+      "label": "Visual: long drafts avoid blur/character nodes; reduced motion presents complete clear text immediately",
+      "status": "passed"
+    },
+    {
+      "id": 68,
+      "label": "Visual: Escape and window blur cancel decoration without losing text or replaying it on focus",
+      "status": "passed"
+    },
+    {
+      "id": 69,
+      "label": "Visual: keyboard double focus ring and every control or its editor frame retain skin, including manual facts, all selects and copy fallback",
+      "status": "passed"
+    },
+    {
+      "id": 70,
+      "label": "Feedback: communication receives a visible acknowledgement and never starts hidden card/persona effects",
+      "status": "passed"
+    },
+    {
+      "id": 71,
+      "label": "Feedback: a turn sent from communication and received on the result pane animates only the visible card/persona",
+      "status": "passed"
+    },
+    {
+      "id": 72,
+      "label": "Feedback: changing panes after acknowledgement never replays the old success cue",
+      "status": "passed"
+    },
+    {
+      "id": 73,
+      "label": "Feedback: real background completion stays with its owner and does not replay on history return",
+      "status": "passed"
+    },
+    {
+      "id": 74,
+      "label": "Feedback: dropped real response recovers by identical request and headers; canonical replay advances once without success effects",
+      "status": "passed"
+    },
+    {
+      "id": 75,
+      "label": "Feedback: real Critic rejection preserves formal state and produces no completion cue",
+      "status": "passed"
+    },
+    {
+      "id": 76,
+      "label": "Light theme result, copy fallback and trace: 91 rendered text samples meet contrast thresholds; minimum 4.65:1",
+      "status": "passed"
+    },
+    {
+      "id": 77,
+      "label": "App shell: real wheel and keyboard scrolling are isolated to the contract; task, risk, header and footer positions stay unchanged",
+      "status": "passed"
+    },
+    {
+      "id": 78,
+      "label": "App shell: processing details use a bounded nonmodal drawer, Escape restores focus, and the footer never moves",
+      "status": "passed"
+    },
+    {
+      "id": 79,
+      "label": "App shell: mobile pane switching preserves task scroll position, input text and Composer identity without a page scrollbar",
+      "status": "passed"
+    },
+    {
+      "id": 80,
+      "label": "Communication directions: five real choices; fees/other preserve separate messages, copy fallback is usable, no fake score or turn POST, fixed practice remains intact",
+      "status": "passed"
+    },
+    {
+      "id": 81,
+      "label": "Review activation: first success, repeated current-task clicks and mobile pane changes all activate the completed version without an empty selector",
+      "status": "passed"
+    },
+    {
+      "id": 82,
+      "label": "Review background completion: actual task/draft stays intact, a visible ready action and meaningful placeholder appear, explicit activation preserves the other task",
+      "status": "passed"
+    },
+    {
+      "id": 83,
+      "label": "Review explicit history choice: selecting even the already displayed older version prevents auto-switch; the new result remains explicitly available",
+      "status": "passed"
+    },
+    {
+      "id": 84,
+      "label": "Supplement groups: newest questions first; retained answers collapse into exact editable summaries; IDs and all text survive update without duplicate labels",
+      "status": "passed"
+    },
+    {
+      "id": 85,
+      "label": "Supplement groups: composing blocks editor collapse; hidden single/combined over-limit answers auto-expand with nearby reasons; clause switching preserves the original answers",
+      "status": "passed"
+    },
+    {
+      "id": 86,
+      "label": "Review failure displays a shared reason once, preserves distinct advice and input, and never fabricates successful results",
+      "status": "passed"
+    },
+    {
+      "id": 87,
+      "label": "Proposal failure also deduplicates public reasons without losing distinct guidance or the edited goal",
+      "status": "passed"
+    },
+    {
+      "id": 88,
+      "label": "Expression style: one action follows all inputs; switching style sends nothing, preserves facts/answers/message/budget, marks the old draft stale and uses a new style-bound request; retained-only questions still allow updating",
+      "status": "passed"
+    },
+    {
+      "id": 89,
+      "label": "Expression style: unknown retries retain the identical style/body/ID; style changes invalidate slow old responses without automatic requests, IME blocks changes, final messages and formal rounds stay intact",
+      "status": "passed"
+    },
+    {
+      "id": 90,
+      "label": "Expression style: clause-local preferences survive navigation; zero-question results retain a single action and budget, desktop/mobile controls remain in-bounds and the same Composer stays mounted",
+      "status": "passed"
+    },
+    {
+      "id": 91,
+      "label": "Assistant layout: goal and ID-bound answers share one collapsible tool, draft stays independent, SVG label and shortcut link remain available; message grows within bounds and explicitly names simulated recipient",
+      "status": "passed"
+    },
+    {
+      "id": 92,
+      "label": "Proposal copy: professional task label, persistent editable-goal hint, phase-specific supplement guidance and a single compact budget; over-limit reasons and update remain functional",
+      "status": "passed"
+    },
+    {
+      "id": 93,
+      "label": "Results: unselected scene cannot export; reason is associated with the button; empty results lead to the visible message editor",
+      "status": "passed"
+    },
+    {
+      "id": 94,
+      "label": "Results: failure details open and focus the correct visible pane without resubmitting or modifying formal values",
+      "status": "passed"
+    },
+    {
+      "id": 95,
+      "label": "Results: unknown status replaces the old failure badge; recovery reveals the old snapshot and preserves new input with one canonical commit",
+      "status": "passed"
+    },
+    {
+      "id": 96,
+      "label": "Results: both checklist fields finish injected IME composition on the original owner, defer scenario switching and block partial export",
+      "status": "passed"
+    },
+    {
+      "id": 97,
+      "label": "Results: a selected scene may still export an honest zero-round preparation checklist",
+      "status": "passed"
+    },
+    {
+      "id": 98,
+      "label": "Results: multiline user messages and Markdown headings/fences stay quoted and attributed; official conditions remain independent",
+      "status": "passed"
+    },
+    {
+      "id": 99,
+      "label": "Results: desktop and phone layouts retain usable checklist controls without horizontal overflow",
+      "status": "passed"
+    },
+    {
+      "id": 100,
+      "label": "Result clarity: a single existing result tab preserves goal/message with zero turn calls, no redundant shortcut, and explicit fixed-refund scope",
+      "status": "passed"
+    },
+    {
+      "id": 101,
+      "label": "Result clarity: one response contains official terms; first round has no fake round-zero history; scoring is secondary and explains the preset target while the personal goal stays intact",
+      "status": "passed"
+    },
+    {
+      "id": 102,
+      "label": "Result clarity: copied checklist separates the actual 1000 refund from the requested 1500 deposit and 3-day deadline, retaining manual follow-ups without extra requests",
+      "status": "passed"
+    },
+    {
+      "id": 103,
+      "label": "Result clarity: goals and checklist additions stay clause-local; real five-round progression, final-offer notice and desktop/phone access remain correct",
+      "status": "passed"
+    }
+  ],
+  "external": 0,
+  "proposalReadiness": [
+    {
+      "width": 1440,
+      "height": 900,
+      "scenario": "total",
+      "button": {
+        "top": 482.0625,
+        "bottom": 518.0625,
+        "left": 1005,
+        "right": 1123
+      },
+      "reason": {
+        "top": 532.0625,
+        "bottom": 554.25,
+        "left": 1005,
+        "right": 1393
+      },
+      "pane": {
+        "top": 132.640625,
+        "bottom": 867.40625,
+        "left": 984,
+        "right": 1424
+      },
+      "oldBudget": {
+        "top": 0,
+        "bottom": 0,
+        "left": 0,
+        "right": 0
+      },
+      "scrollWidth": 1440,
+      "text": "合计 2200 / 2000 字合计 2200 / 2000 字，请删减 200 字后更新。已有内容完整保留。"
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "scenario": "single",
+      "button": {
+        "top": 482.0625,
+        "bottom": 518.0625,
+        "left": 1005,
+        "right": 1123
+      },
+      "reason": {
+        "top": 532.0625,
+        "bottom": 576.4375,
+        "left": 1005,
+        "right": 1393
+      },
+      "pane": {
+        "top": 132.640625,
+        "bottom": 867.40625,
+        "left": 984,
+        "right": 1424
+      },
+      "oldBudget": {
+        "top": 0,
+        "bottom": 0,
+        "left": 0,
+        "right": 0
+      },
+      "scrollWidth": 1440,
+      "text": "合计 1400 / 2000 字本次补充中第 1 项回答为 1100 / 1000 字，请删减 100 字。已有内容完整保留。"
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "scenario": "both",
+      "button": {
+        "top": 482.0625,
+        "bottom": 518.0625,
+        "left": 1005,
+        "right": 1123
+      },
+      "reason": {
+        "top": 532.0625,
+        "bottom": 576.4375,
+        "left": 1005,
+        "right": 1393
+      },
+      "pane": {
+        "top": 132.640625,
+        "bottom": 867.40625,
+        "left": 984,
+        "right": 1424
+      },
+      "oldBudget": {
+        "top": 0,
+        "bottom": 0,
+        "left": 0,
+        "right": 0
+      },
+      "scrollWidth": 1440,
+      "text": "合计 2300 / 2000 字合计 2300 / 2000 字，请删减 300 字后更新；本次补充中第 1 项回答为 1200 / 1000 字，请删减 200 字。已有内容完整保留。"
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "scenario": "at-limit",
+      "button": {
+        "top": 482.0625,
+        "bottom": 518.0625,
+        "left": 1005,
+        "right": 1123
+      },
+      "reason": {
+        "top": 488.96875,
+        "bottom": 511.15625,
+        "left": 1287.421875,
+        "right": 1393
+      },
+      "pane": {
+        "top": 132.640625,
+        "bottom": 867.40625,
+        "left": 984,
+        "right": 1424
+      },
+      "oldBudget": {
+        "top": 491.96875,
+        "bottom": 507.96875,
+        "left": 1287.421875,
+        "right": 1393
+      },
+      "scrollWidth": 1440,
+      "text": "合计 2000 / 2000 字"
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "scenario": "total",
+      "button": {
+        "top": 485.734375,
+        "bottom": 521.734375,
+        "left": 37,
+        "right": 155
+      },
+      "reason": {
+        "top": 535.734375,
+        "bottom": 580.109375,
+        "left": 37,
+        "right": 353
+      },
+      "pane": {
+        "top": 210.9375,
+        "bottom": 797,
+        "left": 16,
+        "right": 374
+      },
+      "oldBudget": {
+        "top": 0,
+        "bottom": 0,
+        "left": 0,
+        "right": 0
+      },
+      "scrollWidth": 390,
+      "text": "合计 2200 / 2000 字合计 2200 / 2000 字，请删减 200 字后更新。已有内容完整保留。"
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "scenario": "single",
+      "button": {
+        "top": 485.734375,
+        "bottom": 521.734375,
+        "left": 37,
+        "right": 155
+      },
+      "reason": {
+        "top": 535.734375,
+        "bottom": 580.109375,
+        "left": 37,
+        "right": 353
+      },
+      "pane": {
+        "top": 210.9375,
+        "bottom": 797,
+        "left": 16,
+        "right": 374
+      },
+      "oldBudget": {
+        "top": 0,
+        "bottom": 0,
+        "left": 0,
+        "right": 0
+      },
+      "scrollWidth": 390,
+      "text": "合计 1400 / 2000 字本次补充中第 1 项回答为 1100 / 1000 字，请删减 100 字。已有内容完整保留。"
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "scenario": "both",
+      "button": {
+        "top": 485.734375,
+        "bottom": 521.734375,
+        "left": 37,
+        "right": 155
+      },
+      "reason": {
+        "top": 535.734375,
+        "bottom": 602.296875,
+        "left": 37,
+        "right": 353
+      },
+      "pane": {
+        "top": 210.9375,
+        "bottom": 797,
+        "left": 16,
+        "right": 374
+      },
+      "oldBudget": {
+        "top": 0,
+        "bottom": 0,
+        "left": 0,
+        "right": 0
+      },
+      "scrollWidth": 390,
+      "text": "合计 2300 / 2000 字合计 2300 / 2000 字，请删减 300 字后更新；本次补充中第 1 项回答为 1200 / 1000 字，请删减 200 字。已有内容完整保留。"
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "scenario": "at-limit",
+      "button": {
+        "top": 485.734375,
+        "bottom": 521.734375,
+        "left": 37,
+        "right": 155
+      },
+      "reason": {
+        "top": 492.640625,
+        "bottom": 514.828125,
+        "left": 247.421875,
+        "right": 353
+      },
+      "pane": {
+        "top": 210.9375,
+        "bottom": 797,
+        "left": 16,
+        "right": 374
+      },
+      "oldBudget": {
+        "top": 495.640625,
+        "bottom": 511.640625,
+        "left": 247.421875,
+        "right": 353
+      },
+      "scrollWidth": 390,
+      "text": "合计 2000 / 2000 字"
+    }
+  ]
+}

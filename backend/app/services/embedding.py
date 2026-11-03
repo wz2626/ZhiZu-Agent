@@ -8,6 +8,8 @@ import httpx
 from langchain_core.embeddings import Embeddings
 
 from backend.app.core.config import get_settings, has_real_key
+from backend.app.core.privacy import redact_pii
+from backend.app.services.model_gateway import check_deadline, remaining_timeout, post_embeddings
 
 DIMENSIONS = 1024
 _TOPICS = (
@@ -49,15 +51,19 @@ class SiliconFlowEmbeddings(Embeddings):
     def embed_documents(self, texts: list[str]) -> list[list[float]]:
         if not texts:
             return []
+        check_deadline()
+        if sum(len(text) for text in texts) > 48000 or any(redact_pii(text) != text for text in texts):
+            raise ValueError("unsafe or oversized embedding payload")
         try:
-            response = httpx.post(
+            response = post_embeddings(
                 f"{self.base_url}/embeddings",
                 headers={"Authorization": f"Bearer {self._api_key}"},
                 json={"model": self.model, "input": texts},
-                timeout=self.timeout,
+                timeout=remaining_timeout(self.timeout),
             )
             response.raise_for_status()
             payload = response.json()
+            check_deadline()
             entries = payload["data"]
             if not isinstance(entries, list) or any(
                 not isinstance(item, dict) or type(item.get("index")) is not int

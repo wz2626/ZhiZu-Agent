@@ -1,0 +1,62 @@
+{
+  "mode": "layout-only; saved real cloud response replayed through local HTTP fixture",
+  "checks": [
+    {
+      "label": "Desktop collapsed",
+      "after": true,
+      "below": true,
+      "right": 0,
+      "header": 0,
+      "overflow": false,
+      "clickable": true
+    },
+    {
+      "label": "Desktop expanded laws",
+      "after": true,
+      "below": true,
+      "right": 0,
+      "header": 0,
+      "overflow": false,
+      "clickable": true
+    },
+    {
+      "label": "compact",
+      "after": true,
+      "below": true,
+      "right": 0,
+      "header": 0,
+      "overflow": false,
+      "clickable": true
+    },
+    {
+      "label": "mobile",
+      "after": true,
+      "below": true,
+      "right": 0,
+      "header": 0,
+      "overflow": false,
+      "clickable": true
+    },
+    {
+      "label": "reflow",
+      "after": true,
+      "below": true,
+      "right": 0,
+      "header": 0,
+      "overflow": false,
+      "clickable": true
+    },
+    {
+      "label": "CTA enters selected clause task",
+      "selected": "C-03"
+    }
+  ],
+  "console": [],
+  "screenshots": [
+    "desktop-collapsed.png",
+    "desktop-expanded.png",
+    "compact.png",
+    "mobile.png",
+    "reflow.png"
+  ]
+}

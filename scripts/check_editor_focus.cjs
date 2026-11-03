@@ -1,0 +1,53 @@
+// Trusted pointer, keyboard and touch checks for the composite contract editor.
+module.exports=async function({cdp,pause,assert,pass,shot}){
+ const ev=s=>cdp.evaluate(s);
+ const state=()=>ev(`(()=>{const e=document.getElementById('contract-input'),p=e.closest('.contract-editor-surface'),s=getComputedStyle(e),a=getComputedStyle(p),h=getComputedStyle(e,'::placeholder'),r=p.getBoundingClientRect();return {active:document.activeElement.id,value:e.value,textSize:parseFloat(s.fontSize),textColor:s.color,placeholder:e.placeholder,placeholderSize:parseFloat(h.fontSize),placeholderColor:h.color,placeholderWeight:h.fontWeight,innerOutline:s.outlineStyle,outerOutline:a.outlineStyle,outerWidth:a.outlineWidth,shadow:a.boxShadow,rect:[r.x,r.y,r.width,r.height],keyboard:document.getElementById('app').classList.contains('keyboard-navigation')}})()`);
+ const point=()=>ev(`(()=>{const r=document.getElementById('contract-input').getBoundingClientRect();return {x:r.left+42,y:r.top+32}})()`);
+ await cdp.send('Page.bringToFront');
+ await ev('document.activeElement?.blur()');const idle=await state();
+ await shot('editor-idle');
+ const mouse=await point();
+ await cdp.send('Input.dispatchMouseEvent',{type:'mousePressed',...mouse,button:'left',clickCount:1});
+ await cdp.send('Input.dispatchMouseEvent',{type:'mouseReleased',...mouse,button:'left',clickCount:1});await pause(170);
+ const pointer=await state();
+ assert.equal(pointer.active,'contract-input');assert.equal(pointer.keyboard,false);
+ assert.equal(pointer.innerOutline,'none');assert.equal(pointer.outerOutline,'none');
+ assert.notEqual(pointer.shadow,'none');assert.deepEqual(pointer.rect,idle.rect);
+ await shot('editor-pointer-focus');
+ pass('Editor focus: trusted mouse click uses only the rounded outer surface feedback; no inner rectangle or layout shift');
+ assert.equal(pointer.value,'');assert.ok(pointer.placeholderSize<pointer.textSize);
+ assert.notEqual(pointer.placeholderColor,pointer.textColor);assert.equal(pointer.placeholderWeight,'400');
+ await cdp.send('Input.insertText',{text:'房屋租赁合同测试文本'});await pause(50);
+ assert.equal((await state()).value,'房屋租赁合同测试文本');
+ await shot('editor-entered-text');
+ await cdp.send('Input.dispatchKeyEvent',{type:'keyDown',key:'a',code:'KeyA',windowsVirtualKeyCode:65,modifiers:2});
+ await cdp.send('Input.dispatchKeyEvent',{type:'keyUp',key:'a',code:'KeyA',windowsVirtualKeyCode:65,modifiers:2});
+ await cdp.send('Input.dispatchKeyEvent',{type:'keyDown',key:'Backspace',code:'Backspace',windowsVirtualKeyCode:8});
+ await cdp.send('Input.dispatchKeyEvent',{type:'keyUp',key:'Backspace',code:'Backspace',windowsVirtualKeyCode:8});await pause(50);
+ assert.equal((await state()).value,'');
+ pass('Editor placeholder: prompt is smaller, lighter and never input data; native typing and clearing preserve the empty state');
+ await ev('document.getElementById("load-sample").focus({preventScroll:true})');
+ for(let i=0;i<6&&(await state()).active!=='contract-input';i++){
+  await cdp.send('Input.dispatchKeyEvent',{type:'keyDown',key:'Tab',code:'Tab',windowsVirtualKeyCode:9});
+  await cdp.send('Input.dispatchKeyEvent',{type:'keyUp',key:'Tab',code:'Tab',windowsVirtualKeyCode:9});await pause(30);
+ }
+ const keyboard=await state();assert.equal(keyboard.active,'contract-input');assert.equal(keyboard.keyboard,true);
+ assert.equal(keyboard.innerOutline,'none');assert.equal(keyboard.outerOutline,'solid');assert.equal(keyboard.outerWidth,'2px');
+ assert.deepEqual(keyboard.rect,idle.rect);await shot('editor-keyboard-focus');
+ await cdp.send('Emulation.setEmulatedMedia',{features:[{name:'forced-colors',value:'active'}]});
+ assert.equal((await state()).outerOutline,'solid');
+ await cdp.send('Emulation.setEmulatedMedia',{features:[]});
+ pass('Editor focus: native Tab navigation retains a clear full-editor indicator; forced-color mode also has an outline');
+ await cdp.send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
+ await cdp.send('Emulation.setTouchEmulationEnabled',{enabled:true,maxTouchPoints:1});await pause(80);
+ await ev('document.activeElement?.blur()');const touch=await point();
+ await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[touch]});
+ await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await pause(170);
+ const tapped=await state();assert.equal(tapped.active,'contract-input');assert.equal(tapped.keyboard,false);
+ assert.equal(tapped.innerOutline,'none');assert.equal(tapped.outerOutline,'none');
+ assert.equal(tapped.textSize,16,'Actual input stays 16px on mobile');await shot('editor-touch-focus');
+ assert.ok(await ev('document.documentElement.scrollHeight<=innerHeight+1'));
+ await cdp.send('Emulation.setDeviceMetricsOverride',{width:1440,height:900,deviceScaleFactor:1,mobile:false});
+ await cdp.send('Emulation.setTouchEmulationEnabled',{enabled:false});await ev('document.activeElement?.blur()');await pause(80);
+ pass('Editor focus: touch uses the same soft outer feedback, keeps 16px input and does not break the fixed App Shell');
+};

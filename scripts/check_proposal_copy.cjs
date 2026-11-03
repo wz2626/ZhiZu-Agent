@@ -1,0 +1,74 @@
+module.exports=async({cdp,click,fill,until,pause,assert,pass,shot})=>{
+ const ev=e=>cdp.evaluate(e);
+ await cdp.send('Page.reload',{ignoreCache:true});await pause(180);await until('!!window.__zhizuLayoutDiagnostics?.length','workspace');
+ await fill('contract-input','房屋租赁合同。租赁结束后可不说明理由直接扣留全部押金。\n维修责任和费用均由租客承担。\n提前退租须支付固定违约金2000元。');
+ await click('#analyze-contract');await until('document.querySelectorAll("#risk-items [data-clause]").length===3','analysis');await click('[data-clause="C-02"]');await click('#prepare-communication');await click('#proposal-tool>summary');
+ assert.equal(await ev('document.querySelector("[aria-label=沟通任务] button").textContent'),'准备沟通消息');
+ assert.ok(await ev('document.querySelector(".proposal-goal-heading").textContent.includes("可随时补充或修改")'));
+ assert.ok(!await ev('document.getElementById("proposal-tool").textContent.includes("无需重复")'));
+ assert.equal(await ev('document.querySelector("#proposal-tool>summary .assistant-title").textContent.trim()'),'表达助手');
+ assert.equal(await ev('document.querySelectorAll("#proposal-tool>summary svg[aria-hidden=true]").length'),1);
+ assert.ok(await ev('document.querySelector(".assistant-intro").textContent.includes("可修改的沟通草稿")'));
+ await fill('proposal-goal','希望及时退还押金');
+ for(const width of [1440,390]){
+  await cdp.send('Emulation.setDeviceMetricsOverride',{width,height:width===390?844:900,deviceScaleFactor:1,mobile:width===390});
+  await ev('document.getElementById("generate-proposal").scrollIntoView({block:"center",behavior:"instant"})');
+  const size=await ev('(()=>{const b=document.getElementById("generate-proposal").getBoundingClientRect(),r=document.getElementById("proposal-generate-readiness").getBoundingClientRect();return {b:{top:b.top,bottom:b.bottom},r:{top:r.top,bottom:r.bottom},width:innerWidth,scroll:document.documentElement.scrollWidth}})()');
+  assert.ok(size.r.top<size.b.bottom&&size.r.bottom>size.b.top,JSON.stringify(size));assert.ok(size.scroll<=size.width+2);
+  assert.equal(await ev('[...document.querySelectorAll(".proposal-budget-count")].filter(e=>e.getClientRects().length).length'),1);
+  assert.ok(!await ev('document.getElementById("proposal-generate-readiness").textContent.includes("可生成或更新")'));
+  await shot('goal-compact-'+width,false);
+ }
+ await click('#generate-proposal');await until('document.querySelectorAll("#current-answers textarea").length===3','questions');
+ assert.ok(await ev('document.getElementById("proposal-answers").textContent.includes("也可以直接使用当前版本")'));
+ assert.equal(await ev('document.getElementById("proposal-answers").closest("#proposal-tool")!==null'),true);
+ assert.equal(await ev('document.getElementById("generate-proposal").textContent'),'检查并更新参考稿');
+ assert.equal(await ev('document.querySelectorAll("#proposal-status").length'),0);
+ assert.ok(await ev('document.querySelector(".proposal-ready").textContent.includes("参考稿已就绪")'));
+ const supplement=await ev('(()=>{const e=document.getElementById("proposal-answers"),s=getComputedStyle(e),a=document.querySelector("#current-answers .answer-field");return {background:s.backgroundColor,left:s.borderLeftWidth,top:s.borderTopWidth,height:a.offsetHeight,title:document.getElementById("supplement-heading").textContent,privacy:e.querySelectorAll(".privacy-hint").length}})()');
+ assert.equal(supplement.background,'rgba(0, 0, 0, 0)');assert.equal(supplement.left,'0px');assert.equal(supplement.top,'1px');assert.ok(supplement.height<100,JSON.stringify(supplement));assert.ok(supplement.title.includes('选填 · 3 项'));assert.equal(supplement.privacy,0);
+ await ev('document.getElementById("supplement-heading").scrollIntoView({block:"start",behavior:"instant"})');await shot('optional-supplements-390',false);
+ const answerId=await ev('document.querySelector("#current-answers textarea").id');
+ const compactHeight=await ev('document.getElementById('+JSON.stringify(answerId)+').offsetHeight');
+ await fill(answerId,Array(18).fill('已准备交接记录。').join('\n'));
+ const expanded=await ev('(()=>{const e=document.getElementById('+JSON.stringify(answerId)+');return {height:e.offsetHeight,max:parseFloat(getComputedStyle(e).maxHeight),value:e.value}})()');
+ assert.ok(expanded.height>compactHeight&&expanded.height<=expanded.max+1,JSON.stringify(expanded));
+ assert.equal(expanded.value,Array(18).fill('已准备交接记录。').join('\n'));
+ await fill(answerId,'');assert.equal(await ev('document.getElementById('+JSON.stringify(answerId)+').offsetHeight'),compactHeight);
+
+ assert.equal(await ev('document.querySelectorAll("#proposal-preview textarea,#proposal-preview #proposal-answers").length'),0);
+ await click('#proposal-tool>summary');
+ assert.equal(await ev('document.getElementById("proposal-tool").open'),false);
+ assert.ok(await ev('document.getElementById("proposed-message").getClientRects().length>0'));
+ assert.equal(await ev('document.querySelector(".assistant-question-count").textContent.trim()'),'3 项可补充');
+ await ev('document.getElementById("proposal-preview").scrollIntoView({block:"start",behavior:"instant"})');await shot('separate-draft-390',false);
+ await click('#proposal-tool>summary');
+ assert.equal(await ev('[...document.querySelectorAll(".proposal-budget-count")].filter(e=>e.getClientRects().length).length'),1);
+ assert.equal(await ev('document.getElementById("proposal-budget").closest("#proposal-generate-readiness")!==null'),true);
+ await cdp.send('Emulation.setDeviceMetricsOverride',{width:1440,height:900,deviceScaleFactor:1,mobile:false});
+ await ev('document.getElementById("supplement-heading").scrollIntoView({block:"start",behavior:"instant"})');await shot('optional-supplements-1440',false);
+ await cdp.send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
+ await ev('document.getElementById("generate-proposal").scrollIntoView({block:"center",behavior:"instant"})');await shot('supplements-compact-390',false);
+ await fill('proposal-goal','目'.repeat(2100));
+ assert.equal(await ev('document.getElementById("generate-proposal").disabled'),true);
+ assert.ok(await ev('document.getElementById("proposal-generate-readiness").textContent.includes("请删减 100 字")'));
+ await fill('proposal-goal','希望及时退还押金');await click('#generate-proposal');await until('!document.getElementById("generate-proposal").disabled','updated');
+ await click('#proposal-tool>summary');
+ await click('#fill-proposal');
+ const original=await ev('document.getElementById("negotiation-draft").value');
+ assert.ok(original.length>20);
+ for(const width of [1440,390]){
+  await cdp.send('Emulation.setDeviceMetricsOverride',{width,height:width===390?844:900,deviceScaleFactor:1,mobile:width===390});await pause(100);
+  await fill('negotiation-draft','请核对押金扣减与退还安排。');
+  const base=await ev('document.getElementById("negotiation-draft").getBoundingClientRect().height');assert.ok(base>=168);
+  await fill('negotiation-draft',Array(24).fill('请列明扣减项目、凭证和退还时间。').join('\n'));
+  const size=await ev('(()=>{const e=document.getElementById("negotiation-draft");return {height:e.offsetHeight,max:parseFloat(getComputedStyle(e).maxHeight),scroll:e.scrollHeight,client:e.clientHeight}})()');
+  assert.ok(size.height>base&&size.height<=size.max+1,JSON.stringify(size));assert.ok(size.scroll>size.client);
+  assert.ok(await ev('document.getElementById("send-negotiation").textContent.includes("检查并发送给模拟房东")'));
+  await ev('document.getElementById("send-negotiation").scrollIntoView({block:"end",behavior:"instant"})');await shot('message-editor-'+width,false);
+  assert.ok(await ev('document.documentElement.scrollWidth<=innerWidth+2'));
+ }
+ await fill('negotiation-draft',original);
+ pass('Assistant layout: goal and ID-bound answers share one collapsible tool, draft stays independent, SVG label and shortcut link remain available; message grows within bounds and explicitly names simulated recipient');
+ pass('Proposal copy: professional task label, persistent editable-goal hint, phase-specific supplement guidance and a single compact budget; over-limit reasons and update remain functional');
+};

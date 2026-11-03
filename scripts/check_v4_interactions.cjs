@@ -1,0 +1,66 @@
+// Real local HTTP/graph, explicit offline LLM fixture; no cloud calls.
+module.exports=async function({cdp,click,fill,until,pause,assert,requests,pass,shot}){
+ const ev=e=>cdp.evaluate(e);
+ await click('[data-clause="C-02"]');await click('#prepare-communication');await fill('scenario-select','maintenance','change');
+ if(!await ev('document.getElementById("proposal-tool").open'))await click('#proposal-tool > summary');
+ await fill('proposal-goal','目'.repeat(900));await click('#generate-proposal');
+ await until('document.querySelectorAll("#proposal-answers textarea").length>=3','three structured questions');
+ const ids=await ev('[...document.querySelectorAll("#proposal-answers textarea")].map(e=>e.id).slice(-3)');
+ for(const id of ids)await fill(id,'答'.repeat(200));
+ assert.ok(await ev('document.getElementById("proposal-budget").textContent.includes("1500 / 2000")'));
+ assert.equal(await ev('document.getElementById("generate-proposal").disabled'),false);
+ await require('./check_proposal_readiness.cjs')({cdp,click,fill,pause,assert,requests,pass,ids,shot});
+ await click('#generate-proposal');
+ await until('!document.getElementById("generate-proposal").disabled && document.querySelectorAll("#proposal-answers textarea").length>=6','updated draft retains prior answers');
+ const request=requests.filter(r=>r.path==='/api/review/proposal').at(-1);
+ assert.equal(request.goal_text.length,900);assert.equal(request.answers.length,3);
+ assert.deepEqual(request.answers.map(a=>'answer-'+a.question_id),ids);
+ for(const id of ids)assert.equal(await ev(`document.getElementById(${JSON.stringify(id)}).value`),'答'.repeat(200));
+ assert.equal(await ev('new Set([...document.querySelectorAll("#proposal-answers textarea")].map(e=>e.id)).size'),await ev('document.querySelectorAll("#proposal-answers textarea").length'));
+ pass('900-character goal plus three 200-character answers generates; changed questions retain old answer IDs exactly once');
+ assert.ok(await ev('document.querySelectorAll(".privacy-hint").length>=2'));
+ assert.ok(await ev('document.getElementById("proposal-tool").textContent.includes("云端模型生成")'));
+ assert.ok(await ev('document.getElementById("condition-cloud-label").textContent.includes("不调用云端模型")'));
+ pass('Persistent privacy and separate condition/draft cloud labels remain available after first use');
+ await click('#new-practice');await fill('negotiation-draft','请确认维修责任。');await click('#send-negotiation');
+ assert.equal(await ev('document.getElementById("generate-proposal").disabled'),false);
+ await fill('negotiation-draft','发送后继续编辑的下一版');await pause(1700);
+ assert.equal(await ev('document.getElementById("negotiation-draft").value'),'发送后继续编辑的下一版');
+ pass('Negotiation in flight permits independent drafting and preserves the next edited message');
+ cdp.dropNext=true;await click('#send-negotiation');await until('!!document.getElementById("recover-negotiation")','unknown before archive');
+ await fill('negotiation-draft','封存时携带的新内容');
+ await click('#recheck-recovery-service');await until('!document.getElementById("recheck-recovery-service").disabled','read-only discovery during unknown');
+ assert.equal(await ev('document.getElementById("recover-negotiation").disabled'),false);
+ await ev('document.getElementById("negotiation-draft").dispatchEvent(new CompositionEvent("compositionstart",{bubbles:true}))');
+ assert.equal(await ev('document.getElementById("recover-negotiation").disabled'),true);
+ await ev('document.getElementById("negotiation-draft").dispatchEvent(new CompositionEvent("compositionend",{bubbles:true}))');await pause(40);
+ const oldKey=await ev('document.querySelector("[aria-label=查看练习记录]").value'),count=requests.length;
+ await click('#archive-practice');const newKey=await ev('document.querySelector("[aria-label=查看练习记录]").value');
+ assert.notEqual(oldKey,newKey);assert.equal(requests.length,count);
+ assert.equal(await ev('document.getElementById("round-count").dataset.round'),'0');
+ assert.equal(await ev('document.getElementById("negotiation-draft").value'),'封存时携带的新内容');
+ await ev(`(()=>{const e=document.querySelector('[aria-label=查看练习记录]');e.value=${JSON.stringify(oldKey)};e.dispatchEvent(new Event('change',{bubbles:true}))})()`);await pause(40);
+ await click('#recover-negotiation');await until('document.getElementById("round-count").dataset.round==="2"','archived request replay stays on old record');
+ await ev(`(()=>{const e=document.querySelector('[aria-label=查看练习记录]');e.value=${JSON.stringify(newKey)};e.dispatchEvent(new Event('change',{bubbles:true}))})()`);await pause(40);
+ assert.equal(await ev('document.getElementById("round-count").dataset.round'),'0');
+ assert.equal(await ev('document.getElementById("negotiation-draft").value'),'封存时携带的新内容');
+ pass('Unknown permits read-only service recheck; IME blocks recovery; explicit archive carries input without sending and late replay stays with old session');
+ cdp.invalidTermsNext=true;await click('#send-negotiation');await until('!!document.getElementById("recover-negotiation")','out-of-range formal terms rejected');
+ assert.equal(await ev('document.getElementById("round-count").dataset.round'),'0');
+ await click('#recover-negotiation');await until('document.getElementById("round-count").dataset.round==="1"','valid terms restored from canonical replay');
+ pass('Formal numeric terms require scenario field/type/range validation before rendering or committing');
+ // Explicit transport fixture: an expired operation does not expire its context.
+ const goalBefore=await ev('document.getElementById("proposal-goal").value');
+ await ev(`window.__expiryFetch=window.fetch;window.fetch=(url,options)=>{if(String(url)==='/api/review/proposal'){window.__expiredDraftId=JSON.parse(options.body).draft_request_id;return Promise.resolve(new Response(JSON.stringify({detail:{code:'OPERATION_EXPIRED',message:'synthetic deadline'}}),{status:410,headers:{'Content-Type':'application/json'}}));}return window.__expiryFetch(url,options);}`);
+ try{
+  await click('#generate-proposal');await until('document.getElementById("proposal-tool").textContent.includes("原操作已超过处理期限")','operation deadline has local regeneration guidance');
+  assert.equal(await ev('document.getElementById("generate-proposal").disabled'),false);
+  assert.equal(await ev('document.getElementById("proposal-goal").value'),goalBefore);
+ }finally{await ev('window.fetch=window.__expiryFetch;delete window.__expiryFetch');}
+ const expiredId=await ev('window.__expiredDraftId');await click('#generate-proposal');
+ await until('document.getElementById("proposal-tool").textContent.includes("参考稿已就绪") && !document.getElementById("generate-proposal").disabled','same valid context can generate again');
+ assert.notEqual(requests.filter(r=>r.path==='/api/review/proposal').at(-1).draft_request_id,expiredId);
+ assert.equal(await ev('document.getElementById("proposal-goal").value'),goalBefore);
+ pass('Expired operation preserves goal/answers and regenerates under a new ID without requiring a new analysis');
+ await require('./check_v4_review_fixes.cjs')({cdp,click,fill,until,pause,assert,requests,pass});
+};

@@ -1,0 +1,35 @@
+{
+  "passed": 11,
+  "cases": [
+    "Real Uvicorn HTTP accepts a valid 2 MiB Word file beyond the spool threshold",
+    "Real Word/table import masks grouped full-width and cross-line numbers before the first textarea assignment; no auto-analysis",
+    "Real PDF table bbox deduplication and one post-success replacement confirmation",
+    "Mixed scanned page is rejected with page number and preserves current text",
+    "A short extracted document stays visible with an actionable minimum-length hint",
+    "Over-limit Word keeps all tail clauses and disables analysis",
+    "Editing during upload leads to one confirmation and discard preserves the newer draft",
+    "Example switch aborts/reset loading and rejects late responses",
+    "IME defers application and blocks new file selection",
+    "File drag hover and drop feed the same real PDF import pipeline",
+    "All import browser scenarios make zero review/negotiation/model calls"
+  ],
+  "postPaths": [
+    "/api/contracts/parse",
+    "/api/contracts/parse",
+    "/api/contracts/parse",
+    "/api/contracts/parse",
+    "/api/contracts/parse",
+    "/api/contracts/parse",
+    "/api/contracts/parse",
+    "/api/contracts/parse",
+    "/api/contracts/parse"
+  ],
+  "diagnostics": {
+    "blocked_external_calls": 0,
+    "real_cloud_calls": 0,
+    "review": "explicit_chat_and_retrieval_doubles_with_real_graph",
+    "negotiation": "real_graph_fixed_offline_policy",
+    "proposal": "explicit_chat_double_with_real_service_validation_and_cache",
+    "proposal_model_calls": 0
+  }
+}

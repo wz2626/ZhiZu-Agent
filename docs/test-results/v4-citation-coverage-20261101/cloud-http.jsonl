@@ -1,0 +1,4 @@
+{"utc": "2026-11-01T07:18:03.614456+00:00", "host": "api.siliconflow.cn", "path": "/v1/embeddings", "method": "POST", "model": "BAAI/bge-m3", "batch_size": 9, "seed_numbers_present": false, "status": 200, "duration_ms": 764.12}
+{"utc": "2026-11-01T07:18:04.472733+00:00", "host": "api.deepseek.com", "path": "/chat/completions", "method": "POST", "model": "deepseek-flash", "seed_numbers_present": false, "status": 200, "duration_ms": 38313.36}
+{"utc": "2026-11-01T07:18:49.172566+00:00", "host": "api.siliconflow.cn", "path": "/v1/embeddings", "method": "POST", "model": "BAAI/bge-m3", "batch_size": 8, "seed_numbers_present": false, "status": 200, "duration_ms": 365.95}
+{"utc": "2026-11-01T07:18:49.572879+00:00", "host": "api.deepseek.com", "path": "/chat/completions", "method": "POST", "model": "deepseek-flash", "seed_numbers_present": false, "status": 200, "duration_ms": 33871.04}

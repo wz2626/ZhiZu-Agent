@@ -132,7 +132,7 @@ def block_cloud_http(monkeypatch):
     def forbidden(*args, **kwargs):
         pytest.fail("input guard unit tests must not contact a cloud service")
     monkeypatch.setattr(httpx.HTTPTransport, "handle_request", forbidden)
-    monkeypatch.setattr("backend.app.services.embedding.httpx.post", forbidden)
+    monkeypatch.setattr("backend.app.services.embedding.post_embeddings", forbidden)
 
 
 @pytest.fixture
@@ -225,8 +225,9 @@ def test_contact_only_probe_is_masked_before_rejection_without_cloud(client, mon
     else:
         response = ReviewDetailedResponse.model_validate(result.json())
         assert response.failure_code == ReviewFailureCode.INVALID_CONTRACT_TEXT
-    assert observed == [mask_sensitive_text(text)]
-    assert "[手机号]" in observed[0] and "[身份证号]" in observed[0]
+    from backend.app.core.privacy import redact_pii
+    assert observed == [mask_sensitive_text(text) if endpoint == "analyze" else redact_pii(text)]
+    assert ("[手机号]" in observed[0] and "[身份证号]" in observed[0]) if endpoint == "analyze" else observed[0].count("***") == 2
     assert phone not in result.text + caplog.text and identity not in result.text + caplog.text
 
 
@@ -273,12 +274,13 @@ def test_valid_rental_pii_probe_reaches_only_masked_retrieval_and_llm(synthetic_
     finally:
         service.close()
     assert response.status == "success" and response.total_risks == 0
-    masked_text = mask_sensitive_text(text)
+    from backend.app.core.privacy import redact_pii
+    masked_text = mask_sensitive_text(text) if method == "analyze_contract" else redact_pii(text)
     assert observed == [masked_text] and store.calls == [(masked_text, 4)]
     assert len(llm.calls) == 1
     payload = json.loads(llm.calls[0][1].content)
     assert payload["合同文本"] == masked_text
-    assert "[手机号]" in masked_text and "[身份证号]" in masked_text
+    assert ("[手机号]" in masked_text and "[身份证号]" in masked_text) if method == "analyze_contract" else masked_text.count("***") == 2
     visible = response.model_dump_json() + caplog.text + json.dumps(payload, ensure_ascii=False)
     assert phone not in visible and identity not in visible
     if method == "analyze_contract_detailed":

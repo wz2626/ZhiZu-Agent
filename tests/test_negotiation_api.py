@@ -30,7 +30,7 @@ def offline(monkeypatch):
         pytest.fail("Day 10 tests must not call cloud services")
     monkeypatch.setattr(httpx.HTTPTransport, "handle_request", forbidden)
     monkeypatch.setattr("backend.app.services.review.ChatOpenAI.invoke", forbidden)
-    monkeypatch.setattr("backend.app.services.embedding.httpx.post", forbidden)
+    monkeypatch.setattr("backend.app.services.embedding.post_embeddings", forbidden)
 
 
 def practice_service(responder=graph_module.scenario_landlord_responder):

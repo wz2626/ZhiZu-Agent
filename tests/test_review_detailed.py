@@ -42,7 +42,7 @@ def offline_environment(monkeypatch, tmp_path):
 
     # Keep the legacy test module's fixtures untouched; also block SDK bypasses.
     monkeypatch.setattr("backend.app.services.review.ChatOpenAI.invoke", forbidden)
-    monkeypatch.setattr("backend.app.services.embedding.httpx.post", forbidden)
+    monkeypatch.setattr("backend.app.services.embedding.post_embeddings", forbidden)
     monkeypatch.setattr(httpx.HTTPTransport, "handle_request", forbidden)
 
 
@@ -274,7 +274,8 @@ def test_masking_before_retrieval_and_trace_contains_no_contract():
     text = "联系13800138000，身份证110101199001011234。" + CONTRACT
     service = service_for(json.dumps([finding()]))
     response = service.analyze_contract_detailed(text)
-    assert service.vector_store.calls == [(mask_sensitive_text(text), 4)]
+    from backend.app.core.privacy import redact_pii
+    assert service.vector_store.calls == [(redact_pii(text), 4)]
     assert "13800138000" not in service.llm.calls[0][1].content
     trace = json.dumps([event.model_dump() for event in response.trace], ensure_ascii=False)
     assert CONTRACT not in trace and "13800138000" not in trace and "110101199001011234" not in trace

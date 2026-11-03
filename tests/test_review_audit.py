@@ -69,7 +69,7 @@ def test_sensitive_identifier_enters_bounded_rewrite_without_leaking_feedback():
 def mock_embedding_response(monkeypatch, indices):
     payload = {"data": [{"index": value, "embedding": [float(position), 1.0]}
                         for position, value in enumerate(indices)]}
-    monkeypatch.setattr("backend.app.services.embedding.httpx.post", lambda *args, **kwargs:
+    monkeypatch.setattr("backend.app.services.embedding.post_embeddings", lambda *args, **kwargs:
                         SimpleNamespace(raise_for_status=lambda: None, json=lambda: payload))
     return SiliconFlowEmbeddings(base_url="https://embedding.invalid/v1", model="offline",
                                  api_key="sk-offline-audit", expected_dimension=2)

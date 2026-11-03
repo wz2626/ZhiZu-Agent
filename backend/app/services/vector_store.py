@@ -6,6 +6,7 @@ import math
 import re
 import sqlite3
 from contextlib import closing
+from functools import lru_cache
 from pathlib import Path
 
 import chromadb
@@ -22,18 +23,14 @@ VERIFIED_DATE = "2026-10-05"
 STORAGE_ERRORS = (chromadb.errors.ChromaError, sqlite3.DatabaseError, OSError)
 logger = logging.getLogger(__name__)
 
-_PHONE_PATTERN = re.compile(r"(?<!\d)(?:\+?86[ \t-]*)?1[3-9]\d[ \t-]?\d{4}[ \t-]?\d{4}(?!\d)")
-_BIRTH_MONTH_DAY = r"(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])"
-_ID_PATTERN = re.compile(
-    r"(?<!\d)(?:"
-    r"[1-9]\d{5}(?:18|19|20)\d{2}" + _BIRTH_MONTH_DAY + r"\d{3}[\dXx]|"
-    r"[1-9]\d{5}\d{2}" + _BIRTH_MONTH_DAY + r"\d{3})(?!\d)"
-)
-
-
 def mask_sensitive_text(text: str) -> str:
-    text = _PHONE_PATTERN.sub("[手机号]", text)
-    return _ID_PATTERN.sub("[身份证号]", text)
+    from backend.app.core.privacy import redact_report
+    report = redact_report(text)
+    pieces, offset = [], 0
+    for span in report["spans"]:
+        pieces.extend([text[offset:span["start"]], "[手机号]" if span["kind"] == "phone" else "[身份证号]"])
+        offset = span["end"]
+    return "".join([*pieces, text[offset:]])
 
 
 def _check_sqlite_readable(directory: Path) -> None:
@@ -47,7 +44,26 @@ def _check_sqlite_readable(directory: Path) -> None:
 
 def load_authoritative_laws() -> list[LawArticle]:
     """Read only the pinned authoritative JSON file; never scan directories."""
-    raw = json.loads(LAW_FILE.read_text(encoding="utf-8"))
+    stamp = LAW_FILE.stat()
+    return [item.model_copy(deep=True) for item in _law_registry(str(LAW_FILE), stamp.st_mtime_ns, stamp.st_size)]
+
+
+def review_queries(text: str) -> list[str]:
+    """Whole-contract recall plus at most eight adjacent clause groups.
+
+    Group all passages rather than taking the first eight: a repair or safety
+    clause near the end must not disappear behind rent/term boilerplate.
+    These are retrieval views only; response anchors still use the full text.
+    """
+    passages = [part.strip() for part in re.split(r"\n+|(?<=[。；;！？])", text) if part.strip()]
+    group_size = max(1, math.ceil(len(passages) / 8))
+    groups = ["\n".join(passages[i:i + group_size]) for i in range(0, len(passages), group_size)]
+    return list(dict.fromkeys([text, *groups]))
+
+
+@lru_cache(maxsize=1)
+def _law_registry(path: str, modified: int, size: int) -> tuple:
+    raw = json.loads(Path(path).read_text(encoding="utf-8"))
     if not isinstance(raw, list) or len(raw) != 32:
         raise ValueError("authoritative law file must contain exactly 32 articles")
     articles = [LawArticle.model_validate(item) for item in raw]
@@ -55,7 +71,7 @@ def load_authoritative_laws() -> list[LawArticle]:
         raise ValueError("authoritative law IDs must be exactly LAW-703 through LAW-734")
     if [item.article_number for item in articles] != list(range(703, 735)):
         raise ValueError("authoritative law articles must be ordered and consecutive")
-    return articles
+    return tuple(articles)
 
 
 class LawVectorStoreService:
@@ -315,6 +331,62 @@ class LawVectorStoreService:
             if law_id in authoritative and score > 0.0:
                 evidence.append(self._evidence(authoritative[law_id], score))
         return evidence
+
+    def search_review_evidence(self, query: str, top_k: int = 4) -> list[EvidenceItem]:
+        """Batch clause recall; top_k applies to each view, union <= 32 laws.
+
+        The public KB search and legacy review retain their single-query
+        semantics. This path never assigns a citation or a risk level.
+        """
+        if not query or not query.strip():
+            raise ValueError("query must not be empty")
+        if len(query) > 5000:
+            raise ValueError("review query exceeds contract budget")
+        if type(top_k) is not int or not 1 <= top_k <= 8:
+            raise ValueError("top_k must be between 1 and 8")
+        self._check_mode()
+        self._check_ids()
+        count = self.collection.count()
+        if not count:
+            return []
+        safe_query = mask_sensitive_text(query) if self.embedding_mode == "cloud" else query
+        queries = review_queries(safe_query)
+        # SiliconFlowEmbeddings supports batch input: one bounded HTTP request,
+        # not a network call for every sentence in a long contract.
+        vectors = self.embeddings.embed_documents(queries)
+        if len(vectors) != len(queries):
+            raise ValueError("embedding response count mismatch")
+        valid_vectors = []
+        for vector in vectors:
+            if len(vector) != self.embedding_dimension:
+                raise ValueError("embedding dimension mismatch")
+            if any(type(value) not in (int, float) or not math.isfinite(value) for value in vector):
+                raise ValueError("embedding vector must contain finite numbers")
+            norm = math.hypot(*vector)
+            if not math.isfinite(norm):
+                raise ValueError("embedding vector norm must be finite")
+            if norm:
+                valid_vectors.append(vector)
+        if not valid_vectors:
+            return []
+        result = self.collection.query(
+            query_embeddings=valid_vectors, n_results=min(top_k, count), include=["distances"],
+        )
+        if len(result["ids"]) != len(valid_vectors) or len(result["distances"]) != len(valid_vectors):
+            raise ValueError("retrieval response count mismatch")
+        authoritative = {article.law_id: article for article in load_authoritative_laws()}
+        scores = {}
+        for ids, distances in zip(result["ids"], result["distances"]):
+            if len(ids) != len(distances) or len(ids) > top_k:
+                raise ValueError("retrieval response shape mismatch")
+            for law_id, distance in zip(ids, distances):
+                if not math.isfinite(distance):
+                    raise ValueError("retrieval distance must be finite")
+                score = min(1.0, 1.0 - distance)
+                if law_id in authoritative and score > 0:
+                    scores[law_id] = max(scores.get(law_id, 0.0), score)
+        return [self._evidence(authoritative[law_id], score)
+                for law_id, score in sorted(scores.items(), key=lambda pair: -pair[1])]
 
     def get_laws_by_ids(self, evidence_ids: list[str]) -> list[EvidenceItem]:
         self._check_mode()

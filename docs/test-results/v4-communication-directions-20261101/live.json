@@ -1,0 +1,602 @@
+{
+  "started": "2026-11-01T10:27:32.535Z",
+  "origin": "http://127.0.0.1:58119",
+  "mode": "production app, real providers, no mocks",
+  "phases": [
+    {
+      "phase": "directions",
+      "status": "passed",
+      "seconds": 49.4
+    }
+  ],
+  "api": [
+    {
+      "path": "/api/health",
+      "method": "GET",
+      "body": null,
+      "headers": {},
+      "status": 200,
+      "duration_ms": 4.62,
+      "data": {
+        "status": "ok",
+        "project": "ZhiZu-Agent",
+        "version": "0.1.0",
+        "env_configured": true
+      }
+    },
+    {
+      "path": "/api/negotiation/meta",
+      "method": "GET",
+      "body": null,
+      "headers": {},
+      "status": 200,
+      "duration_ms": 4.7,
+      "data": {
+        "interaction_version": 4,
+        "practice_epoch": "9583f1a3eb38462da94892670c1f2a73",
+        "privacy_policy_version": "v4-fold-view-2",
+        "privacy_policy": {
+          "engine": "fold-codepoint-v1",
+          "replacement": "***",
+          "char_map": {
+            "160": " ",
+            "8239": " ",
+            "12288": " ",
+            "65336": "X",
+            "65368": "x"
+          },
+          "version": "v4-fold-view-2",
+          "digit_zeros": [
+            48,
+            1632,
+            1776,
+            1984,
+            2406,
+            2534,
+            2662,
+            2790,
+            2918,
+            3046,
+            3174,
+            3302,
+            3430,
+            3558,
+            3664,
+            3792,
+            3872,
+            4160,
+            4240,
+            6112,
+            6160,
+            6470,
+            6608,
+            6784,
+            6800,
+            6992,
+            7088,
+            7232,
+            7248,
+            42528,
+            43216,
+            43264,
+            43472,
+            43504,
+            43600,
+            44016,
+            65296,
+            66720,
+            68912,
+            69734,
+            69872,
+            69942,
+            70096,
+            70384,
+            70736,
+            70864,
+            71248,
+            71360,
+            71472,
+            71904,
+            72016,
+            72784,
+            73040,
+            73120,
+            73552,
+            92768,
+            92864,
+            93008,
+            120782,
+            120792,
+            120802,
+            120812,
+            120822,
+            123200,
+            123632,
+            124144,
+            125264,
+            130032
+          ],
+          "id_pattern": "(?<!\\d)(?:\\d{6}[ \\t-]?\\d{8}[ \\t-]?\\d{3}[\\dXx]|\\d{15})(?![\\dXx])",
+          "phone_pattern": "(?<!\\d)(?:\\+?86[ \\t-]*)?1\\d{2}[ \\t-]?\\d{4}[ \\t-]?\\d{4}(?!\\d)",
+          "ignored_points": [
+            173,
+            8203,
+            8204,
+            8205,
+            8288,
+            65279
+          ],
+          "space_points": [
+            160,
+            8239,
+            12288
+          ]
+        },
+        "mode": "fixed_offline",
+        "max_rounds": 5,
+        "scenarios": {
+          "deposit": {
+            "final_offer_from_round": 3
+          },
+          "maintenance": {
+            "final_offer_from_round": 3
+          },
+          "early_termination": {
+            "final_offer_from_round": 3
+          }
+        }
+      }
+    },
+    {
+      "path": "/api/health",
+      "method": "GET",
+      "body": null,
+      "headers": {},
+      "status": 200,
+      "duration_ms": 4.12,
+      "data": {
+        "status": "ok",
+        "project": "ZhiZu-Agent",
+        "version": "0.1.0",
+        "env_configured": true
+      }
+    },
+    {
+      "path": "/api/review/analyze-detailed",
+      "method": "POST",
+      "body": {
+        "contract_text": "房屋租赁合同（合成沟通准备验收）\n第一条 租期一年，租金每月3000元，按月支付。\n第二条 房东可以随意提高水电费和服务费，无需提供账单或说明计费标准。\n第三条 房东无须事先通知即可随时进入房屋。",
+        "top_k": 4
+      },
+      "headers": {
+        "X-Interaction-Version": "4",
+        "Content-Type": "application/json"
+      },
+      "status": 200,
+      "duration_ms": 30137.31,
+      "data": {
+        "status": "success",
+        "results": [
+          {
+            "clause_id": "C-01",
+            "original_clause": "第一条 租期一年，租金每月3000元，按月支付。",
+            "risk_level": "NONE",
+            "explanation": "本条约定租期一年、月租金3000元并按月支付，内容明确；LAW-704将租金及支付方式列为租赁合同一般内容，LAW-721允许承租人按约定期限支付租金，LAW-707涉及六个月以上租赁的书面形式。仅就本条在本次提供依据下未发现具体不利约定，不代表对合同全文合法性的确认。",
+            "evidence_ids": [
+              "LAW-704",
+              "LAW-721",
+              "LAW-707"
+            ],
+            "negotiation_tip": ""
+          },
+          {
+            "clause_id": "C-02",
+            "original_clause": "第二条 房东可以随意提高水电费和服务费，无需提供账单或说明计费标准。",
+            "risk_level": "MEDIUM",
+            "explanation": "该条赋予房东单方随意提高水电费和服务费的权利，并免除账单和计费标准说明义务，使承租人费用负担不确定、核算困难，存在任意加价或多扣的具体争议风险；本次提供的民法典条文未直接规定此类费用调整及账单义务，不能据此认定已确认违法或列为HIGH，需补充价格、公用事业收费或当地租赁规定等依据。",
+            "evidence_ids": [],
+            "negotiation_tip": "要求列明水电费和服务费的项目、现行单价、计量方式、账单提供周期及调整条件；约定未经承租人书面同意不得单方提高，或按公共事业单位账单据实结算并附凭证。"
+          },
+          {
+            "clause_id": "C-03",
+            "original_clause": "第三条 房东无须事先通知即可随时进入房屋。",
+            "risk_level": "MEDIUM",
+            "explanation": "该条允许房东无须事先通知即可随时进入房屋，直接削弱承租人对房屋的使用安排和居住安宁，属于具体不利约定；本次提供的民法典条文未直接规定出租人进入租赁物的通知义务及例外，不能据此认定已确认违法或列为HIGH，需补充相关依据并核对全文其他约定。",
+            "evidence_ids": [],
+            "negotiation_tip": "改为房东原则上应提前合理时间书面通知并取得承租人同意后方可进入，紧急维修、人身财产安全危险等例外情形应明确；同时限定进入时段、次数并保留通知记录。"
+          }
+        ],
+        "total_risks": 2,
+        "failure_code": null,
+        "reason": null,
+        "errors": [],
+        "retry_count": 0,
+        "trace_label": "本次执行回放",
+        "trace": [
+          {
+            "sequence": 1,
+            "node": "configuration",
+            "attempt": 0,
+            "status": "completed",
+            "duration_ms": 991.283,
+            "evidence_ids": [],
+            "feedback": []
+          },
+          {
+            "sequence": 2,
+            "node": "retrieval",
+            "attempt": 0,
+            "status": "completed",
+            "duration_ms": 675.992,
+            "evidence_ids": [
+              "LAW-721",
+              "LAW-707",
+              "LAW-730",
+              "LAW-705",
+              "LAW-722",
+              "LAW-718",
+              "LAW-715",
+              "LAW-723",
+              "LAW-729",
+              "LAW-704",
+              "LAW-716"
+            ],
+            "feedback": []
+          },
+          {
+            "sequence": 3,
+            "node": "drafting",
+            "attempt": 1,
+            "status": "completed",
+            "duration_ms": 28460.536,
+            "evidence_ids": [
+              "LAW-721",
+              "LAW-707",
+              "LAW-730",
+              "LAW-705",
+              "LAW-722",
+              "LAW-718",
+              "LAW-715",
+              "LAW-723",
+              "LAW-729",
+              "LAW-704",
+              "LAW-716"
+            ],
+            "feedback": []
+          },
+          {
+            "sequence": 4,
+            "node": "critic",
+            "attempt": 1,
+            "status": "completed",
+            "duration_ms": 0.394,
+            "evidence_ids": [
+              "LAW-721",
+              "LAW-707",
+              "LAW-730",
+              "LAW-705",
+              "LAW-722",
+              "LAW-718",
+              "LAW-715",
+              "LAW-723",
+              "LAW-729",
+              "LAW-704",
+              "LAW-716"
+            ],
+            "feedback": []
+          }
+        ],
+        "evidence_by_id": {
+          "LAW-704": {
+            "article_no": "第七百零四条",
+            "law_name": "中华人民共和国民法典",
+            "content": "租赁合同的内容一般包括租赁物的名称、数量、用途、租赁期限、租金及其支付期限和方式、租赁物维修等条款。",
+            "source_url": "https://www.court.gov.cn/zixun/xiangqing/233181.html",
+            "verified_date": "2026-10-05"
+          },
+          "LAW-707": {
+            "article_no": "第七百零七条",
+            "law_name": "中华人民共和国民法典",
+            "content": "租赁期限六个月以上的，应当采用书面形式。当事人未采用书面形式，无法确定租赁期限的，视为不定期租赁。",
+            "source_url": "https://www.court.gov.cn/zixun/xiangqing/233181.html",
+            "verified_date": "2026-10-05"
+          },
+          "LAW-721": {
+            "article_no": "第七百二十一条",
+            "law_name": "中华人民共和国民法典",
+            "content": "承租人应当按照约定的期限支付租金。对支付租金的期限没有约定或者约定不明确，依据本法第五百一十条的规定仍不能确定，租赁期限不满一年的，应当在租赁期限届满时支付；租赁期限一年以上的，应当在每届满一年时支付，剩余期限不满一年的，应当在租赁期限届满时支付。",
+            "source_url": "https://www.court.gov.cn/zixun/xiangqing/233181.html",
+            "verified_date": "2026-10-05"
+          }
+        },
+        "review_context_id": "[REDACTED]"
+      }
+    },
+    {
+      "path": "/api/review/proposal",
+      "method": "POST",
+      "body": {
+        "review_context_id": "[REDACTED]",
+        "clause_id": "C-02",
+        "goal_text": "希望房东提供水电费、服务费账单，说明计费标准与变更依据；未核对前不认可新增费用。",
+        "draft_request_id": "[REDACTED]",
+        "answers": []
+      },
+      "headers": {
+        "X-Interaction-Version": "4",
+        "Content-Type": "application/json"
+      },
+      "status": 200,
+      "duration_ms": 10486.63,
+      "data": {
+        "review_context_id": "[REDACTED]",
+        "clause_id": "C-02",
+        "draft_request_id": "[REDACTED]",
+        "status": "success",
+        "proposed_message": "您好，我想就合同里关于水电费和服务费的约定与您确认一下。为避免后续费用计算不清，建议补充明确：1. 水电费和服务费分别包含哪些项目，现行单价或收费标准是多少；2. 水电如何计量，是否有独立表具或分摊方式；3. 账单按什么周期提供，能否附公共事业单位账单、分摊明细或收费凭证；4. 费用如需调整，请说明调整依据并提前书面通知，经双方书面确认后再执行；5. 在账单和计费标准核对清楚前，我不认可新增或调高的费用。若部分费用属于代收代缴，希望按实际账单和合理分摊据实结算。以上可作为补充约定写入合同或确认单。您看是否方便提供现有收费明细和账单样本，我们再具体核对。",
+        "evidence_ids": [],
+        "questions": [
+          "目前水电费和服务费的具体项目及现行单价分别是多少？",
+          "水电是否独立计量；如为分摊，具体分摊规则是什么？",
+          "账单提供周期、提供形式及可附凭证类型能否明确？",
+          "服务费是否包含在租金内；若不包含，具体覆盖哪些服务？",
+          "公共区域水电或其他共同费用如何分摊？",
+          "现有收费明细、账单样本或历史账单能否提供？",
+          "费用调整的触发条件、通知方式和生效时间能否写入补充约定？",
+          "是否存在与水电费相关的预收、押金或结算安排？"
+        ],
+        "question_items": [
+          {
+            "question_id": "sha256:9369df4ddc9144cb",
+            "text": "目前水电费和服务费的具体项目及现行单价分别是多少？"
+          },
+          {
+            "question_id": "sha256:870c697f936ea413",
+            "text": "水电是否独立计量；如为分摊，具体分摊规则是什么？"
+          },
+          {
+            "question_id": "sha256:d0952d0702ea8118",
+            "text": "账单提供周期、提供形式及可附凭证类型能否明确？"
+          },
+          {
+            "question_id": "sha256:463233acb04af619",
+            "text": "服务费是否包含在租金内；若不包含，具体覆盖哪些服务？"
+          },
+          {
+            "question_id": "sha256:7589935dd62112ee",
+            "text": "公共区域水电或其他共同费用如何分摊？"
+          },
+          {
+            "question_id": "sha256:ec1c21db69de3e78",
+            "text": "现有收费明细、账单样本或历史账单能否提供？"
+          },
+          {
+            "question_id": "sha256:f4acc1b8ea9fa25d",
+            "text": "费用调整的触发条件、通知方式和生效时间能否写入补充约定？"
+          },
+          {
+            "question_id": "sha256:94cd76042da414ee",
+            "text": "是否存在与水电费相关的预收、押金或结算安排？"
+          }
+        ],
+        "failure_code": null,
+        "reason": null,
+        "errors": [],
+        "retry_count": 0,
+        "trace_label": "本次执行回放",
+        "trace": [
+          {
+            "sequence": 1,
+            "node": "context",
+            "attempt": 0,
+            "status": "completed",
+            "duration_ms": 0.15909993089735508,
+            "evidence_ids": [],
+            "feedback": []
+          },
+          {
+            "sequence": 2,
+            "node": "configuration",
+            "attempt": 0,
+            "status": "completed",
+            "duration_ms": 10.351300006732345,
+            "evidence_ids": [],
+            "feedback": []
+          },
+          {
+            "sequence": 3,
+            "node": "drafting",
+            "attempt": 1,
+            "status": "completed",
+            "duration_ms": 10471.46520006936,
+            "evidence_ids": [],
+            "feedback": []
+          },
+          {
+            "sequence": 4,
+            "node": "critic",
+            "attempt": 1,
+            "status": "completed",
+            "duration_ms": 0.49350003246217966,
+            "evidence_ids": [],
+            "feedback": [
+              "草稿结构、隐私和引用校验通过；法律实质支持仍需人工核对。"
+            ]
+          }
+        ],
+        "replayed": false
+      }
+    },
+    {
+      "path": "/api/review/proposal",
+      "method": "POST",
+      "body": {
+        "review_context_id": "[REDACTED]",
+        "clause_id": "C-02",
+        "goal_text": "希望房东进入房屋前先联系并取得同意，约定合理通知时间；这是我的协商诉求，不代表对方已经接受。",
+        "draft_request_id": "[REDACTED]",
+        "answers": []
+      },
+      "headers": {
+        "X-Interaction-Version": "4",
+        "Content-Type": "application/json"
+      },
+      "status": 200,
+      "duration_ms": 7166.14,
+      "data": {
+        "review_context_id": "[REDACTED]",
+        "clause_id": "C-02",
+        "draft_request_id": "[REDACTED]",
+        "status": "success",
+        "proposed_message": "您好，关于合同中的相关约定，我想就水电费、服务费的收取方式，以及进入房屋的安排，与您沟通一下。以下是我的初步想法，供您参考，也请您提出修改意见。\n\n一、关于水电费和服务费\n希望在合同里写清收费项目（水费、电费、服务费各自包含哪些内容）、目前的单价、计量方式和抄表周期。费用按实际用量结算，并请在每个结算周期提供账单或缴费凭证，方便我核对。如果以后需要调整单价或新增收费项目，希望您提前告知并说明理由，经双方书面确认后再执行；在双方确认之前，仍按原标准执行。\n\n二、关于进入房屋\n如果需要进入房屋，希望您提前通过微信或电话与我联系，约定一个双方都方便的时间。遇到漏水、燃气等紧急安全隐患时除外，但事后也请告知我处理情况。\n\n以上只是我的协商诉求，不代表任何一方已经同意，具体表述和条款我们都可以再商量。您看哪些内容可以接受，哪些还需要调整？",
+        "evidence_ids": [],
+        "questions": [
+          "目前水费、电费、服务费分别包含哪些收费项目，单价各是多少？",
+          "水电是否独立计量？抄表周期和结算方式是怎样的？",
+          "您是否愿意按供水、供电单位的账单据实结算并提供缴费凭证？",
+          "服务费具体对应哪些服务内容？",
+          "过往是否有书面账单或收费记录可供我参考？",
+          "如果以后需要调整价格，您希望提前多久告知？",
+          "进入房屋前，您认为提前多久通知比较合适（例如24小时）？",
+          "上述内容是否可以写入合同或另行签订补充协议？"
+        ],
+        "question_items": [
+          {
+            "question_id": "sha256:535ad3378a5f11cf",
+            "text": "目前水费、电费、服务费分别包含哪些收费项目，单价各是多少？"
+          },
+          {
+            "question_id": "sha256:529fa6d07cb25a87",
+            "text": "水电是否独立计量？抄表周期和结算方式是怎样的？"
+          },
+          {
+            "question_id": "sha256:67d14b163652878f",
+            "text": "您是否愿意按供水、供电单位的账单据实结算并提供缴费凭证？"
+          },
+          {
+            "question_id": "sha256:0d0c36aa9eae8b3e",
+            "text": "服务费具体对应哪些服务内容？"
+          },
+          {
+            "question_id": "sha256:dcbf53c4d9ac1504",
+            "text": "过往是否有书面账单或收费记录可供我参考？"
+          },
+          {
+            "question_id": "sha256:6c5dcac5c8e903d3",
+            "text": "如果以后需要调整价格，您希望提前多久告知？"
+          },
+          {
+            "question_id": "sha256:d38658bc7e33b8b2",
+            "text": "进入房屋前，您认为提前多久通知比较合适（例如24小时）？"
+          },
+          {
+            "question_id": "sha256:5fcabe686633870d",
+            "text": "上述内容是否可以写入合同或另行签订补充协议？"
+          }
+        ],
+        "failure_code": null,
+        "reason": null,
+        "errors": [],
+        "retry_count": 0,
+        "trace_label": "本次执行回放",
+        "trace": [
+          {
+            "sequence": 1,
+            "node": "context",
+            "attempt": 0,
+            "status": "completed",
+            "duration_ms": 0.1265000319108367,
+            "evidence_ids": [],
+            "feedback": []
+          },
+          {
+            "sequence": 2,
+            "node": "configuration",
+            "attempt": 0,
+            "status": "completed",
+            "duration_ms": 10.539199924096465,
+            "evidence_ids": [],
+            "feedback": []
+          },
+          {
+            "sequence": 3,
+            "node": "drafting",
+            "attempt": 1,
+            "status": "completed",
+            "duration_ms": 7151.146200019866,
+            "evidence_ids": [],
+            "feedback": []
+          },
+          {
+            "sequence": 4,
+            "node": "critic",
+            "attempt": 1,
+            "status": "completed",
+            "duration_ms": 0.2452000044286251,
+            "evidence_ids": [],
+            "feedback": [
+              "草稿结构、隐私和引用校验通过；法律实质支持仍需人工核对。"
+            ]
+          }
+        ],
+        "replayed": false
+      }
+    }
+  ],
+  "console": [],
+  "screenshots": [
+    "fees-real-draft.png",
+    "other-real-mobile.png"
+  ],
+  "cloud": [
+    {
+      "utc": "2026-11-01T10:27:34.391675+00:00",
+      "host": "api.siliconflow.cn",
+      "path": "/v1/embeddings",
+      "method": "POST",
+      "model": "BAAI/bge-m3",
+      "batch_size": 5,
+      "seed_numbers_present": false,
+      "status": 200,
+      "duration_ms": 503.1
+    },
+    {
+      "utc": "2026-11-01T10:27:34.963784+00:00",
+      "host": "api.deepseek.com",
+      "path": "/chat/completions",
+      "method": "POST",
+      "model": "deepseek-flash",
+      "seed_numbers_present": false,
+      "status": 200,
+      "duration_ms": 28393.69
+    },
+    {
+      "utc": "2026-11-01T10:28:03.853284+00:00",
+      "host": "api.deepseek.com",
+      "path": "/chat/completions",
+      "method": "POST",
+      "model": "deepseek-flash",
+      "seed_numbers_present": false,
+      "status": 200,
+      "duration_ms": 10468.82
+    },
+    {
+      "utc": "2026-11-01T10:28:14.669653+00:00",
+      "host": "api.deepseek.com",
+      "path": "/chat/completions",
+      "method": "POST",
+      "model": "deepseek-flash",
+      "seed_numbers_present": false,
+      "status": 200,
+      "duration_ms": 7147.71
+    }
+  ],
+  "finished": "2026-11-01T10:28:22.147Z",
+  "result": {
+    "recommended": "fees",
+    "feeDraft": "success",
+    "otherDraft": "success",
+    "turnPosts": 0,
+    "messageIsolation": true
+  }
+}

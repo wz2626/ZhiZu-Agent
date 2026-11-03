@@ -1,5 +1,27 @@
 # Spec 04：v0.1 谈判 HTTP、三场景与执行回放
 
+## V4 后端原子发布与容量（2026-10-31 授权）
+
+turn 默认必须携带 X-Interaction-Version:4、X-Practice-Epoch、X-Expected-Round；缺失/不合法返回受控409。meta 无需头。旧无头协议仅由显式 V4_ALLOW_LEGACY_HEADERS=true 开启。epoch 校验先于预览/创建；新会话仅在 expected_round=0 时创建。get_session 未找到时返回不落存储的空快照，不创建会话。
+
+保留固定图在会话锁内串行执行，不迁移为锁外 CAS；生产组合根不依赖云客户端。冻结规则和可信证据，提交前复核分数、确认文本与条件；完整 NegotiationResponse 构造/校验/序列化预检成功后，才在同一锁内发布正式状态、原 turn_effect 与回放响应。校验失败不得改变轮次、条件、分数或缓存。
+
+Python兼容约束：非评分安排只接受 round_{before.round_count+1}，其值从“【模拟房东】确认本轮安排：”后的非空文字独立重建；不得从待审条件反推合法键。缺项、额外项或改写历史项均拒绝。提交复核拒绝属于不可信编排出口，返回 needs_review 且不写请求缓存；正常 Critic 业务失败仍按原规则缓存。
+
+HTTP/网页只支持本场景的固定数值条件；非评分安排仅保留Python服务兼容，不进入HTTP响应。API层在完整响应发布前检查场景对应评分键、数值类型及范围；round_N或其他不支持的条件返回受控422 UNSUPPORTED_HTTP_TERMS，不提交正式状态、不写请求缓存。重放出口同样不得公开Python兼容条件。此限制不进入共享NegotiationService/NegotiationState，不影响public_api=True的Python兼容调用。
+
+SESSION_INVALID 后只更新供全新练习使用的实例元信息，旧练习、冻结请求及其 epoch 永不迁移。全新练习尚无在途快照或正式轮次时，可绑定重新读取的当前 epoch；正式发送前再次核对元信息。409 按 code 处理：SESSION_INVALID/ROUND_CONFLICT 隔离旧练习，REQUEST_CONFLICT 允许新编号继续，INTERACTION_VERSION 提示更新协议，不将所有冲突等同于会话失效。
+
+默认最多1000个活跃会话，空闲3600秒到期，每会话64个操作编号；在途会话不淘汰。实例生命周期内最多10000个会话身份（包括过期墓碑），身份预算耗尽拒绝新建，不回收身份使旧编号复活。过期返回 SESSION_INVALID，容量返回429；不宣称跨重启恢复。
+
+## V4.0 请求一致性增补（2026-10-30 授权）
+
+保留旧JSON入参和旧调用兼容。新增只读GET /api/negotiation/meta，返回interaction_version=4、practice_epoch、privacy_policy_version、mode=fixed_offline、max_rounds及各场景final_offer_from_round=3。只读重检不因存在未知请求而禁用，不创建会话或调用云端。
+
+V4客户端发送X-Interaction-Version:4、X-Practice-Epoch、X-Expected-Round。实例不匹配在创建会话前返回409 detail.code=SESSION_INVALID；会话锁内先查同编号同内容缓存，再校验预期轮次，不匹配返回409 ROUND_CONFLICT。冲突不运行图、不消费轮次；未知结果必须保留原请求头重试。无这些头的旧调用仅在显式兼容配置下保留；有部分练习头而缺版本头不得降级。实例标识不是鉴权。
+
+V4输入二次遮蔽若改变内容，返回HTTP428 PRIVACY_PREVIEW_REQUIRED，详见Spec02；不缓存、不消费请求编号、不进入图。前端不倒退正式状态；缓存重放不能重复计分。服务重启不提供跨实例恢复，旧结果未知的记录明确标为不可恢复或封存，不宣称未提交。五轮、Critic和原子提交不变。
+
 状态：2026-10-14，Day 10 经开发者明确授权新增。继承 Spec 00/03；本规格扩展 Day 7 的仅押金模板与保守默认服务，不改变既有算分公式和旧审查接口。
 
 ## HTTP 与场景

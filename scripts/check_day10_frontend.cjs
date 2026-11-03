@@ -53,6 +53,10 @@ class CDP {
       // Preserve the actual server response before any intentional transport
       // or malformed-response injection changes the browser-facing copy.
       traces.push({ path: new URL(request.url).pathname, data: structuredClone(data) });
+      if(this.emptyProposalQuestionsNext && request.url.endsWith('/api/review/proposal')){
+        this.emptyProposalQuestionsNext=false;data.questions=[];data.question_items=[];
+        return this.send('Fetch.fulfillRequest',{requestId,responseCode:200,responseHeaders:[{name:'Content-Type',value:'application/json'}],body:Buffer.from(JSON.stringify(data)).toString('base64')});
+      }
       if (this.dropNext && request.url.endsWith('/api/negotiation/turn')) {
         this.dropNext = false;
         return this.send('Fetch.failRequest', { requestId, errorReason: 'ConnectionClosed' });
@@ -74,6 +78,12 @@ class CDP {
         return this.send('Fetch.fulfillRequest', { requestId, responseCode:200,
           responseHeaders:[{name:'Content-Type',value:'application/json'}],
           body:Buffer.from(JSON.stringify(data)).toString('base64') });
+      }
+      if(this.invalidTermsNext&&request.url.endsWith('/api/negotiation/turn')){
+        this.invalidTermsNext=false;
+        const term=Object.keys(data.confirmed_terms)[0];data.confirmed_terms[term]=50000;
+        data.turn_effect.changes.forEach(change=>{if(change.term===term)change.after=50000;});
+        return this.send('Fetch.fulfillRequest',{requestId,responseCode:200,responseHeaders:[{name:'Content-Type',value:'application/json'}],body:Buffer.from(JSON.stringify(data)).toString('base64')});
       }
       return this.send('Fetch.continueRequest', { requestId });
     }
@@ -110,7 +120,7 @@ async function fill(id, value, type = 'input') {
   await cdp.evaluate(`(() => { const e = document.getElementById(${JSON.stringify(id)}); e.value = ${JSON.stringify(value)}; e.dispatchEvent(new Event(${JSON.stringify(type)}, {bubbles:true})); })()`);
   await pause(30);
 }
-async function shot(dir,name){const r=await cdp.send('Page.captureScreenshot',{format:'png',captureBeyondViewport:true});fs.writeFileSync(path.join(dir,name+'.png'),Buffer.from(r.data,'base64'));}
+async function shot(dir,name,fullPage=true){const r=await cdp.send('Page.captureScreenshot',{format:'png',captureBeyondViewport:fullPage});fs.writeFileSync(path.join(dir,name+'.png'),Buffer.from(r.data,'base64'));}
 async function setMode(value){await fetch(origin+'/_test/mode',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({value})});}
 (async () => {
   server = spawn(path.join(root, '.venv/Scripts/python.exe'), ['-u', 'scripts/day10_offline_app.py'], { cwd: root, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
@@ -142,9 +152,9 @@ async function setMode(value){await fetch(origin+'/_test/mode',{method:'POST',he
   await cdp.send('Page.navigate', { url: origin });
   await until('!!window.__zhizuLayoutDiagnostics?.length','workspace mounted');
   await require('./check_workspace.cjs')({cdp,click,fill,until,pause,assert,
-    real:true,requests,responses:traces,pass:pass,mode:setMode,shot:name=>shot(out10,name)});
+    real:true,requests,responses:traces,pass:pass,mode:setMode,shot:(name,fullPage=true)=>shot(out10,name,fullPage)});
   assert.equal(cdp.errors.length,0,JSON.stringify(cdp.errors));assert.equal(cdp.external.length,0);
-  fs.writeFileSync(path.join(out10,'browser-results.json'),JSON.stringify({passed:cases.length,failed:0,skipped:0,cases:cases,external:cdp.external.length},null,2));
+  fs.writeFileSync(path.join(out10,'browser-results.json'),JSON.stringify({passed:cases.length,failed:0,skipped:0,cases:cases,external:cdp.external.length,proposalReadiness:cdp.proposalReadinessEvidence||[]},null,2));
   console.log('Workspace checks passed: '+cases.length);
 })().catch(async error => {
   console.error(error); console.error(stderr); process.exitCode = 1;

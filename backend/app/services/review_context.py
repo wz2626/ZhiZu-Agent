@@ -13,6 +13,7 @@ from uuid import uuid4
 
 from backend.app.core.privacy import redact_pii
 from backend.app.schemas.review import ReviewClauseResult, ReviewEvidence
+from backend.app.services.operation_store import OperationStore, OperationBusy
 
 
 class ReviewContextMissing(ValueError):
@@ -37,8 +38,12 @@ class ReviewContext:
     clauses: dict[str, ReviewClauseResult]
     evidence_by_id: dict[str, ReviewEvidence]
     lock: object = field(default_factory=Lock)
-    # Values are (clause_id, masked goal, detached public response).
+    # Values are (clause_id, safe goal/answer fingerprint, detached response).
     requests: OrderedDict = field(default_factory=OrderedDict)
+    questions: dict = field(default_factory=dict)
+    inflight: set = field(default_factory=set)
+    retired: set = field(default_factory=set)
+    pins: int = 0
 
 
 class ReviewContextStore:
@@ -49,10 +54,11 @@ class ReviewContextStore:
         self._ttl, self._capacity, self._clock = ttl_seconds, capacity, clock
         self._contexts: OrderedDict[str, ReviewContext] = OrderedDict()
         self._lock = Lock()
+        self.operations = OperationStore()
 
     def _prune(self, now: float) -> None:
         for key in list(self._contexts):
-            if self._contexts[key].expires_at <= now:
+            if self._contexts[key].expires_at <= now and not self._contexts[key].pins:
                 del self._contexts[key]
 
     def create(self, text: str, clauses: list[ReviewClauseResult],
@@ -62,7 +68,10 @@ class ReviewContextStore:
             now = self._clock()
             self._prune(now)
             while len(self._contexts) >= self._capacity:
-                self._contexts.popitem(last=False)
+                victim = next((key for key, item in self._contexts.items() if not item.pins), None)
+                if victim is None:
+                    raise OperationBusy("all review contexts are in use")
+                del self._contexts[victim]
             self._contexts[context_id] = ReviewContext(
                 context_id=context_id, expires_at=now + self._ttl,
                 contract_text=redact_pii(text),
@@ -71,14 +80,20 @@ class ReviewContextStore:
             )
         return context_id
 
-    def get(self, context_id: str) -> ReviewContext:
+    def get(self, context_id: str, *, pin: bool = False) -> ReviewContext:
         with self._lock:
             self._prune(self._clock())
             context = self._contexts.get(context_id)
-            if context is None:
+            if context is None or context.expires_at <= self._clock():
                 raise ReviewContextMissing("review context is missing or expired")
             self._contexts.move_to_end(context_id)
+            if pin:
+                context.pins += 1
             return context
+
+    def release(self, context: ReviewContext):
+        with self._lock:
+            context.pins -= 1
 
 
 review_context_store = ReviewContextStore()

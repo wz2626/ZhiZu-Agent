@@ -6,6 +6,13 @@ import pytest
 
 
 @pytest.fixture(autouse=True)
+def explicit_legacy_compatibility(monkeypatch):
+    # Historical HTTP tests exercise the supported opt-in legacy protocol.
+    # Strict V4 tests remove this setting explicitly; production defaults strict.
+    monkeypatch.setenv("V4_ALLOW_LEGACY_HEADERS", "true")
+
+
+@pytest.fixture(autouse=True)
 def forbid_external_network(monkeypatch):
     connect = socket.socket.connect
     connect_ex = socket.socket.connect_ex

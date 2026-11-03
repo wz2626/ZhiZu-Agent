@@ -119,7 +119,8 @@ class ProposalChatDouble:
         proposal_calls += 1
         payload = json.loads(messages[1].content)
         assert redact_pii(payload["goal_text"]) == payload["goal_text"]
-        sleep(0.08)
+        slow = mode["value"] == "proposal_slow"
+        sleep(0.5 if slow else 0.08)
         if mode["value"] == "proposal_invalid":
             return SimpleNamespace(content='{"proposed_message":"13800000000","evidence_ids":[],"questions":[]}')
         if mode["value"] == "proposal_timeout":
@@ -127,9 +128,10 @@ class ProposalChatDouble:
         ids = list(payload["evidence_by_id"])
         prefix = "依据" + "、".join(ids) + "，" if ids else ""
         return SimpleNamespace(content=json.dumps({
-            "proposed_message": prefix + "合成反提案：请核对相关凭证，明确责任、具体金额和处理日期。",
+            "proposed_message": ("合成慢请求结果：" if slow else "") + prefix + "合成反提案：请核对相关凭证，明确责任、具体金额和处理日期。",
             "evidence_ids": ids,
-            "questions": ["请补充费用凭证与交接记录。"],
+            "questions": (["请确认处理时间。", "还有哪些材料？", "费用是否仍有争议？"] if payload.get("answers") else
+                          ["请补充费用凭证与交接记录。", "希望何时完成？", "费用是多少？"]),
         }, ensure_ascii=False))
 
 
@@ -156,7 +158,7 @@ async def test_wait(request, call_next):
 
 @app.post("/_test/mode", include_in_schema=False)
 def set_mode(body: dict):
-    assert body["value"] in {"normal", "critic_failure", "node_exception", "proposal_invalid", "proposal_timeout"}
+    assert body["value"] in {"normal", "critic_failure", "node_exception", "proposal_invalid", "proposal_timeout", "proposal_slow"}
     mode["value"] = body["value"]
     return {"ok": True}
 
@@ -168,6 +170,14 @@ def diagnostics():
             "negotiation": "real_graph_fixed_offline_policy",
             "proposal": "explicit_chat_double_with_real_service_validation_and_cache",
             "proposal_model_calls": proposal_calls}
+
+
+@app.post("/_test/restart-practice", include_in_schema=False)
+def restart_practice():
+    # Explicit test-only instance replacement: real registry and epoch reset.
+    global practice
+    practice = NegotiationService(build_negotiation_graph(landlord_responder=test_responder), public_api=True)
+    return {"practice_epoch": practice.practice_epoch}
 
 
 if __name__ == "__main__":

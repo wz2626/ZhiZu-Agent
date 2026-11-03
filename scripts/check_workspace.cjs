@@ -4,6 +4,9 @@ module.exports=async function({cdp,click,fill,until,pause,assert,real,requests,r
  assert.equal(await ev('document.querySelectorAll("#negotiation-draft").length'),1);
  await ev('window.savedComposer=document.getElementById("negotiation-draft")');
  pass('Stable workspace and one mounted Composer');
+ await require('./check_app_shell.cjs')({cdp,click,pause,assert,pass,shot,stage:'input'});
+ await require('./check_editor_focus.cjs')({cdp,pause,assert,pass,shot});
+ await require('./check_light_theme.cjs')({cdp,assert,pass,label:'initial input'});
  await shot('01-input');
  const raw=real?'房屋租赁合同。租赁结束后可不说明理由直接扣留全部押金。\n维修责任和费用均由租客承担。\n提前退租须支付固定违约金2000元。\n电话13800000000，身份证11010119900101000X。':'租赁合同\n联系电话：13800000000。维修责任和费用均由租客承担。\n联系电话：13800000000。维修责任和费用均由租客承担。\n<img src=x onerror="window.__xss=1">';
  const nReview=()=>requests.filter(r=>real?r.path==='/api/review/analyze-detailed':true).length;
@@ -24,24 +27,29 @@ module.exports=async function({cdp,click,fill,until,pause,assert,real,requests,r
  assert.equal(await ev('document.getElementById("negotiation-draft")===window.savedComposer'),true);
  pass('Risk selection preserves full source and mounted Composer');await shot('02-review');
  await click('#prepare-communication');
- await fill('negotiation-draft','选场景前写好的消息');await click('#message-privacy-confirm');
+ assert.equal(await ev('document.getElementById("scenario-select").value'),real?'deposit':'maintenance');
+ assert.ok(await ev('document.getElementById("direction-guidance").textContent.includes("已根据当前条款推荐")'));
+ pass('Explicit clause recommends its fixed direction before writing; recommendation does not generate or submit a message');
+ await click('#standalone-practice');
+ await fill('negotiation-draft','选场景前写好的消息');
  assert.equal(await ev('document.getElementById("send-negotiation").disabled'),true);
  assert.ok(await ev('document.getElementById("send-readiness").textContent.includes("先选择")'));
  await click('#send-readiness button');assert.equal(await ev('document.activeElement.id'),'scenario-select');
  await fill('scenario-select','maintenance','change');
  assert.equal(await ev('document.getElementById("negotiation-draft").value'),'选场景前写好的消息');
- assert.equal(await ev('document.getElementById("message-privacy-confirm").checked'),true);
+ assert.equal(await ev('document.querySelectorAll("#message-privacy-confirm,#proposal-privacy-confirm").length'),0);
  if(real){await until('!document.getElementById("send-negotiation").disabled','valid confirmed message enables send');}
  await fill('scenario-select','deposit','change');
- pass('Missing scenario has an actionable explanation; first selection preserves message and consent and enables available service');
- await fill('negotiation-draft','A 的消息，要求核对押金收据。');await click('#message-privacy-confirm');
+ pass('Standalone keeps an explicit direction choice; first selection preserves message and enables available service');
+ await click('[data-clause="C-01"]');await click('#prepare-communication');await fill('scenario-select',real?'deposit':'maintenance','change');
+ await fill('negotiation-draft','A 的消息，要求核对押金收据。');
  await click('[data-clause="C-02"]');await click('#prepare-communication');await fill('scenario-select','maintenance','change');
  await fill('negotiation-draft','B 的消息，请明确维修责任。');
  await click('[data-clause="C-01"]');await click('#prepare-communication');
  assert.equal(await ev('document.getElementById("negotiation-draft").value'),'A 的消息，要求核对押金收据。');
- assert.equal(await ev('document.getElementById("message-privacy-confirm").checked'),true);
- await fill('negotiation-draft','A 改写');assert.equal(await ev('document.getElementById("message-privacy-confirm").checked'),false);
- pass('A/B drafts and consent are record-local; rebinding is not an edit');
+ assert.equal(await ev('document.querySelectorAll("#message-privacy-confirm,#proposal-privacy-confirm").length'),0);
+ await fill('negotiation-draft','A 改写');assert.equal(await ev('document.querySelectorAll("#message-privacy-confirm,#proposal-privacy-confirm").length'),0);
+ pass('A/B drafts are record-local; rebinding is not an edit');
  await ev('document.getElementById("negotiation-draft").dispatchEvent(new CompositionEvent("compositionstart",{bubbles:true}))');
  await click('[data-clause="C-02"]');assert.equal(await ev('document.getElementById("negotiation-draft").value'),'A 改写');
  await ev('document.getElementById("negotiation-draft").dispatchEvent(new CompositionEvent("compositionend",{bubbles:true}))');await pause(60);
@@ -53,7 +61,7 @@ module.exports=async function({cdp,click,fill,until,pause,assert,real,requests,r
    await until('!!document.getElementById("retry-negotiation-api")','missing OpenAPI recovery');await click('#retry-negotiation-api');
    await click('[data-clause="C-01"]');assert.ok(await ev('document.getElementById("clause-advice").textContent.includes("合成建议")'));
    assert.equal(await ev('document.querySelectorAll("mark.current").length'),1);
-   await click('#task-panel .task-explanation details:last-child > summary');await click('.law-card > summary');
+   await click('#task-panel .task-explanation details:last-of-type > summary');await click('.law-card > summary');
    const law=require('../backend/data/laws/civil_code_lease_703_734.json').find(x=>x.law_id==='LAW-709');
    assert.equal(await ev('document.querySelector(".law-body").textContent'),law.content);
    assert.equal(await ev('document.querySelector(".law-meta a").href'),law.source_url);
@@ -63,36 +71,62 @@ module.exports=async function({cdp,click,fill,until,pause,assert,real,requests,r
    assert.equal(await ev('document.getElementById("submitted-document").textContent'),safe);
    pass('Law text, source and date equal the canonical library; repeated occurrences preserve exact source');
    await click('[data-clause="C-02"]');assert.ok(await ev('document.getElementById("location-notice").textContent.includes("未找到")'));
+   await ev('document.querySelector(".law-evidence").closest("details").open=true');
+   assert.equal(await ev('document.querySelectorAll(".law-evidence .law-card").length'),0);
+   assert.ok(await ev('document.querySelector("[data-evidence-state=uncited]").textContent.includes("本条分析未引用具体法条")'));
+   assert.ok(await ev('document.querySelector("[data-evidence-state=uncited]").getBoundingClientRect().height>0'));
+   await shot('02a-law-uncited');
+   await ev(`(()=>{const component=document.getElementById('workspace-app').__vue_app__._component.components.LawEvidence,host=document.createElement('div');host.id='law-fallback-check';document.body.append(host);window.__lawFallbackApp=Vue.createApp(component,{ids:['LAW-709','LAW-712'],evidence:{'LAW-709':${JSON.stringify(law)}}});window.__lawFallbackApp.mount(host)})()`);
+   assert.equal(await ev('document.querySelectorAll("#law-fallback-check .law-card").length'),1);
+   assert.equal(await ev('document.querySelectorAll("#law-fallback-check [data-evidence-state=unavailable]").length'),1);
+   assert.equal(await ev('document.querySelectorAll("#law-fallback-check [data-evidence-state=uncited]").length'),0);
+   assert.ok(await ev('document.querySelector("#law-fallback-check [data-evidence-state=unavailable]").textContent.includes("LAW-712")'));
+   await ev('window.__lawFallbackApp.unmount();delete window.__lawFallbackApp;document.getElementById("law-fallback-check").remove()');
+   pass('Uncited clauses explain the empty state; missing evidence metadata is distinguished without hiding valid citations');
    for(const failure of ['failure','badjson','http422']){await mode(failure);await click('#edit-contract');await fill('contract-input',safe+'\n新编辑版本'+failure);await click('#analyze-contract');await until('document.querySelector(".notice-error")!==null','failure visible');await pause(150);assert.equal(await ev('document.getElementById("submitted-document").textContent'),safe);assert.ok(!await ev('document.body.textContent.includes("DO_NOT_DISPLAY_RAW_INPUT")'));}
+   await shot('review-error-preserved');await require('./check_light_theme.cjs')({cdp,assert,pass,label:'review rejection'});
    pass('Unlocated source is honest; missing service retry and all review failures preserve prior source without leaking raw errors');
    await mode('overlap');await fill('contract-input','租赁合同\n维修责任由房东承担。\n费用由双方确认。\n哈哈哈哈哈');await click('#analyze-contract');await until('document.getElementById("submitted-document").textContent.includes("哈哈哈哈哈")','overlapping review');
    assert.equal(await ev('document.querySelectorAll("mark mark").length'),0);assert.equal(await ev('document.getElementById("submitted-document").textContent'),'租赁合同\n维修责任由房东承担。\n费用由双方确认。\n哈哈哈哈哈');pass('Cross-paragraph and self-overlapping matches preserve exact source without nested marks');
  }else{
    const setTask=async label=>{await ev(`[...document.querySelectorAll('.task-tabs button')].find(b=>b.textContent===${JSON.stringify(label)}).click()`);await pause(40)};
-   const msg=async text=>{await setTask('写沟通消息');await fill('negotiation-draft',text);if(!await ev('document.getElementById("message-privacy-confirm").checked'))await click('#message-privacy-confirm');};
+   const msg=async text=>{await setTask('准备沟通消息');await fill('negotiation-draft',text);};
    const snapshot=()=>ev('({round:document.getElementById("round-count").dataset.round,score:document.getElementById("negotiation-score").textContent,terms:document.getElementById("confirmed-terms").textContent})');
    const turn=async(score)=>{await msg('请核对凭证并明确返还安排。');await click('#send-negotiation');await until(`document.getElementById('negotiation-score').textContent==='${score} / 100' && document.getElementById('negotiation-draft').value===''`,'accepted turn');};
    // Generate with C-02's real cited law through the production service and explicit model double.
    const beforePrivate=requests.length;
-   await fill('negotiation-draft','请回电 +86 138-0000-0000，证件11010119900101000X和110101900101001。');await click('#message-privacy-confirm');await click('#send-negotiation');
-   assert.equal(requests.length,beforePrivate);assert.equal(await ev('document.getElementById("message-privacy-confirm").checked'),false);
+   await fill('negotiation-draft','请回电 +86 138-0000-0000，证件11010119900101000X和110101900101001。');await click('#send-negotiation');
+   assert.equal(requests.length,beforePrivate);assert.equal(await ev('document.querySelectorAll("#message-privacy-confirm,#proposal-privacy-confirm").length'),0);
    assert.ok(!/[0-9]{6}/.test(await ev('document.getElementById("negotiation-draft").value')));
    await fill('negotiation-draft','B 的消息，请明确维修责任。');
-   await click('#proposal-tool > summary');await fill('proposal-goal','请核对手机号13800000000对应的维修费用。');await click('#proposal-privacy-confirm');await click('#generate-proposal');
-   assert.equal(requests.length,beforePrivate);assert.equal(await ev('document.getElementById("proposal-privacy-confirm").checked'),false);
-   pass('Final message and goal masking revoke their own consent and upload nothing until explicitly reconfirmed');
-   await fill('proposal-goal','请核对维修费用凭证。');await click('#proposal-privacy-confirm');await click('#generate-proposal');
+   await click('#proposal-tool > summary');await fill('proposal-goal','请核对手机号13800000000对应的维修费用。');await click('#generate-proposal');
+   assert.equal(requests.length,beforePrivate);assert.equal(await ev('document.querySelectorAll("#message-privacy-confirm,#proposal-privacy-confirm").length'),0);
+   pass('Final message and goal masking update the visible snapshot and upload nothing until explicitly reconfirmed');
+   await fill('proposal-goal','请核对维修费用凭证。');await click('#generate-proposal');
+   await until('document.querySelector(".proposal-wait-text")?.getClientRects().length>0','single drafting wait status');
+   assert.equal(await ev('[...document.querySelectorAll(".proposal-wait-text")].filter(e=>e.getClientRects().length).length'),1);
+   assert.equal(await ev('!!document.getElementById("proposal-status")?.getClientRects().length'),false);
+   assert.ok(!await ev('document.getElementById("generate-proposal").textContent.includes("正在生成")'));
+   await shot('draft-single-wait',false);
    await until('!!document.getElementById("proposed-message")','proposal');
+   assert.ok(await ev('document.querySelector(".proposal-law-references>summary").textContent.includes("《民法典》")'));
+   assert.ok(!await ev('document.querySelector(".proposal-law-references>summary").textContent.includes("LAW-709")'));
+   await click('.proposal-law-references>summary');await click('.proposal-law-references .law-card>summary');
+   assert.ok(await ev('document.querySelector(".proposal-law-references .law-body").getBoundingClientRect().height>0'));
+   await shot('draft-law-readable',false);
+   await click('.proposal-law-references>summary');
+   await ev('document.getElementById("task-panel").scrollTop=0');await shot('communication-unified-surface',false);
+   pass('Draft wait is a single timed status; legal references use verified law titles with accessible full text');
    const original=await ev('document.getElementById("proposed-message").textContent');
    await fill('proposal-goal','请核对维修费用凭证，并说明期限。');
    assert.equal(await ev('document.getElementById("proposed-message").textContent'),original);
    assert.ok(await ev('document.getElementById("proposal-preview").textContent.includes("修改前")'));
-   assert.equal(await ev('document.getElementById("proposal-privacy-confirm").checked'),false);
-   pass('Editing the goal retains prior draft and questions, marks them stale and revokes only its consent');
+   assert.equal(await ev('document.querySelectorAll("#message-privacy-confirm,#proposal-privacy-confirm").length'),0);
+   pass('Editing the goal retains prior draft and questions, marks them stale and requires no checkbox');
    await click('#fill-proposal');assert.ok(await ev('!!document.getElementById("proposal-overwrite")'));await click('#confirm-fill-proposal');
-   assert.equal(await ev('document.getElementById("negotiation-draft").value'),original);assert.equal(await ev('document.getElementById("message-privacy-confirm").checked'),false);
+   assert.equal(await ev('document.getElementById("negotiation-draft").value'),original);assert.equal(await ev('document.querySelectorAll("#message-privacy-confirm,#proposal-privacy-confirm").length'),0);
    assert.equal((await snapshot()).round,'0');pass('Explicit old-draft adoption confirms replacement and never sends or consumes a round');
-   await click('#proposal-privacy-confirm');await mode('proposal_invalid');await click('#generate-proposal');await until('!!document.getElementById("proposal-error")','bad model output rejected');assert.equal(await ev('document.getElementById("proposed-message").textContent'),original);await mode('normal');
+   await mode('proposal_invalid');await click('#generate-proposal');await until('!!document.getElementById("proposal-error")','bad model output rejected');assert.equal(await ev('document.getElementById("proposed-message").textContent'),original);await mode('normal');
    pass('Rejected draft generation retains old reference and never exposes unvalidated PII');
    // Request A completes while viewing B. Score/effect validation must use A's baseline.
    await click('[data-clause="C-01"]');await click('#prepare-communication');await msg('返还押金，请核对明细。');
@@ -111,14 +145,16 @@ module.exports=async function({cdp,click,fill,until,pause,assert,real,requests,r
    assert.equal(failed.status,'needs_review');assert.equal(Math.max(...failed.trace.map(e=>e.attempt)),3);
    await click('.task-detail-link');await pause(1500);assert.ok(await ev('document.querySelectorAll(".trace-step[data-status=retry]").length>0'));await click('#trace-toggle');
    pass('Critic failure preserves official round, score and terms');
-   cdp.dropNext=true;await msg('请明确押金返还期限。');await click('#send-negotiation');await until('document.getElementById("send-negotiation").textContent.includes("重试")','lost response');
-   const first=requests.filter(r=>r.path==='/api/negotiation/turn').at(-1);assert.equal(await ev('document.getElementById("negotiation-draft").disabled'),true);
-   await click('#send-negotiation');await until('document.getElementById("round-count").dataset.round==="3"','cached success');const retry=requests.filter(r=>r.path==='/api/negotiation/turn').at(-1);assert.equal(retry.request_id,first.request_id);assert.equal(retry.user_input,first.user_input);
-   pass('Lost response locks its message and retries the same request, accepting cached success once');
+   cdp.dropNext=true;await msg('请明确押金返还期限。');await click('#send-negotiation');await until('!!document.getElementById("recover-negotiation")','lost response');
+   const first=requests.filter(r=>r.path==='/api/negotiation/turn').at(-1);assert.equal(await ev('document.getElementById("negotiation-draft").disabled'),false);
+   await fill('negotiation-draft','超时后继续编辑的新消息');assert.equal(await ev('document.getElementById("send-negotiation").disabled'),true);assert.equal(await ev('document.getElementById("recovery-message").textContent'),first.user_input);const unknownCount=requests.length;await click('#send-negotiation');assert.equal(requests.length,unknownCount);
+   await shot('unknown-dirty-recovery');await require('./check_light_theme.cjs')({cdp,assert,pass,label:'unknown recovery'});
+   await click('#recover-negotiation');await until('document.getElementById("round-count").dataset.round==="3"','cached success');const retry=requests.filter(r=>r.path==='/api/negotiation/turn').at(-1);assert.equal(retry.request_id,first.request_id);assert.equal(retry.user_input,first.user_input);
+   assert.equal(await ev('document.getElementById("negotiation-draft").value'),'超时后继续编辑的新消息');pass('Unknown dirty shows the old snapshot in a separate recovery control; same-ID replay preserves new input');
    await turn(100);await turn(100);assert.equal(await ev('document.getElementById("send-negotiation").disabled'),true);
    const count=requests.length;await click('#send-negotiation');assert.equal(requests.length,count);pass('Five successful rounds disable sixth submission');
    const aRequest=requests.filter(r=>r.path==='/api/negotiation/turn').at(-1).request_id;
-   await shot('03-results');
+   await setTask('练习结果与清单');await shot('03-results');
    await ev('Object.defineProperty(navigator,"clipboard",{configurable:true,value:{writeText:()=>Promise.reject(new Error("denied"))}})');
    await click('#negotiation-more > summary');await fill('unresolved-requests','希望尽快返还押金，并联系13800000000。');await fill('missing-facts','核对身份证110101900101001对应凭证。');
    await click('#export-checklist');await until('!!document.getElementById("checklist-copy")','copy fallback');
@@ -126,7 +162,7 @@ module.exports=async function({cdp,click,fill,until,pause,assert,real,requests,r
    assert.ok(await ev('document.getElementById("checklist-status").getClientRects().length>0'));
    const copied=await ev('document.getElementById("checklist-copy").value');assert.ok(copied.includes('### 自行补充（待确认）\n- 希望尽快返还押金，并联系***。'));assert.ok(copied.includes('### 自行补充（待核实）\n- 核对身份证***对应凭证。'));assert.ok(!copied.split('## 待明确事项')[0].includes('尽快'));
    await click('[data-clause="C-02"]');await click('#prepare-communication');await turn(50);await turn(75);await turn(100);
-   await click('#export-checklist');await until('!!document.getElementById("checklist-copy")','B copy');const bcopy=await ev('document.getElementById("checklist-copy").value');assert.ok(bcopy.includes('维修责任'));assert.ok(!bcopy.includes('确认返还押金'));pass('Independent scenario scores and per-session exports never merge conditions');
+   await setTask('练习结果与清单');await click('#export-checklist');await until('!!document.getElementById("checklist-copy")','B copy');const bcopy=await ev('document.getElementById("checklist-copy").value');assert.ok(bcopy.includes('维修责任'));assert.ok(!bcopy.includes('确认返还押金'));pass('Independent scenario scores and per-session exports never merge conditions');
    await click('#standalone-practice');await fill('scenario-select','early_termination','change');assert.equal((await snapshot()).round,'0');await turn(50);await turn(75);await turn(100);pass('Standalone practice has its own session and decreasing-fee improvement uses real rule output');
    // Real review overlap: editing while request in flight cannot change submitted source.
    await click('#edit-contract');await fill('contract-input',safe+'\n新版本一');await click('#analyze-contract');await click('#edit-contract');await fill('contract-input',safe+'\n尚未提交的下一版');await pause(1800);
@@ -154,19 +190,19 @@ module.exports=async function({cdp,click,fill,until,pause,assert,real,requests,r
    // but a late generation for the previous target cannot replace it.
    await click('[data-clause="C-02"]');await click('#prepare-communication');
    if(!await ev('document.getElementById("proposal-tool").open'))await click('#proposal-tool > summary');
-   await fill('proposal-goal','新目标，核对费用和凭证。');await click('#proposal-privacy-confirm');
+   await fill('proposal-goal','新目标，核对费用和凭证。');
    await click('#generate-proposal');await fill('proposal-goal','生成期间修改为另一目标。');await pause(1800);
    assert.equal(await ev('document.getElementById("proposed-message").textContent'),original);assert.ok(await ev('document.getElementById("proposal-preview").textContent.includes("修改前")'));
    pass('Changing target invalidates its in-flight generation without deleting its accepted reference');
    // Proposal transport replay uses the same draft request and never touches formal state.
-   await click('#proposal-privacy-confirm');cdp.dropNextProposal=true;await click('#generate-proposal');await until('document.getElementById("generate-proposal").textContent.includes("重试")','proposal response lost');
+   cdp.dropNextProposal=true;await click('#generate-proposal');await until('document.getElementById("generate-proposal").textContent.includes("重试")','proposal response lost');
    const draftId=requests.filter(r=>r.path==='/api/review/proposal').at(-1).draft_request_id;const official=await snapshot();
    await click('#generate-proposal');await until('!document.getElementById("generate-proposal").textContent.includes("重试") && !document.getElementById("generate-proposal").disabled','proposal replay');
    assert.equal(requests.filter(r=>r.path==='/api/review/proposal').at(-1).draft_request_id,draftId);assert.deepEqual(await snapshot(),official);pass('Lost drafting response uses same independent request ID and preserves formal practice state');
-   cdp.quotaNextProposal=true;await fill('proposal-goal','再次核对');await click('#proposal-privacy-confirm');await click('#generate-proposal');await until('document.getElementById("proposal-error")?.textContent.includes("上限")','explicit quota error');assert.ok(!await ev('document.getElementById("generate-proposal").textContent.includes("重试")'));pass('Explicit drafting quota rejection explains recovery and clears unusable retry metadata');
+   cdp.quotaNextProposal=true;await fill('proposal-goal','再次核对');await click('#generate-proposal');await until('document.getElementById("proposal-error")?.textContent.includes("上限")','explicit quota error');assert.ok(!await ev('document.getElementById("generate-proposal").textContent.includes("重试")'));pass('Explicit drafting quota rejection explains recovery and clears unusable retry metadata');
    // A malformed effect must not commit; same-id replay recovers canonical server outcome.
-   cdp.invalidEffectNext=true;await msg('继续核对维修责任。');await click('#send-negotiation');await until('document.getElementById("send-negotiation").textContent.includes("重试")','invalid effect');assert.deepEqual(await snapshot(),official);
-   await click('#send-negotiation');await until('document.getElementById("round-count").dataset.round==="4"','valid replay');pass('Contradictory turn-effect metadata is rejected; canonical replay commits once');
+   cdp.invalidEffectNext=true;await msg('继续核对维修责任。');await click('#send-negotiation');await until('!!document.getElementById("recover-negotiation")','invalid effect');assert.deepEqual(await snapshot(),official);
+   await click('#recover-negotiation');await until('document.getElementById("round-count").dataset.round==="4"','valid replay');pass('Contradictory turn-effect metadata is rejected; canonical replay commits once');
    cdp.invalidTraceNext=true;await msg('请书面确认。');await click('#send-negotiation');await until('document.getElementById("round-count").dataset.round==="5"','final B round');await click('.task-detail-link');await pause(300);
    assert.equal(await ev('document.querySelectorAll(".trace-event").length'),0);assert.ok(await ev('document.getElementById("trace-note").textContent.includes("格式")'));await click('#trace-toggle');pass('Malformed Trace is not fabricated or substituted, independently of valid official results');
    // A held old review is delivered after a newer accepted review.
@@ -178,6 +214,7 @@ module.exports=async function({cdp,click,fill,until,pause,assert,real,requests,r
    await ev('(()=>{const e=document.querySelector("[aria-label=查看练习记录]");e.value=e.options[0].value;e.dispatchEvent(new Event("change",{bubbles:true}))})()');await pause(60);assert.deepEqual(await snapshot(),previousPractice);
    pass('An explicit fresh practice uses a new session while the prior standalone practice stays selectable and unchanged');
  }
+ if(real)await require('./check_v4_interactions.cjs')({cdp,click,fill,until,pause,assert,requests,pass,shot});
  // Layout and accessible stable controls, including 200% reflow and touch width.
  await click('#standalone-practice');
  for(const [w,h,zoom] of [[1440,900,1],[1440,900,2],[390,844,1],[1280,560,1]]){
@@ -187,8 +224,21 @@ module.exports=async function({cdp,click,fill,until,pause,assert,real,requests,r
    await ev('document.getElementById("send-negotiation").scrollIntoView({block:"center",behavior:"instant"})');
    assert.ok(await ev('(()=>{const e=document.getElementById("send-negotiation"),r=e.getBoundingClientRect();return r.width>0&&r.top>=0&&r.bottom<=innerHeight&&document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)===e})()'));
    assert.ok(await ev('document.documentElement.scrollWidth<=innerWidth+2'));
+   await require('./check_app_shell.cjs')({cdp,assert,stage:'frame'});
    assert.equal(await ev('document.getElementById("negotiation-draft")===window.savedComposer'),true);
    await shot(`layout-${w}-${h}-${zoom}`);
  }
  pass('1440 desktop, 200% reflow, mobile and short viewport: one scroll reaches uncovered send button; Composer identity retained');
+ await require('./check_visual_polish.cjs')({cdp,click,fill,until,pause,assert,pass,shot});
+ if(real)await require('./check_result_feedback.cjs')({cdp,click,fill,until,pause,assert,pass,mode});
+ await require('./check_light_theme.cjs')({cdp,assert,pass,label:'result, copy fallback and trace'});
+ await require('./check_app_shell.cjs')({cdp,click,pause,assert,pass,shot,stage:'populated'});
+ await require('./check_communication_directions.cjs')({cdp,click,fill,until,pause,assert,pass,shot,real,mode});
+ if(real)await require('./check_review_activation.cjs')({cdp,click,fill,until,pause,assert,pass,shot});
+ if(real)await require('./check_supplement_groups.cjs')({cdp,click,fill,until,pause,assert,pass,shot});
+ if(real)await require('./check_failure_messages.cjs')({cdp,click,fill,until,pause,assert,pass,shot});
+ if(real)await require('./check_proposal_style.cjs')({cdp,click,fill,until,pause,assert,pass,shot,requests,mode});
+ if(real)await require('./check_proposal_copy.cjs')({cdp,click,fill,until,pause,assert,pass,shot});
+ if(real)await require('./check_result_integrity.cjs')({cdp,click,fill,until,pause,assert,pass,shot,mode,requests});
+ if(real)await require('./check_result_clarity.cjs')({cdp,click,fill,until,pause,assert,pass,shot,requests});
 };

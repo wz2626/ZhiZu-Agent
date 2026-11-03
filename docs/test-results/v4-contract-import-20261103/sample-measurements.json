@@ -1,0 +1,45 @@
+{
+  "scope": "Single synthetic sample per case; tracemalloc adds overhead and excludes native allocations; not process RSS or production throughput.",
+  "results": [
+    {
+      "sample": "phone.docx",
+      "size_bytes": 36949,
+      "status": "success",
+      "char_count": 106,
+      "elapsed_ms": 152.35,
+      "python_tracemalloc_peak_mib": 2.33
+    },
+    {
+      "sample": "table.pdf",
+      "size_bytes": 1144,
+      "status": "success",
+      "char_count": 41,
+      "elapsed_ms": 170.51,
+      "python_tracemalloc_peak_mib": 11.91
+    },
+    {
+      "sample": "big.docx",
+      "size_bytes": 2097152,
+      "status": "success",
+      "char_count": 25,
+      "elapsed_ms": 92.32,
+      "python_tracemalloc_peak_mib": 1.2
+    },
+    {
+      "sample": "long.docx",
+      "size_bytes": 36726,
+      "status": "success",
+      "char_count": 6014,
+      "elapsed_ms": 122.29,
+      "python_tracemalloc_peak_mib": 2.2
+    },
+    {
+      "sample": "mixed.pdf",
+      "size_bytes": 1290,
+      "status": "INCOMPLETE_EXTRACTION",
+      "char_count": null,
+      "elapsed_ms": 25.54,
+      "python_tracemalloc_peak_mib": 0.59
+    }
+  ]
+}

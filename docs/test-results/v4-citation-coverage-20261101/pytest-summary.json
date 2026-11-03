@@ -1,0 +1,10 @@
+{
+  "name": "pytest",
+  "errors": "0",
+  "failures": "0",
+  "skipped": "0",
+  "tests": "852",
+  "time": "33.874",
+  "timestamp": "2026-11-01T15:18:17.306675+08:00",
+  "hostname": "wz"
+}

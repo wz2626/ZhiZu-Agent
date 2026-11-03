@@ -1,0 +1,213 @@
+{
+  "passed": 41,
+  "failed": 0,
+  "skipped": 0,
+  "cases": [
+    {
+      "id": 1,
+      "label": "Stable workspace and one mounted Composer",
+      "status": "passed"
+    },
+    {
+      "id": 2,
+      "label": "App shell: empty input stays within the viewport at desktop, tablet, phone, short height and 200% reflow; mobile panes share one mounted Composer",
+      "status": "passed"
+    },
+    {
+      "id": 3,
+      "label": "Editor focus: trusted mouse click uses only the rounded outer surface feedback; no inner rectangle or layout shift",
+      "status": "passed"
+    },
+    {
+      "id": 4,
+      "label": "Editor placeholder: prompt is smaller, lighter and never input data; native typing and clearing preserve the empty state",
+      "status": "passed"
+    },
+    {
+      "id": 5,
+      "label": "Editor focus: native Tab navigation retains a clear full-editor indicator; forced-color mode also has an outline",
+      "status": "passed"
+    },
+    {
+      "id": 6,
+      "label": "Editor focus: touch uses the same soft outer feedback, keeps 16px input and does not break the fixed App Shell",
+      "status": "passed"
+    },
+    {
+      "id": 7,
+      "label": "Light theme initial input: 33 rendered text samples meet contrast thresholds; minimum 4.65:1",
+      "status": "passed"
+    },
+    {
+      "id": 8,
+      "label": "Submit-time new masking requires a second explicit confirmation of the displayed replacement",
+      "status": "passed"
+    },
+    {
+      "id": 9,
+      "label": "Local masking occurs in the original editor, without upload or second preview",
+      "status": "passed"
+    },
+    {
+      "id": 10,
+      "label": "One explicit consent action submits exactly the displayed sanitized text; duplicate blocked; HTML remains text",
+      "status": "passed"
+    },
+    {
+      "id": 11,
+      "label": "Risk selection preserves full source and mounted Composer",
+      "status": "passed"
+    },
+    {
+      "id": 12,
+      "label": "Explicit clause recommends its fixed direction before writing; recommendation does not generate or submit a message",
+      "status": "passed"
+    },
+    {
+      "id": 13,
+      "label": "Standalone keeps an explicit direction choice; first selection preserves message and enables available service",
+      "status": "passed"
+    },
+    {
+      "id": 14,
+      "label": "A/B drafts are record-local; rebinding is not an edit",
+      "status": "passed"
+    },
+    {
+      "id": 15,
+      "label": "IME composition defers navigation until the real composition end event",
+      "status": "passed"
+    },
+    {
+      "id": 16,
+      "label": "Keyboard: IME and repeated shortcuts do not submit; checkbox-free Composer and accessibility references survive",
+      "status": "passed"
+    },
+    {
+      "id": 17,
+      "label": "Law text, source and date equal the canonical library; repeated occurrences preserve exact source",
+      "status": "passed"
+    },
+    {
+      "id": 18,
+      "label": "Uncited clauses explain the empty state; missing evidence metadata is distinguished without hiding valid citations",
+      "status": "passed"
+    },
+    {
+      "id": 19,
+      "label": "Light theme review rejection: 52 rendered text samples meet contrast thresholds; minimum 4.93:1",
+      "status": "passed"
+    },
+    {
+      "id": 20,
+      "label": "Unlocated source is honest; missing service retry and all review failures preserve prior source without leaking raw errors",
+      "status": "passed"
+    },
+    {
+      "id": 21,
+      "label": "Cross-paragraph and self-overlapping matches preserve exact source without nested marks",
+      "status": "passed"
+    },
+    {
+      "id": 22,
+      "label": "1440 desktop, 200% reflow, mobile and short viewport: one scroll reaches uncovered send button; Composer identity retained",
+      "status": "passed"
+    },
+    {
+      "id": 23,
+      "label": "Visual: risk totals exclude NONE and the complete source remains exact",
+      "status": "passed"
+    },
+    {
+      "id": 24,
+      "label": "Risk filter: grade toggles filter only the list; a repeated click or total restores all items including NONE; counts stay global",
+      "status": "passed"
+    },
+    {
+      "id": 25,
+      "label": "Risk filter: zero-count choices provide an explicit reset; native keyboard activation works on filter buttons",
+      "status": "passed"
+    },
+    {
+      "id": 26,
+      "label": "Risk filter: excluding the selected clause preserves source, explanation, input and round; restoring all retains the selection",
+      "status": "passed"
+    },
+    {
+      "id": 27,
+      "label": "Risk filter: mobile filtering stays in the risk pane with no viewport overflow, data loss or HTTP POST",
+      "status": "passed"
+    },
+    {
+      "id": 28,
+      "label": "Visual: rapid next-match navigation scrolls/highlights only the final occurrence; source click never recenters",
+      "status": "passed"
+    },
+    {
+      "id": 29,
+      "label": "Visual: switching analysis versions cancels queued old-match scrolling and emphasis",
+      "status": "passed"
+    },
+    {
+      "id": 30,
+      "label": "Visual: consecutive accepted drafts restart the 260ms pulse; text is complete, adoption cancels it and consumes no round",
+      "status": "passed"
+    },
+    {
+      "id": 31,
+      "label": "Visual: background completion, history return and replay display full drafts without replaying arrival effects",
+      "status": "passed"
+    },
+    {
+      "id": 32,
+      "label": "Visual: long drafts avoid blur/character nodes; reduced motion presents complete clear text immediately",
+      "status": "passed"
+    },
+    {
+      "id": 33,
+      "label": "Visual: Escape and window blur cancel decoration without losing text or replaying it on focus",
+      "status": "passed"
+    },
+    {
+      "id": 34,
+      "label": "Visual: keyboard double focus ring and every control or its editor frame retain skin, including manual facts, all selects and copy fallback",
+      "status": "passed"
+    },
+    {
+      "id": 35,
+      "label": "Light theme result, copy fallback and trace: 106 rendered text samples meet contrast thresholds; minimum 4.65:1",
+      "status": "passed"
+    },
+    {
+      "id": 36,
+      "label": "App shell: real wheel and keyboard scrolling are isolated to the contract; task, risk, header and footer positions stay unchanged",
+      "status": "passed"
+    },
+    {
+      "id": 37,
+      "label": "App shell: processing details use a bounded nonmodal drawer, Escape restores focus, and the footer never moves",
+      "status": "passed"
+    },
+    {
+      "id": 38,
+      "label": "App shell: mobile pane switching preserves task scroll position, input text and Composer identity without a page scrollbar",
+      "status": "passed"
+    },
+    {
+      "id": 39,
+      "label": "Communication directions: five real choices; fees/other preserve separate messages, copy fallback is usable, no fake score or turn POST, fixed practice remains intact",
+      "status": "passed"
+    },
+    {
+      "id": 40,
+      "label": "Communication directions: deposit/repair/termination/fees/other recommendations follow source clauses; mixed topics stay unselected; manual choices and clause goals survive navigation",
+      "status": "passed"
+    },
+    {
+      "id": 41,
+      "label": "Communication directions: IME postpones switching; mobile copy action is reachable, viewport stays fixed and the Composer is never remounted",
+      "status": "passed"
+    }
+  ],
+  "external": 0
+}

@@ -78,7 +78,7 @@ _LOCATION_PREFIX = re.compile(r"(?:位于|在|进入|前往|来到)[^。！？�
 _LOCATION_TAIL = re.compile(r"[^。！？；;，,\n]{0,10}(?:内|中|里|清洁|打扫|家政)")
 _ENGLISH_LEASE = re.compile(r"\b(?:tenant|landlord)\b.{0,50}\b(?:rent|lease|deposit|repair|sublet)\b", re.I)
 _TEST_HEADING = re.compile(r"【[^】]*(?:合成|测试|脱敏|压力)[^】]*】")
-_PLACEHOLDER = re.compile(r"\[(?:手机号|身份证号|电话|已脱敏|REDACTED)\]", re.I)
+_PLACEHOLDER = re.compile(r"\[(?:手机号|身份证号|电话|已脱敏|REDACTED)\]|\*{3}", re.I)
 _CONTACT_LABEL = re.compile(r"(?:联系方式|联系(?:人)?|编号|手机(?:号)?|身份证(?:号)?|电话号码|号码)\s*[A-Za-z]?\s*[:=：]?", re.I)
 _NOISE = re.compile(r"乱码|锟斤拷|锟+|烫+|随机字符|无意义字符|[�□]+")
 _PROSE = re.compile(r"[\u3400-\u9fff]{4,}")

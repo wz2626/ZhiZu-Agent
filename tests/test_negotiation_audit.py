@@ -67,14 +67,14 @@ def test_valid_arrangement_preserves_tabs_and_detached_cached_snapshot(monkeypat
     arrangement = "周五\t核对水电与交接记录"
     monkeypatch.setattr(graph_module, "landlord_node", lambda state: {
         "landlord_response": f"【模拟房东】确认本轮安排：{arrangement}",
-        "candidate_terms": {"handover": {"arrangement": [arrangement]}},
+        "candidate_terms": {"round_1": {"arrangement": [arrangement]}},
         "landlord_confirmed": True,
     })
     service = NegotiationService(graph_module.build_negotiation_graph(), public_api=True)
     response = service.negotiate_with_effect("safe-session", "核对交接安排", request_id="same")
     assert response.state.status == "success" and response.state.round_count == 1
-    assert response.state.confirmed_terms == {"handover": {"arrangement": [arrangement]}}
-    response.state.confirmed_terms["handover"]["arrangement"].clear()
+    assert response.state.confirmed_terms == {"round_1": {"arrangement": [arrangement]}}
+    response.state.confirmed_terms["round_1"]["arrangement"].clear()
     replay = service.negotiate_with_effect("safe-session", "核对交接安排", request_id="same")
     assert replay.state.replayed and replay.state.round_count == 1
-    assert replay.state.confirmed_terms == {"handover": {"arrangement": [arrangement]}}
+    assert replay.state.confirmed_terms == {"round_1": {"arrangement": [arrangement]}}

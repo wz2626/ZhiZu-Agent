@@ -18,6 +18,9 @@ from backend.app.schemas.review import (
 )
 from backend.app.services.review_context import ReviewContextStore, review_context_store
 from backend.app.services.graph import review_graph
+from backend.app.services.operation_store import OperationBusy, OperationExpired
+from backend.app.services.model_gateway import check_deadline, remaining_timeout, CloudTransport
+from backend.app.core.privacy import redact_pii
 from backend.app.services.review_input_guard import classify_review_input
 from backend.app.services.review_trace import FAILURE_MESSAGES, append_trace, public_feedback
 from backend.app.services.vector_store import (
@@ -59,13 +62,14 @@ class ContractReviewService:
                 # LangChain caches its default transport. A request-scoped
                 # service must own its transport so close() cannot poison the
                 # next request or another service that is still using it.
-                self._http_client = httpx.Client(timeout=self.settings.chat_timeout_seconds)
+                self._http_client = httpx.Client(timeout=remaining_timeout(self.settings.chat_timeout_seconds), transport=CloudTransport())
                 self.llm = ChatOpenAI(
                     base_url=self.settings.chat_base_url,
                     model=self.settings.chat_model,
                     api_key=self.settings.chat_api_key,
                     temperature=0.1,
-                    timeout=self.settings.chat_timeout_seconds,
+                    timeout=remaining_timeout(self.settings.chat_timeout_seconds),
+                    max_tokens=4096,
                     max_retries=0,
                     use_responses_api=False,
                     http_client=self._http_client,
@@ -148,7 +152,7 @@ class ContractReviewService:
 
     def analyze_contract_detailed(self, text: str, top_k: int = 4) -> ReviewDetailedResponse:
         request = ReviewRequest(contract_text=text, top_k=top_k)
-        safe_text = mask_sensitive_text(request.contract_text)
+        safe_text = redact_pii(request.contract_text)
         trace: list[ReviewTraceEvent] = []
         started = perf_counter()
         guard_code = classify_review_input(safe_text)
@@ -181,11 +185,20 @@ class ContractReviewService:
                 retrieval_code = ReviewFailureCode.KB_NOT_READY
             else:
                 searching = True
-                evidence = self._filter_evidence(
-                    self.vector_store.search_evidence(safe_text, top_k=request.top_k), request.top_k,
-                )
+                # Detailed review needs coverage across clauses, not just the
+                # four laws most similar to the contract as a single document.
+                # Existing injected stores keep their single-query protocol.
+                clause_search = getattr(self.vector_store, "search_review_evidence", None)
+                if callable(clause_search):
+                    evidence = self._filter_evidence(clause_search(safe_text, top_k=request.top_k), 32)
+                else:
+                    evidence = self._filter_evidence(
+                        self.vector_store.search_evidence(safe_text, top_k=request.top_k), request.top_k,
+                    )
                 if not evidence:
                     retrieval_code = ReviewFailureCode.NO_EVIDENCE
+        except (OperationBusy, OperationExpired):
+            raise
         except (ValueError, *STORAGE_ERRORS):
             retrieval_code = ReviewFailureCode.KB_NOT_READY
         except RuntimeError:
@@ -223,16 +236,21 @@ class ContractReviewService:
                     for law in load_authoritative_laws()
                     if law.law_id in cited and law.law_id in retrieved
                 }
-                context_id = self.context_store.create(safe_text, results, evidence_by_id)
-                return ReviewDetailedResponse(
+                response = ReviewDetailedResponse(
                     status="success", results=results,
                     total_risks=sum(item.risk_level != RiskLevel.NONE for item in results),
                     retry_count=state["retry_count"], trace=trace,
-                    evidence_by_id=evidence_by_id, review_context_id=context_id,
+                    evidence_by_id=evidence_by_id,
                 )
+                response.model_dump_json()
+                check_deadline()
+                context_id = self.context_store.create(safe_text, results, evidence_by_id)
+                return response.model_copy(update={"review_context_id": context_id})
             code = state.get("failure_code") or ReviewFailureCode.VALIDATION_FAILED
             return self._detailed_failure(code, trace, errors=state["errors"],
                                           retry_count=state["retry_count"])
+        except (OperationBusy, OperationExpired):
+            raise
         except Exception:
             code = ReviewFailureCode.GRAPH_EXECUTION_FAILED
             append_trace(trace, node="graph", attempt=0, status="failed", started=started,

@@ -37,7 +37,7 @@ def isolated_review_environment(monkeypatch, tmp_path):
         pytest.fail("review unit tests must not call cloud APIs")
 
     monkeypatch.setattr("backend.app.services.review.ChatOpenAI.invoke", unexpected_cloud_call)
-    monkeypatch.setattr("backend.app.services.embedding.httpx.post", unexpected_cloud_call)
+    monkeypatch.setattr("backend.app.services.embedding.post_embeddings", unexpected_cloud_call)
 
 
 @pytest.fixture
@@ -303,7 +303,7 @@ def test_chat_client_uses_config_and_disables_hidden_retries(monkeypatch):
     assert calls == [{
         "base_url": "https://chat.example.invalid/v1", "model": "test-review-model",
         "api_key": "sk-synthetic-config-test", "temperature": 0.1,
-        "timeout": 20.0, "max_retries": 0, "use_responses_api": False,
+        "timeout": 20.0, "max_tokens": 4096, "max_retries": 0, "use_responses_api": False,
         "http_client": service._http_client,
     }]
     service.close()

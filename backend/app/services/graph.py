@@ -17,6 +17,7 @@ from backend.app.schemas.knowledge import EvidenceItem
 from backend.app.schemas.review import ReviewClauseResult, ReviewFailureCode, ReviewTraceEvent, RiskLevel
 from backend.app.services.review_trace import FAILURE_MESSAGES, append_trace
 from backend.app.services.vector_store import mask_sensitive_text
+from backend.app.services.model_gateway import invoke_model
 
 logger = logging.getLogger(__name__)
 _RESULTS_ADAPTER = TypeAdapter(list[ReviewClauseResult])
@@ -32,6 +33,11 @@ clause_id 使用 C-01、C-02 等唯一编号。original_clause 必须逐字复�
 evidence_ids 只能引用本次法律依据中的 law_id，不得凭记忆补充任何未提供的法条 ID。
 HIGH 必须有本次提供的法条直接支持，不得在没有可用引用时判定为 HIGH。
 依据不足时 evidence_ids 使用空数组并明确提示需补充依据，不能将“缺少依据”写成“已确认违法”或“已确认合法”。
+逐项对照本次提供的候选法条：能支持该项解释的条文应填入 evidence_ids，
+并在 explanation 中说明具体条文支持的权利义务、适用前提和例外，而不是笼统说未提供依据。
+不同条款分别判断：某项缺少直接依据，不影响其他条款引用已经提供的适用法条。
+候选集合可能由多个条款分别检索后合并；不能把候选命中当成必然适用，
+不得为了补齐引用而挂上不能支持本项解释的法条。确实不足时保留空数组并说明欠缺。
 法律依据仅覆盖民法典第703至734条。相关性不等于直接依据；本章没有直接规定押金返还，
 不得仅依据相关条文认定押金不退必然违法；提前退租的统一通知天数和费用也不能凭空断言。
 NONE 仅表示提供依据下未发现风险，不代表合同在全部法律范围内有效。
@@ -83,7 +89,7 @@ def _unique_json_object(pairs: list[tuple[str, object]]) -> dict:
 
 
 def validate_response(content: str, text: str, evidence_ids: set[str]) -> list[ReviewClauseResult]:
-    if not isinstance(content, str):
+    if not isinstance(content, str) or len(content) > 32000:
         raise ReviewValidationError("review output must be JSON text")
     cleaned = content.strip()
     # strip('json') strips a character set, not a prefix. Only apply the
@@ -94,7 +100,7 @@ def validate_response(content: str, text: str, evidence_ids: set[str]) -> list[R
     payload = json.loads(
         cleaned, parse_constant=_reject_nonfinite_json, object_pairs_hook=_unique_json_object,
     )
-    if not isinstance(payload, list):
+    if not isinstance(payload, list) or len(payload) > 32:
         raise ReviewValidationError("review output must be a JSON array")
     for item in payload:
         if not isinstance(item, dict):
@@ -184,7 +190,7 @@ def drafting_node(state: ReviewState, runtime: Runtime[ReviewContext]) -> dict:
             "不含 Markdown 或其他文本。"
         ))
     try:
-        response = runtime.context["llm"].invoke(messages)
+        response = invoke_model(runtime.context["llm"], messages)
         content = response.content
     except Exception as error:
         # Exception messages can contain keys or personal data.

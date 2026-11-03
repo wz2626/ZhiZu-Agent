@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const http = require('node:http');
-const { spawn } = require('node:child_process');
+const { spawn, execFileSync } = require('node:child_process');
 const assert = require('node:assert/strict');
 const { prepareEvidence } = require('./browser_evidence.cjs');
 const root = path.resolve(__dirname, '..');
@@ -16,6 +16,7 @@ const clause = '联系电话：***。维修责任和费用均由租客承担。'
 const markup = '<img src=x onerror="window.__xss=1">';
 const pageHtml = fs.readFileSync(path.join(root, 'frontend-web/index.html'), 'utf8');
 const law709 = JSON.parse(fs.readFileSync(path.join(root, 'backend/data/laws/civil_code_lease_703_734.json'), 'utf8')).find(law => law.law_id === 'LAW-709');
+const fixturePolicy=JSON.parse(execFileSync(path.join(root,'.venv/Scripts/python.exe'),['-c','import json;from backend.app.core.privacy import privacy_policy;print(json.dumps(privacy_policy()))'],{cwd:root,windowsHide:true,encoding:'utf8'}));
 const server = http.createServer(async (req, res) => {
   // Deliberately no OpenAPI fixture: exercise discovery-unavailable recovery.
   if (req.url === '/openapi.json') { discoveryRequests++; await pause(60); }
@@ -24,6 +25,7 @@ const server = http.createServer(async (req, res) => {
     res.end(fs.readFileSync(path.join(root, 'frontend-web', req.url.slice(1))));
     return;
   }
+  if(req.url==='/api/negotiation/meta'){res.setHeader('Content-Type','application/json');res.end(JSON.stringify({interaction_version:4,practice_epoch:'b'.repeat(32),privacy_policy_version:fixturePolicy.version,privacy_policy:fixturePolicy,mode:'fixed_offline',max_rounds:5,scenarios:{}}));return;}
   if (req.url === '/api/health') {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify({ status: 'ok', env_configured: true }));
@@ -45,6 +47,10 @@ const server = http.createServer(async (req, res) => {
       return;
     }
     if (responseMode === 'badjson') { res.end('DO_NOT_DISPLAY_RAW_INPUT not json'); return; }
+    if (responseMode === 'directions') {
+      const quotes=JSON.parse(body).contract_text.split('\n').slice(1);
+      res.end(JSON.stringify({status:'success',total_risks:quotes.length,review_context_id:'d'.repeat(32),evidence_by_id:{},results:quotes.map((quote,i)=>({clause_id:'C-0'+(i+1),original_clause:quote,risk_level:'MEDIUM',explanation:'合成沟通方向验收，不是法律结论。',evidence_ids:[],negotiation_tip:'请核对具体事实与约定。'}))}));return;
+    }
     if (responseMode === 'overlap') {
       res.end(JSON.stringify({status:'success',total_risks:2,results:[
         {clause_id:'C-01',original_clause:'维修责任由房东承担。\n费用由双方确认。',risk_level:'HIGH',explanation:'跨段原句定位测试。',evidence_ids:['LAW-712'],negotiation_tip:'核对两段约定。'},

@@ -75,7 +75,7 @@ def test_cloud_embedding_response_and_secret_safe_error(monkeypatch):
         calls.append((url, kwargs))
         return FakeResponse()
 
-    monkeypatch.setattr("backend.app.services.embedding.httpx.post", fake_post)
+    monkeypatch.setattr("backend.app.services.embedding.post_embeddings", fake_post)
     secret = "sk-private-test-secret"
     embedder = SiliconFlowEmbeddings(
         base_url="https://example.invalid/v1/", model="BAAI/bge-m3",
@@ -89,7 +89,7 @@ def test_cloud_embedding_response_and_secret_safe_error(monkeypatch):
     def failing_post(url, **kwargs):
         raise ValueError(secret)
 
-    monkeypatch.setattr("backend.app.services.embedding.httpx.post", failing_post)
+    monkeypatch.setattr("backend.app.services.embedding.post_embeddings", failing_post)
     with pytest.raises(RuntimeError) as error:
         embedder.embed_documents(["维修"])
     assert secret not in str(error.value)
@@ -221,7 +221,7 @@ def test_cloud_rejects_invalid_vector_elements(monkeypatch, invalid_value):
         def json(self):
             return {"data": [{"index": 0, "embedding": [0.1, invalid_value]}]}
 
-    monkeypatch.setattr("backend.app.services.embedding.httpx.post", lambda *args, **kwargs: FakeResponse())
+    monkeypatch.setattr("backend.app.services.embedding.post_embeddings", lambda *args, **kwargs: FakeResponse())
     embeddings = SiliconFlowEmbeddings(
         base_url="https://example.invalid/v1", model="test-model",
         api_key=secret, expected_dimension=2,
@@ -283,6 +283,7 @@ def test_zero_scores_are_removed_and_small_positive_scores_are_kept(tmp_path, mo
         ("110101199001011234", "[身份证号]"),
         ("11010119900101123X", "[身份证号]"),
         ("11010119900101123x", "[身份证号]"),
+        ("银行卡622202123456789012", "银行卡[身份证号]"),
     ],
 )
 def test_sensitive_number_formats_are_masked(text, expected):
@@ -293,7 +294,6 @@ def test_sensitive_number_formats_are_masked(text, expected):
     "text",
     [
         "银行卡6222021234567890",
-        "银行卡622202123456789012",
         "订单6222021234567890123",
         "金额138001380000元",
         "订单1101011990010112349",

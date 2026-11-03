@@ -20,11 +20,11 @@ class ReviewClauseResult(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     clause_id: Annotated[str, StringConstraints(pattern=r"^C-\d{2,}$")]
-    original_clause: str = Field(min_length=1, strict=True)
+    original_clause: str = Field(min_length=1, max_length=5000, strict=True)
     risk_level: RiskLevel
-    explanation: str = Field(strict=True)
+    explanation: str = Field(max_length=2000, strict=True)
     evidence_ids: list[LawId]
-    negotiation_tip: str = Field(strict=True)
+    negotiation_tip: str = Field(max_length=2000, strict=True)
 
     @model_validator(mode="after")
     def validate_risk_details(self) -> "ReviewClauseResult":
@@ -37,6 +37,7 @@ class ReviewClauseResult(BaseModel):
 
 
 class ReviewRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     contract_text: str = Field(min_length=10, max_length=5000, strict=True)
     top_k: int = Field(default=4, ge=1, le=8, strict=True)
 
@@ -50,7 +51,7 @@ class ReviewRequest(BaseModel):
 
 class ReviewResponse(BaseModel):
     status: Literal["success", "mock"]
-    results: list[ReviewClauseResult] = Field(min_length=1)
+    results: list[ReviewClauseResult] = Field(min_length=1, max_length=32)
     total_risks: int = Field(ge=0, strict=True)
 
     @model_validator(mode="after")
@@ -104,7 +105,7 @@ class ReviewDetailedResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     status: Literal["success", "needs_review"]
-    results: list[ReviewClauseResult]
+    results: list[ReviewClauseResult] = Field(max_length=32)
     total_risks: int = Field(ge=0, strict=True)
     failure_code: ReviewFailureCode | None = None
     reason: str | None = None
