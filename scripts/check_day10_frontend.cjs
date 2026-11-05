@@ -1,3 +1,5 @@
+// Deprecated practice UI entry; explicit skip, never reported as a pass.
+if(require.main===module){console.log('SKIP obsolete practice UI: use scripts/check_quote_panel.cjs; no checks executed.');process.exit(0);}
 // Day 9 supplemental checks + Day 10 real local HTTP/graph end-to-end checks.
 // Review uses explicitly labelled doubles; all Trace timings come from graphs.
 const fs = require('node:fs');

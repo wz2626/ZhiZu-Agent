@@ -1,0 +1,198 @@
+{
+  "fixture": "synthetic de-identified material; live configured model; no automatic retries",
+  "batch": {
+    "cases": 20,
+    "statuses": {
+      "success": 12,
+      "needs_context": 4,
+      "out_of_scope": 2,
+      "failed": 2
+    },
+    "median_ms": 3847.5,
+    "p95_ms": 5144,
+    "input_tokens": 39245,
+    "output_tokens": 10281
+  },
+  "targeted_retests": 2,
+  "final_distinct_cases": [
+    {
+      "case": "deposit_wear",
+      "status": "success",
+      "calls": 1,
+      "final_local_validation": "passed",
+      "selected_from": "batch"
+    },
+    {
+      "case": "repair_request",
+      "status": "success",
+      "calls": 1,
+      "final_local_validation": "passed",
+      "selected_from": "batch"
+    },
+    {
+      "case": "rent_overdue",
+      "status": "success",
+      "calls": 1,
+      "final_local_validation": "passed",
+      "selected_from": "batch"
+    },
+    {
+      "case": "unclear_reference",
+      "status": "needs_context",
+      "calls": 1,
+      "final_local_validation": "passed",
+      "selected_from": "batch"
+    },
+    {
+      "case": "early_exit",
+      "status": "success",
+      "calls": 1,
+      "final_local_validation": "passed",
+      "selected_from": "batch"
+    },
+    {
+      "case": "rent_raise",
+      "status": "success",
+      "calls": 1,
+      "final_local_validation": "passed",
+      "selected_from": "batch"
+    },
+    {
+      "case": "utility_bill",
+      "status": "success",
+      "calls": 1,
+      "final_local_validation": "passed",
+      "selected_from": "batch"
+    },
+    {
+      "case": "unrelated",
+      "status": "out_of_scope",
+      "calls": 1,
+      "final_local_validation": "passed",
+      "selected_from": "batch"
+    },
+    {
+      "case": "prompt_injection",
+      "status": "out_of_scope",
+      "calls": 1,
+      "final_local_validation": "passed",
+      "selected_from": "batch"
+    },
+    {
+      "case": "landlord_threat",
+      "status": "success",
+      "calls": 1,
+      "final_local_validation": "passed",
+      "selected_from": "batch"
+    },
+    {
+      "case": "claimed_lawsuit",
+      "status": "needs_context",
+      "calls": 1,
+      "final_local_validation": "passed",
+      "selected_from": "batch"
+    },
+    {
+      "case": "goal_without_concession",
+      "status": "success",
+      "calls": 1,
+      "final_local_validation": "passed",
+      "selected_from": "targeted_retest"
+    },
+    {
+      "case": "numeric_consistency",
+      "status": "needs_context",
+      "calls": 1,
+      "final_local_validation": "passed",
+      "selected_from": "batch"
+    },
+    {
+      "case": "no_invented_deadline",
+      "status": "success",
+      "calls": 1,
+      "final_local_validation": "passed",
+      "selected_from": "batch"
+    },
+    {
+      "case": "fault_exception",
+      "status": "success",
+      "calls": 1,
+      "final_local_validation": "passed",
+      "selected_from": "targeted_retest"
+    },
+    {
+      "case": "safety",
+      "status": "success",
+      "calls": 1,
+      "final_local_validation": "passed",
+      "selected_from": "batch"
+    },
+    {
+      "case": "sublease",
+      "status": "success",
+      "calls": 1,
+      "final_local_validation": "passed",
+      "selected_from": "batch"
+    },
+    {
+      "case": "entry",
+      "status": "success",
+      "calls": 1,
+      "final_local_validation": "passed",
+      "selected_from": "batch"
+    },
+    {
+      "case": "evidence_missing",
+      "status": "needs_context",
+      "calls": 1,
+      "final_local_validation": "passed",
+      "selected_from": "batch"
+    },
+    {
+      "case": "reasonable_handover",
+      "status": "success",
+      "calls": 1,
+      "final_local_validation": "passed",
+      "selected_from": "batch"
+    }
+  ],
+  "development_runs": [
+    {
+      "artifact": "quote-live-smoke-1.json",
+      "requests": 3
+    },
+    {
+      "artifact": "quote-live-final-1.json",
+      "requests": 20
+    },
+    {
+      "artifact": "quote-live-diagnostics-1.json",
+      "requests": 5
+    },
+    {
+      "artifact": "quote-live-final-2.json",
+      "requests": 20
+    },
+    {
+      "artifact": "quote-live-final-3.json",
+      "requests": 20
+    },
+    {
+      "artifact": "quote-threat-diagnostic.json",
+      "requests": 1
+    },
+    {
+      "artifact": "quote-live-threat-final.json",
+      "requests": 1
+    },
+    {
+      "artifact": "quote-live-acceptance.json",
+      "requests": 20
+    },
+    {
+      "artifact": "quote-live-retest-final.json",
+      "requests": 2
+    }
+  ],
+  "development_requests": 92
+}

@@ -1,0 +1,26 @@
+{
+  "passed": 17,
+  "failed": 0,
+  "cases": [
+    "Quote panel replaces visible practice/score/round UI and loads independent privacy metadata",
+    "Direct full-contract analysis without review or clause selection; IME, masking and double-submit protection",
+    "Three copy actions copy only reply text; clipboard denial exposes manual fallback",
+    "Privacy debounce is independent per field even without blur",
+    "IME in one field does not postpone another field masking, and still blocks submit",
+    "Native textarea input enforces the 2000-character cap",
+    "Client rejects success+unclear instead of overwriting the previous coherent card",
+    "out_of_scope clears the previous card, snapshot and copy fallback",
+    "Honest elapsed timer; needs_context keeps three clarification replies and opens the background editor",
+    "Controlled generation failure preserves input and the previous card without leaking upstream output",
+    "Safety refusal has a distinct controlled hint and preserves prior card",
+    "428 applies matching safe preview and requires another explicit submission",
+    "Editing during a request preserves new text and marks the returned old snapshot",
+    "Privacy debounce remains independent across historical/editor owners",
+    "Visible reviewed contract and editor have separate quote records; new contract text cannot impersonate an old result",
+    "Late cross-version responses and delayed clipboard completion stay with the original record",
+    "Desktop, short/tablet, mobile and 200% reflow retain bounded app shell and reachable action"
+  ],
+  "quote_requests": 10,
+  "external_requests": 0,
+  "fixture": "explicit HTTP doubles; no cloud"
+}

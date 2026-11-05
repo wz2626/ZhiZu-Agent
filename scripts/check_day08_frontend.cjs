@@ -1,3 +1,5 @@
+// Deprecated practice UI entry; explicit skip, never reported as a pass.
+if(require.main===module){console.log('SKIP obsolete practice UI: use scripts/check_quote_panel.cjs; no checks executed.');process.exit(0);}
 const fs = require('node:fs');
 const path = require('node:path');
 const http = require('node:http');

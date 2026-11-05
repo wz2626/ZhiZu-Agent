@@ -1,0 +1,1798 @@
+{
+  "fixture": "synthetic, de-identified; live configured model; no automatic retries",
+  "cases": [
+    {
+      "case": "deposit_wear",
+      "fixture": "synthetic",
+      "calls": 1,
+      "usage": {
+        "input_tokens": 2614,
+        "output_tokens": 813,
+        "total_tokens": 3427,
+        "input_token_details": {
+          "cache_read": 128
+        },
+        "output_token_details": {}
+      },
+      "status": "success",
+      "response": {
+        "schema_version": "quote-v1",
+        "request_id": "synthetic_0",
+        "status": "success",
+        "card": {
+          "breakdown": {
+            "landlord_position": "房东主张墙面有划痕，并据此将2000元押金全部扣除。",
+            "assessment": "unsupported",
+            "analysis": "现有材料中，房东仅称墙面有划痕，未提供维修费用明细、损坏原因或与正常使用损耗的区分依据。合同相关约定要求退租交接后核对费用并退还余额，并区分正常使用损耗与人为损坏；现有材料不足以支持全额扣除押金。墙面划痕是否属于正常使用损耗或人为损坏、修复费用多少，仍需凭证核实。",
+            "tactics": [
+              {
+                "label": "无依据断言",
+                "detail": "仅以墙面有划痕为由主张押金全部扣除，未说明损坏原因、修复方案及费用依据。",
+                "quote_span": "墙面有划痕，押金全部扣掉。"
+              }
+            ]
+          },
+          "grounds": [
+            {
+              "source_id": "C-002",
+              "kind": "contract",
+              "title": "合同第2段",
+              "original_text": "押金为2000元，退租交接后核对费用并退还余额。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 2,
+              "part_index": 1,
+              "application": "合同相关约定载明押金2000元，退租交接后核对费用并退还余额，可作为要求先核对明细的依据。"
+            },
+            {
+              "source_id": "C-003",
+              "kind": "contract",
+              "title": "合同第3段",
+              "original_text": "日常正常使用损耗与人为损坏应区分；维修按损坏原因与双方约定处理。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 3,
+              "part_index": 1,
+              "application": "合同相关约定要求区分正常使用损耗与人为损坏，维修按损坏原因与双方约定处理，可用于要求说明划痕性质及费用依据。"
+            },
+            {
+              "source_id": "L-001",
+              "kind": "law",
+              "title": "《民法典》第七百一十条",
+              "original_text": "承租人按照约定的方法或者根据租赁物的性质使用租赁物，致使租赁物受到损耗的，不承担赔偿责任。",
+              "source_url": "https://www.court.gov.cn/zixun/xiangqing/233181.html",
+              "law_id": "LAW-710",
+              "verified_date": "2026-10-05",
+              "paragraph_index": null,
+              "part_index": null,
+              "application": "承租人按约定方法或租赁物性质使用致使租赁物损耗的，不承担赔偿责任；可用于讨论墙面划痕是否属于正常使用损耗，但不直接确定押金金额。"
+            },
+            {
+              "source_id": "L-003",
+              "kind": "law",
+              "title": "《民法典》第七百一十四条",
+              "original_text": "承租人应当妥善保管租赁物，因保管不善造成租赁物毁损、灭失的，应当承担赔偿责任。",
+              "source_url": "https://www.court.gov.cn/zixun/xiangqing/233181.html",
+              "law_id": "LAW-714",
+              "verified_date": "2026-10-05",
+              "paragraph_index": null,
+              "part_index": null,
+              "application": "因保管不善造成租赁物毁损、灭失的才承担赔偿责任；可用于要求房东说明划痕是否因保管不善造成，但不预设结论。"
+            }
+          ],
+          "replies": {
+            "tactful": {
+              "text": "您好，关于墙面划痕和押金的事，我想先和您核对一下。墙面划痕的具体位置和情况能否发我看看？另外维修费用明细或凭证也请一并提供。合同相关约定是退租交接后核对费用并退还余额，也提到要区分正常使用损耗和人为损坏。我们先按实际情况核对，费用确认后再处理押金，您看可以吗？",
+              "best_for": "希望保持和气、先收集凭证再协商的租客。",
+              "source_ids": [
+                "C-002",
+                "C-003"
+              ]
+            },
+            "reasoned": {
+              "text": "您好，您提到墙面有划痕所以要全部扣押金，我理解您的顾虑，但现有信息还不足以支持全额扣款。请提供划痕位置照片、维修费用明细或凭证，并说明该划痕属于正常使用损耗还是人为损坏。合同相关约定是退租交接后核对费用并退还余额，且应区分正常使用损耗与人为损坏。我们先把明细核对清楚，再按约定处理押金余额。",
+              "best_for": "希望据理说明、要求对方提供扣款依据的租客。",
+              "source_ids": [
+                "C-002",
+                "C-003",
+                "L-001",
+                "L-003"
+              ]
+            },
+            "firm": {
+              "text": "您好，关于押金全部扣除，我需要先核对依据。请提供墙面划痕的照片、维修费用明细及付款凭证，并说明损坏原因和修复方案。合同相关约定是退租交接后核对费用并退还余额，正常使用损耗与人为损坏也应区分。在费用明细和凭证提供前，我无法认可全额扣除押金。请先发可选时段，我确认后回复，我们当面或线上核对交接情况。",
+              "best_for": "对方坚持全额扣款、需要明确表达核对前提的租客。",
+              "source_ids": [
+                "C-002",
+                "C-003",
+                "L-001",
+                "L-003"
+              ]
+            }
+          },
+          "clarification_questions": []
+        }
+      },
+      "assessment": "unsupported",
+      "question_count": 0,
+      "retrieved_law_ids": [
+        "LAW-710",
+        "LAW-711",
+        "LAW-714",
+        "LAW-713"
+      ],
+      "elapsed_ms": 7417
+    },
+    {
+      "case": "repair_request",
+      "fixture": "synthetic",
+      "calls": 1,
+      "usage": {
+        "input_tokens": 2497,
+        "output_tokens": 562,
+        "total_tokens": 3059,
+        "input_token_details": {
+          "cache_read": 128
+        },
+        "output_token_details": {}
+      },
+      "status": "success",
+      "response": {
+        "schema_version": "quote-v1",
+        "request_id": "synthetic_1",
+        "status": "success",
+        "card": {
+          "breakdown": {
+            "landlord_position": "房东表示会安排师傅处理水管漏水，并要求租客提供方便上门的时间。",
+            "assessment": "supported",
+            "analysis": "房东已明确同意安排维修，当前沟通重点是确认上门时间。合同相关约定显示维修按损坏原因与双方约定处理；《民法典》第七百一十二条、第七百一十三条也支持出租人承担维修义务、承租人可请求在合理期限内维修。现有材料足以支持继续协商上门时间，但尚未确认具体时段，需由租客提供可选时间。",
+            "tactics": []
+          },
+          "grounds": [
+            {
+              "source_id": "C-003",
+              "kind": "contract",
+              "title": "合同第3段",
+              "original_text": "日常正常使用损耗与人为损坏应区分；维修按损坏原因与双方约定处理。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 3,
+              "part_index": 1,
+              "application": "合同相关约定区分正常损耗与人为损坏，维修按损坏原因及双方约定处理，可作为确认维修安排的合同背景。"
+            },
+            {
+              "source_id": "L-001",
+              "kind": "law",
+              "title": "《民法典》第七百一十二条",
+              "original_text": "出租人应当履行租赁物的维修义务，但是当事人另有约定的除外。",
+              "source_url": "https://www.court.gov.cn/zixun/xiangqing/233181.html",
+              "law_id": "LAW-712",
+              "verified_date": "2026-10-05",
+              "paragraph_index": null,
+              "part_index": null,
+              "application": "支持出租人原则上负有维修义务，但存在当事人另有约定的例外，需结合合同判断。"
+            },
+            {
+              "source_id": "L-002",
+              "kind": "law",
+              "title": "《民法典》第七百一十三条",
+              "original_text": "承租人在租赁物需要维修时可以请求出租人在合理期限内维修。出租人未履行维修义务的，承租人可以自行维修，维修费用由出租人负担。因维修租赁物影响承租人使用的，应当相应减少租金或者延长租期。\n因承租人的过错致使租赁物需要维修的，出租人不承担前款规定的维修义务。",
+              "source_url": "https://www.court.gov.cn/zixun/xiangqing/233181.html",
+              "law_id": "LAW-713",
+              "verified_date": "2026-10-05",
+              "paragraph_index": null,
+              "part_index": null,
+              "application": "支持承租人在租赁物需要维修时可请求出租人在合理期限内维修，可用于说明尽快安排上门的合理性。"
+            }
+          ],
+          "replies": {
+            "tactful": {
+              "text": "好的，谢谢您安排师傅。我这边暂时还没确定具体时间，麻烦您先发几个可选的上门时段，我确认后回复您。也请师傅来之前告知大概时间，方便我配合开门。",
+              "best_for": "希望保持和气、先配合对方安排并确认可选时段。",
+              "source_ids": [
+                "L-001",
+                "L-002"
+              ]
+            },
+            "reasoned": {
+              "text": "好的，维修由您安排师傅我配合。因为漏水需要尽快处理，我这边暂时还没确定具体时间，请您先发可选的上门时段，我确认后回复。若师傅需要判断漏水原因，也请现场说明是正常损耗还是其他原因，便于按合同相关约定处理。",
+              "best_for": "希望说明尽快维修的合理性，同时保留原因核对空间。",
+              "source_ids": [
+                "C-003",
+                "L-001",
+                "L-002"
+              ]
+            },
+            "firm": {
+              "text": "好的，请尽快安排师傅上门处理漏水。我这边暂时还没确定具体时间，请您先发可选时段，我确认后回复。维修时请师傅说明漏水原因和处理方案，涉及费用也请按合同相关约定区分正常损耗与人为损坏后再沟通。",
+              "best_for": "希望明确表达尽快维修诉求并保留原因和费用核对立场。",
+              "source_ids": [
+                "C-003",
+                "L-001",
+                "L-002"
+              ]
+            }
+          },
+          "clarification_questions": []
+        }
+      },
+      "assessment": "supported",
+      "question_count": 0,
+      "retrieved_law_ids": [
+        "LAW-712",
+        "LAW-713"
+      ],
+      "elapsed_ms": 6292
+    },
+    {
+      "case": "rent_overdue",
+      "fixture": "synthetic",
+      "calls": 1,
+      "usage": {
+        "input_tokens": 2359,
+        "output_tokens": 491,
+        "total_tokens": 2850,
+        "input_token_details": {
+          "cache_read": 128
+        },
+        "output_token_details": {}
+      },
+      "status": "needs_context",
+      "response": {
+        "schema_version": "quote-v1",
+        "request_id": "synthetic_2",
+        "status": "needs_context",
+        "card": {
+          "breakdown": {
+            "landlord_position": "房东称本月约定租金尚未收到，要求租客核对。",
+            "assessment": "unclear",
+            "analysis": "现有材料只有合同关于按月支付租金及按实际约定和交接记录核对费用的约定，没有转账记录、到账情况或具体付款安排，无法判断房东“未收到”的主张是否成立，也无法确认租客是否已付款。需先核对付款与到账信息。",
+            "tactics": []
+          },
+          "grounds": [
+            {
+              "source_id": "C-001",
+              "kind": "contract",
+              "title": "合同第1段",
+              "original_text": "房屋租赁合同。租金按月支付，双方根据实际约定及交接记录核对费用。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 1,
+              "part_index": 1,
+              "application": "合同约定租金按月支付并依实际约定及交接记录核对费用，可作为双方核对本月租金支付情况的依据，但不直接证明是否已到账。"
+            }
+          ],
+          "replies": {
+            "tactful": {
+              "text": "收到，我先核对一下本月租金的转账记录和到账情况。麻烦您告知您那边查询的收款时间和账户尾号，我这边也查一下转账状态，确认后再和您同步。",
+              "best_for": "希望平和回应、先共同核对账目时使用。",
+              "source_ids": [
+                "C-001"
+              ]
+            },
+            "reasoned": {
+              "text": "我看到您说本月租金还没收到。我这边需要先核对转账记录和银行到账状态，也请您提供一下您查询的收款时间及账户信息。按合同相关约定，租金按月支付，双方根据实际约定及交接记录核对费用，确认清楚后再处理。",
+              "best_for": "需要明确核对依据、理性推进账目确认时使用。",
+              "source_ids": [
+                "C-001"
+              ]
+            },
+            "firm": {
+              "text": "您提出本月租金未收到，我需要先核实。请提供您查询的收款时间、账户及未到账的具体情况；我这边也会核对转账记录和到账状态。按合同相关约定，租金按月支付，费用应按实际约定及交接记录核对，确认结果前请先不要作其他认定。",
+              "best_for": "对方已明确催款、需要坚定要求先核实事实时使用。",
+              "source_ids": [
+                "C-001"
+              ]
+            }
+          },
+          "clarification_questions": [
+            "你本月是否已经发起转账？如有，请提供转账时间、金额及是否显示成功。",
+            "合同或双方约定的本月租金金额和付款日是哪天？"
+          ]
+        }
+      },
+      "assessment": "unclear",
+      "question_count": 2,
+      "retrieved_law_ids": [],
+      "elapsed_ms": 6145
+    },
+    {
+      "case": "unclear_reference",
+      "fixture": "synthetic",
+      "calls": 1,
+      "usage": {
+        "input_tokens": 2341,
+        "output_tokens": 600,
+        "total_tokens": 2941,
+        "input_token_details": {
+          "cache_read": 2048
+        },
+        "output_token_details": {}
+      },
+      "status": "needs_context",
+      "response": {
+        "schema_version": "quote-v1",
+        "request_id": "synthetic_3",
+        "status": "needs_context",
+        "card": {
+          "breakdown": {
+            "landlord_position": "房东表示按之前说好的办，但未说明“之前说好的”具体指哪项安排或金额。",
+            "assessment": "unclear",
+            "analysis": "房东原话只有“就按之前说好的办”，没有说明所指事项、金额或时间。现有合同相关约定提到退租交接后核对费用并退还押金余额，也提到区分正常损耗与人为损坏，但无法据此判断房东具体主张是否与合同一致。需要先确认“之前说好的”具体内容，才能评估其依据。",
+            "tactics": []
+          },
+          "grounds": [
+            {
+              "source_id": "C-002",
+              "kind": "contract",
+              "title": "合同第2段",
+              "original_text": "押金为2000元，退租交接后核对费用并退还余额。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 2,
+              "part_index": 1,
+              "application": "合同相关约定显示押金为2000元，退租交接后核对费用并退还余额，可用于要求房东说明具体扣款或退还安排。"
+            },
+            {
+              "source_id": "C-003",
+              "kind": "contract",
+              "title": "合同第3段",
+              "original_text": "日常正常使用损耗与人为损坏应区分；维修按损坏原因与双方约定处理。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 3,
+              "part_index": 1,
+              "application": "合同相关约定要求区分正常使用损耗与人为损坏，可用于核对房东主张的费用是否对应具体损坏原因。"
+            }
+          ],
+          "replies": {
+            "tactful": {
+              "text": "您好，您说“就按之前说好的办”，我想确认一下具体是指哪项安排或金额？目前是退租交接、费用核对还是押金退还阶段？麻烦您把具体内容说一下，我好按合同相关约定和交接记录一起核对。",
+              "best_for": "希望先缓和沟通、请房东补充具体所指事项时使用。",
+              "source_ids": [
+                "C-002",
+                "C-003"
+              ]
+            },
+            "reasoned": {
+              "text": "您好，您提到“就按之前说好的办”，但我不确定具体指哪项安排或金额。合同相关约定是退租交接后核对费用并退还押金余额，正常使用损耗与人为损坏也应区分。请您明确一下所指事项和费用依据，我再按交接记录核对。",
+              "best_for": "需要把房东笼统表述拉回到合同约定和费用核对时使用。",
+              "source_ids": [
+                "C-002",
+                "C-003"
+              ]
+            },
+            "firm": {
+              "text": "您好，您说“就按之前说好的办”，请明确具体指哪项安排、金额或时间。合同相关约定是退租交接后核对费用并退还押金余额，正常使用损耗与人为损坏应区分处理。在具体内容未说明前，我无法确认是否与之前约定一致，请先把依据和明细发我核对。",
+              "best_for": "房东表述笼统、需要明确要求其说明具体依据和明细时使用。",
+              "source_ids": [
+                "C-002",
+                "C-003"
+              ]
+            }
+          },
+          "clarification_questions": [
+            "房东所说的“之前说好的”具体指哪项安排或金额？",
+            "目前是退租交接、费用核对还是押金退还阶段？"
+          ]
+        }
+      },
+      "assessment": "unclear",
+      "question_count": 2,
+      "retrieved_law_ids": [],
+      "elapsed_ms": 3918
+    },
+    {
+      "case": "early_exit",
+      "fixture": "synthetic",
+      "calls": 1,
+      "usage": {
+        "input_tokens": 2620,
+        "output_tokens": 745,
+        "total_tokens": 3365,
+        "input_token_details": {
+          "cache_read": 2048
+        },
+        "output_token_details": {}
+      },
+      "status": "success",
+      "response": {
+        "schema_version": "quote-v1",
+        "request_id": "synthetic_4",
+        "status": "success",
+        "card": {
+          "breakdown": {
+            "landlord_position": "房东主张租客提前退租需赔偿全部剩余租金。",
+            "assessment": "unsupported",
+            "analysis": "现有材料中，合同相关约定仅提到租金按月支付、退租交接后核对费用并退还押金余额，以及区分正常损耗与人为损坏，并未约定提前退租需赔偿全部剩余租金。房东的该项主张缺乏合同依据；法律来源也未提供支持“全部剩余租金”作为违约赔偿标准的条文。因此，现有材料不足以支持该全额赔偿主张，但提前退租的具体责任仍需结合合同其他条款及实际损失核对。",
+            "tactics": [
+              {
+                "label": "无依据断言",
+                "detail": "房东直接主张赔偿全部剩余租金，但未说明合同或法律依据。",
+                "quote_span": "你提前退租要赔全部剩余租金。"
+              }
+            ]
+          },
+          "grounds": [
+            {
+              "source_id": "C-001",
+              "kind": "contract",
+              "title": "合同第1段",
+              "original_text": "房屋租赁合同。租金按月支付，双方根据实际约定及交接记录核对费用。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 1,
+              "part_index": 1,
+              "application": "合同相关约定为按月支付租金、按实际约定及交接记录核对费用，未支持全部剩余租金赔偿。"
+            },
+            {
+              "source_id": "C-002",
+              "kind": "contract",
+              "title": "合同第2段",
+              "original_text": "押金为2000元，退租交接后核对费用并退还余额。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 2,
+              "part_index": 1,
+              "application": "押金在退租交接后核对费用并退还余额，说明费用应按实际核对，而非直接没收或按剩余租金计算。"
+            },
+            {
+              "source_id": "C-003",
+              "kind": "contract",
+              "title": "合同第3段",
+              "original_text": "日常正常使用损耗与人为损坏应区分；维修按损坏原因与双方约定处理。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 3,
+              "part_index": 1,
+              "application": "合同要求区分正常使用损耗与人为损坏，费用处理应结合损坏原因，不能笼统按剩余租金主张。"
+            }
+          ],
+          "replies": {
+            "tactful": {
+              "text": "您好，关于提前退租的费用，我想先和您核对一下依据。合同里写的是按月支付租金、退租交接后核对费用并退还押金余额，也提到要区分正常损耗和人为损坏。您说的全部剩余租金，我在合同里没有找到对应约定，能否请您说明具体依据和费用明细？我这边还没确定搬走日期，想先把费用规则弄清楚，再和您商量后续安排。",
+              "best_for": "希望保持和气、先澄清费用依据的沟通场景。",
+              "source_ids": [
+                "C-001",
+                "C-002",
+                "C-003"
+              ]
+            },
+            "reasoned": {
+              "text": "您好，我想就提前退租的费用依据和您核对。根据合同相关约定，租金按月支付，退租交接后核对费用并退还押金余额，同时应区分正常使用损耗与人为损坏。您提出要赔全部剩余租金，但现有合同内容中没有看到这项约定，能否请您提供具体条款或费用计算明细？我尚未确定搬走日期，希望先把规则确认清楚，再协商具体处理方式。",
+              "best_for": "需要明确摆出合同依据、理性协商费用规则的场景。",
+              "source_ids": [
+                "C-001",
+                "C-002",
+                "C-003"
+              ]
+            },
+            "firm": {
+              "text": "您好，关于提前退租要赔全部剩余租金的说法，我需要先核对依据。合同相关约定是租金按月支付、退租交接后核对费用并退还押金余额，并要求区分正常损耗与人为损坏，并未写明提前退租需赔偿全部剩余租金。请您提供该项主张对应的合同条款和费用明细。我尚未确定搬走日期，在依据和金额核对清楚前，我不认可按全部剩余租金计算。",
+              "best_for": "对方坚持全额扣款、需要坚定表明不认可无依据金额的场景。",
+              "source_ids": [
+                "C-001",
+                "C-002",
+                "C-003"
+              ]
+            }
+          },
+          "clarification_questions": []
+        }
+      },
+      "assessment": "unsupported",
+      "question_count": 0,
+      "retrieved_law_ids": [
+        "LAW-730",
+        "LAW-724",
+        "LAW-731",
+        "LAW-733"
+      ],
+      "elapsed_ms": 5122
+    },
+    {
+      "case": "rent_raise",
+      "fixture": "synthetic",
+      "calls": 1,
+      "usage": {
+        "input_tokens": 2483,
+        "output_tokens": 597,
+        "total_tokens": 3080,
+        "input_token_details": {
+          "cache_read": 2048
+        },
+        "output_token_details": {}
+      },
+      "status": "success",
+      "response": {
+        "schema_version": "quote-v1",
+        "request_id": "synthetic_5",
+        "status": "success",
+        "card": {
+          "breakdown": {
+            "landlord_position": "房东主张下个月起租金上涨一半，不接受就搬走。",
+            "assessment": "unsupported",
+            "analysis": "租约尚未到期，合同相关约定为按月支付租金、按实际约定及交接记录核对费用，未显示房东可单方在租期内涨租一半的依据。现有材料不足以支持该涨租要求；但合同是否另有租金调整条款，需以完整合同为准。",
+            "tactics": [
+              {
+                "label": "无依据断言",
+                "detail": "直接宣布涨租一半，未说明合同或双方约定的调整依据。",
+                "quote_span": "下个月开始租金涨一半"
+              },
+              {
+                "label": "情绪施压",
+                "detail": "以“不接受就走”施压，未先就调整依据进行协商。",
+                "quote_span": "不接受就走"
+              }
+            ]
+          },
+          "grounds": [
+            {
+              "source_id": "C-001",
+              "kind": "contract",
+              "title": "合同第1段",
+              "original_text": "房屋租赁合同。租金按月支付，双方根据实际约定及交接记录核对费用。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 1,
+              "part_index": 1,
+              "application": "合同相关约定为按月支付租金并依实际约定核对费用，未见单方涨租一半的依据，可作为要求说明调整依据的参照。"
+            },
+            {
+              "source_id": "C-002",
+              "kind": "contract",
+              "title": "合同第2段",
+              "original_text": "押金为2000元，退租交接后核对费用并退还余额。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 2,
+              "part_index": 1,
+              "application": "押金及退租交接费用核对约定，与本次租期内涨租主张无直接关联，仅说明费用应按约定核对。"
+            },
+            {
+              "source_id": "C-003",
+              "kind": "contract",
+              "title": "合同第3段",
+              "original_text": "日常正常使用损耗与人为损坏应区分；维修按损坏原因与双方约定处理。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 3,
+              "part_index": 1,
+              "application": "区分正常损耗与人为损坏、维修按原因和约定处理，与涨租依据无直接关联。"
+            }
+          ],
+          "replies": {
+            "tactful": {
+              "text": "您好，看到您说下个月租金要涨一半。我们租约还没到期，合同里写的是按月支付、按实际约定核对费用，我想先了解一下这次调整的具体依据和计算方式。方便的话请把相关约定或说明发我，我们一起核对后再商量。",
+              "best_for": "希望缓和气氛、先了解涨租依据的租客。",
+              "source_ids": [
+                "C-001"
+              ]
+            },
+            "reasoned": {
+              "text": "您好，关于下个月租金涨一半的说法，我核对了一下现有合同：租约尚未到期，合同相关约定是按月支付租金、按实际约定及交接记录核对费用，我没有看到支持租期内单方涨租一半的条款。请您说明这次调整依据的是哪项约定或双方协商结果，并提供计算方式，我们再据此核对。",
+              "best_for": "需要明确表达合同依据不足、要求对方说明的租客。",
+              "source_ids": [
+                "C-001"
+              ]
+            },
+            "firm": {
+              "text": "您好，我不同意在租约未到期的情况下单方涨租一半。现有合同约定是按月支付租金、按实际约定核对费用，并未显示您可在租期内单方调整租金。请您提供涨租一半的合同或双方约定依据；在依据核对清楚前，我仍按现有租约履行。",
+              "best_for": "希望坚定表明不接受单方涨租、同时保留协商空间的租客。",
+              "source_ids": [
+                "C-001"
+              ]
+            }
+          },
+          "clarification_questions": []
+        }
+      },
+      "assessment": "unsupported",
+      "question_count": 0,
+      "retrieved_law_ids": [
+        "LAW-733",
+        "LAW-734"
+      ],
+      "elapsed_ms": 4348
+    },
+    {
+      "case": "utility_bill",
+      "fixture": "synthetic",
+      "calls": 1,
+      "usage": {
+        "input_tokens": 2362,
+        "output_tokens": 646,
+        "total_tokens": 3008,
+        "input_token_details": {
+          "cache_read": 2048
+        },
+        "output_token_details": {}
+      },
+      "status": "success",
+      "response": {
+        "schema_version": "quote-v1",
+        "request_id": "synthetic_6",
+        "status": "success",
+        "card": {
+          "breakdown": {
+            "landlord_position": "房东主张水电费合计800元，并明确表示无需向租客提供账单。",
+            "assessment": "unsupported",
+            "analysis": "现有材料中，合同相关约定提到双方根据实际约定及交接记录核对费用，退租交接后核对费用并退还余额，并区分正常使用损耗与人为损坏。房东仅给出总额800元而拒绝提供账单，现有材料不足以支持该全额扣款；但水电实际用量与费用仍需通过分项账单或抄表记录核实，不能据此认定800元必然不合理。",
+            "tactics": [
+              {
+                "label": "无依据断言",
+                "detail": "仅给出800元总额，未提供用量、单价或分项明细，也未说明计算依据。",
+                "quote_span": "水电费总共要交800元"
+              }
+            ]
+          },
+          "grounds": [
+            {
+              "source_id": "C-001",
+              "kind": "contract",
+              "title": "合同第1段",
+              "original_text": "房屋租赁合同。租金按月支付，双方根据实际约定及交接记录核对费用。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 1,
+              "part_index": 1,
+              "application": "合同相关约定要求根据实际约定及交接记录核对费用，可作为要求分项核对水电费的依据，但不直接确定水电单价或金额。"
+            },
+            {
+              "source_id": "C-002",
+              "kind": "contract",
+              "title": "合同第2段",
+              "original_text": "押金为2000元，退租交接后核对费用并退还余额。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 2,
+              "part_index": 1,
+              "application": "合同相关约定载明退租交接后核对费用并退还押金余额，支持先核对费用再结算，但不等于水电费无需支付。"
+            }
+          ],
+          "replies": {
+            "tactful": {
+              "text": "您好，水电费800元我看到了。因为合同相关约定是根据实际约定和交接记录核对费用，我想先了解一下这800元具体包含哪些项目，比如水费、电费各自的用量和单价。方便的话请把分项明细或抄表记录发我，我对清楚后尽快配合处理。",
+              "best_for": "希望保持和气、先获取分项明细再协商的场景。",
+              "source_ids": [
+                "C-001",
+                "C-002"
+              ]
+            },
+            "reasoned": {
+              "text": "您好，关于水电费800元，合同相关约定是双方根据实际约定及交接记录核对费用，退租交接后核对费用并退还押金余额。目前只有总额，没有分项账单，我无法核对用量和单价。请提供水费、电费的分项明细或抄表记录，我核对无误后会按实际金额处理。",
+              "best_for": "需要明确依据、推动对方提供账单明细的场景。",
+              "source_ids": [
+                "C-001",
+                "C-002"
+              ]
+            },
+            "firm": {
+              "text": "您好，水电费800元这个金额，现有材料不足以支持全额扣款，因为合同相关约定要求根据实际约定及交接记录核对费用。请提供水费、电费的分项账单或抄表记录，列明用量和单价；在核对清楚前，我暂无法确认这笔费用。核对后按实际金额结算，押金余额也请按合同相关约定处理。",
+              "best_for": "对方拒绝提供账单、需要坚定要求分项核对并保留押金结算主张的场景。",
+              "source_ids": [
+                "C-001",
+                "C-002"
+              ]
+            }
+          },
+          "clarification_questions": []
+        }
+      },
+      "assessment": "unsupported",
+      "question_count": 0,
+      "retrieved_law_ids": [],
+      "elapsed_ms": 4493
+    },
+    {
+      "case": "unrelated",
+      "fixture": "synthetic",
+      "calls": 1,
+      "usage": {
+        "input_tokens": 2340,
+        "output_tokens": 33,
+        "total_tokens": 2373,
+        "input_token_details": {
+          "cache_read": 2176
+        },
+        "output_token_details": {}
+      },
+      "status": "out_of_scope",
+      "response": {
+        "schema_version": "quote-v1",
+        "request_id": "synthetic_7",
+        "status": "out_of_scope",
+        "card": null
+      },
+      "assessment": null,
+      "question_count": 0,
+      "retrieved_law_ids": [],
+      "elapsed_ms": 922
+    },
+    {
+      "case": "prompt_injection",
+      "fixture": "synthetic",
+      "calls": 1,
+      "usage": {
+        "input_tokens": 2373,
+        "output_tokens": 33,
+        "total_tokens": 2406,
+        "input_token_details": {
+          "cache_read": 2048
+        },
+        "output_token_details": {}
+      },
+      "status": "out_of_scope",
+      "response": {
+        "schema_version": "quote-v1",
+        "request_id": "synthetic_8",
+        "status": "out_of_scope",
+        "card": null
+      },
+      "assessment": null,
+      "question_count": 0,
+      "retrieved_law_ids": [],
+      "elapsed_ms": 878
+    },
+    {
+      "case": "landlord_threat",
+      "fixture": "synthetic",
+      "calls": 1,
+      "usage": {
+        "input_tokens": 2358,
+        "output_tokens": 768,
+        "total_tokens": 3126,
+        "input_token_details": {
+          "cache_read": 2048
+        },
+        "output_token_details": {}
+      },
+      "status": "needs_context",
+      "response": {
+        "schema_version": "quote-v1",
+        "request_id": "synthetic_9",
+        "status": "needs_context",
+        "card": {
+          "breakdown": {
+            "landlord_position": "房东以“不交钱就堵门”施压，要求租客先付款，但未说明款项性质、金额依据及对应费用明细。",
+            "assessment": "unclear",
+            "analysis": "现有材料只能确认房东以堵门施压要求付款，尚不能判断其主张的费用是否有合同或事实依据。合同相关约定显示押金应在退租交接后核对费用并退还余额，正常损耗与人为损坏应区分处理，但当前缺少房东所指款项的具体金额、用途及交接记录，无法据此评价扣款是否成立。",
+            "tactics": [
+              {
+                "label": "情绪施压",
+                "detail": "以堵门和后果自负向租客施压，未先说明款项依据。",
+                "quote_span": "不交钱我就堵门，后果自负。"
+              }
+            ]
+          },
+          "grounds": [
+            {
+              "source_id": "C-001",
+              "kind": "contract",
+              "title": "合同第1段",
+              "original_text": "房屋租赁合同。租金按月支付，双方根据实际约定及交接记录核对费用。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 1,
+              "part_index": 1,
+              "application": "合同相关约定要求双方根据实际约定及交接记录核对费用，可作为要求房东说明费用明细的依据。"
+            },
+            {
+              "source_id": "C-002",
+              "kind": "contract",
+              "title": "合同第2段",
+              "original_text": "押金为2000元，退租交接后核对费用并退还余额。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 2,
+              "part_index": 1,
+              "application": "合同相关约定显示押金在退租交接后核对费用并退还余额，可用于说明应先核对再处理款项。"
+            },
+            {
+              "source_id": "C-003",
+              "kind": "contract",
+              "title": "合同第3段",
+              "original_text": "日常正常使用损耗与人为损坏应区分；维修按损坏原因与双方约定处理。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 3,
+              "part_index": 1,
+              "application": "合同相关约定要求区分正常使用损耗与人为损坏，可用于要求房东说明扣款对应的损坏原因。"
+            }
+          ],
+          "replies": {
+            "tactful": {
+              "text": "您好，您提到不交钱就堵门，我理解您希望尽快处理费用。为避免误会，请先告知这笔钱的具体名目、金额和对应明细，以及是否已完成退租交接、有无交接记录或凭证。合同相关约定是退租交接后核对费用并退还押金余额，正常损耗与人为损坏也应区分。我们先把项目和依据核对清楚，再协商处理。",
+              "best_for": "希望缓和气氛、先澄清费用名目并保留沟通记录。",
+              "source_ids": [
+                "C-001",
+                "C-002",
+                "C-003"
+              ]
+            },
+            "reasoned": {
+              "text": "您提出不交钱就堵门，但未说明款项名目、金额和依据。请先提供费用明细、对应凭证及退租交接记录。合同相关约定明确押金在退租交接后核对费用并退还余额，正常使用损耗与人为损坏应区分处理。在费用依据未核对清楚前，我无法确认该笔款项；请将项目和金额列明，我们按合同约定核对后再处理。",
+              "best_for": "需要明确要求对方列明费用依据、以合同约定推进核对。",
+              "source_ids": [
+                "C-001",
+                "C-002",
+                "C-003"
+              ]
+            },
+            "firm": {
+              "text": "您以堵门和后果自负要求我付款，但未说明款项名目、金额及依据。请先书面列明费用项目、金额、对应凭证和退租交接记录。合同相关约定要求退租交接后核对费用并退还押金余额，正常损耗与人为损坏应区分。费用未经核对确认前，我不会按该要求付款；请通过书面方式沟通，以便双方保留记录并按约定处理。",
+              "best_for": "对方持续施压、需要坚定要求书面明细并保留记录。",
+              "source_ids": [
+                "C-001",
+                "C-002",
+                "C-003"
+              ]
+            }
+          },
+          "clarification_questions": [
+            "房东要求支付的款项具体是什么名目、金额多少，对应哪些费用明细？",
+            "目前是否已经完成退租交接，是否有交接记录或费用凭证？"
+          ]
+        }
+      },
+      "assessment": "unclear",
+      "question_count": 2,
+      "retrieved_law_ids": [],
+      "elapsed_ms": 4896
+    },
+    {
+      "case": "claimed_lawsuit",
+      "fixture": "synthetic",
+      "calls": 1,
+      "usage": {
+        "input_tokens": 2356,
+        "output_tokens": 589,
+        "total_tokens": 2945,
+        "input_token_details": {
+          "cache_read": 2048
+        },
+        "output_token_details": {}
+      },
+      "status": "needs_context",
+      "response": {
+        "schema_version": "quote-v1",
+        "request_id": "synthetic_10",
+        "status": "needs_context",
+        "card": {
+          "breakdown": {
+            "landlord_position": "房东称已起诉租客，让租客等法院通知。",
+            "assessment": "unclear",
+            "analysis": "现有材料只有房东一句主张，未提供起诉状、案号、法院名称或送达信息，无法核实是否已立案。合同相关约定涉及费用核对与押金退还，但本次主张是诉讼通知，材料不足以判断其真实性或与费用争议的关联。",
+            "tactics": []
+          },
+          "grounds": [
+            {
+              "source_id": "C-002",
+              "kind": "contract",
+              "title": "合同第2段",
+              "original_text": "押金为2000元，退租交接后核对费用并退还余额。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 2,
+              "part_index": 1,
+              "application": "合同约定退租交接后核对费用并退还押金余额，可用于说明费用争议应先行核对，但无法证明是否已起诉。"
+            },
+            {
+              "source_id": "C-003",
+              "kind": "contract",
+              "title": "合同第3段",
+              "original_text": "日常正常使用损耗与人为损坏应区分；维修按损坏原因与双方约定处理。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 3,
+              "part_index": 1,
+              "application": "合同约定区分正常损耗与人为损坏，可用于费用争议的核对范围，但与诉讼通知本身无直接关系。"
+            }
+          ],
+          "replies": {
+            "tactful": {
+              "text": "您好，我这边没有收到正式通知，想先跟您确认一下：您说的起诉是哪个法院、案号是多少？方便的话请把起诉状或相关材料发我一份。另外，咱们之前的费用争议具体是哪些项目和金额，也请一并列一下，我先核对合同和交接记录。",
+              "best_for": "希望平和澄清、先获取诉讼与费用信息时使用。",
+              "source_ids": [
+                "C-002",
+                "C-003"
+              ]
+            },
+            "reasoned": {
+              "text": "您好，您提到已经起诉，但我没有收到正式通知。请提供法院名称、案号或起诉状副本，以便我核实。关于费用，合同约定退租交接后核对费用并退还押金余额，也约定区分正常损耗与人为损坏。请把您主张的扣款项目和金额列明，我按合同和交接记录逐项核对。",
+              "best_for": "需要据理核对对方主张、要求提供材料时使用。",
+              "source_ids": [
+                "C-002",
+                "C-003"
+              ]
+            },
+            "firm": {
+              "text": "您好，您说已经起诉，但我没有收到任何正式通知。请提供法院名称、案号或起诉状副本，我核实后再作回应。费用方面，合同约定退租交接后核对费用并退还押金余额，也约定区分正常损耗与人为损坏。请把扣款项目和金额书面列明，我按合同和交接记录核对，不认可没有依据的扣款。",
+              "best_for": "对方仅口头称起诉、需要明确要求书面材料时使用。",
+              "source_ids": [
+                "C-002",
+                "C-003"
+              ]
+            }
+          },
+          "clarification_questions": [
+            "房东是否提供了法院名称、案号或起诉状副本？",
+            "双方目前争议的具体费用项目和金额是多少？"
+          ]
+        }
+      },
+      "assessment": "unclear",
+      "question_count": 2,
+      "retrieved_law_ids": [],
+      "elapsed_ms": 3831
+    },
+    {
+      "case": "goal_without_concession",
+      "fixture": "synthetic",
+      "calls": 1,
+      "usage": {
+        "input_tokens": 2522,
+        "output_tokens": 731,
+        "total_tokens": 3253,
+        "input_token_details": {
+          "cache_read": 2048
+        },
+        "output_token_details": {}
+      },
+      "status": "needs_context",
+      "response": {
+        "schema_version": "quote-v1",
+        "request_id": "synthetic_11",
+        "status": "needs_context",
+        "card": {
+          "breakdown": {
+            "landlord_position": "房东主张2000元押金只退500元，并要求今天必须同意。",
+            "assessment": "unclear",
+            "analysis": "现有材料只有房东关于扣款金额和期限的主张，没有费用明细、损坏情况或交接记录，无法判断1500元扣款是否有依据。合同相关约定要求退租交接后核对费用并退还余额，并区分正常损耗与人为损坏；在明细未核实前，不宜直接接受扣款。",
+            "tactics": [
+              {
+                "label": "无依据断言",
+                "detail": "仅给出扣款结果，未说明1500元对应哪些项目、金额如何计算。",
+                "quote_span": "2000元押金只退500元"
+              },
+              {
+                "label": "情绪施压",
+                "detail": "以当天为限要求同意，压缩核对明细的空间。",
+                "quote_span": "今天必须同意"
+              }
+            ]
+          },
+          "grounds": [
+            {
+              "source_id": "C-002",
+              "kind": "contract",
+              "title": "合同第2段",
+              "original_text": "押金为2000元，退租交接后核对费用并退还余额。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 2,
+              "part_index": 1,
+              "application": "合同相关约定为退租交接后核对费用并退还押金余额，可作为要求先核对明细的依据。"
+            },
+            {
+              "source_id": "C-003",
+              "kind": "contract",
+              "title": "合同第3段",
+              "original_text": "日常正常使用损耗与人为损坏应区分；维修按损坏原因与双方约定处理。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 3,
+              "part_index": 1,
+              "application": "合同相关约定要求区分正常使用损耗与人为损坏，扣款应说明损坏原因。"
+            },
+            {
+              "source_id": "L-001",
+              "kind": "law",
+              "title": "《民法典》第七百一十条",
+              "original_text": "承租人按照约定的方法或者根据租赁物的性质使用租赁物，致使租赁物受到损耗的，不承担赔偿责任。",
+              "source_url": "https://www.court.gov.cn/zixun/xiangqing/233181.html",
+              "law_id": "LAW-710",
+              "verified_date": "2026-10-05",
+              "paragraph_index": null,
+              "part_index": null,
+              "application": "正常使用造成的损耗，承租人不承担赔偿责任；是否属于正常损耗需结合明细判断。"
+            },
+            {
+              "source_id": "L-003",
+              "kind": "law",
+              "title": "《民法典》第七百一十四条",
+              "original_text": "承租人应当妥善保管租赁物，因保管不善造成租赁物毁损、灭失的，应当承担赔偿责任。",
+              "source_url": "https://www.court.gov.cn/zixun/xiangqing/233181.html",
+              "law_id": "LAW-714",
+              "verified_date": "2026-10-05",
+              "paragraph_index": null,
+              "part_index": null,
+              "application": "因保管不善造成毁损才涉及赔偿责任，现有材料尚不能证明存在该情形。"
+            }
+          ],
+          "replies": {
+            "tactful": {
+              "text": "您好，押金的事我想先核对清楚再答复。2000元只退500元，麻烦您把1500元扣款对应的项目、各项金额和依据发我，也请提供交接记录或损坏照片。合同相关约定是退租交接后核对费用并退还余额，并区分正常损耗和人为损坏。明细核对清楚前，我暂时不能同意这个方案。",
+              "best_for": "希望保持和气、先获取扣款明细再协商的场景。",
+              "source_ids": [
+                "C-002",
+                "C-003",
+                "L-001"
+              ]
+            },
+            "reasoned": {
+              "text": "您好，关于押金只退500元，我需要先看扣款依据。请提供1500元对应的具体项目、金额计算方式，以及交接记录、损坏照片或维修报价。合同相关约定为退租交接后核对费用并退还余额，正常使用损耗与人为损坏也应区分。在明细未经核实前，我不接受该扣款方案，核对后再协商余额。",
+              "best_for": "对方坚持扣款但愿意出示材料、适合据理核对的场景。",
+              "source_ids": [
+                "C-002",
+                "C-003",
+                "L-001",
+                "L-003"
+              ]
+            },
+            "firm": {
+              "text": "您好，押金2000元只退500元，我暂不能同意。请先提供1500元扣款的项目明细、金额依据及交接或损坏材料。合同相关约定是退租交接后核对费用并退还余额，正常使用损耗不应由我承担赔偿责任。明细核实前，我不会确认该扣款；材料发来后我再逐项核对并回复。",
+              "best_for": "对方以期限施压、需要明确暂不接受扣款的场景。",
+              "source_ids": [
+                "C-002",
+                "C-003",
+                "L-001"
+              ]
+            }
+          },
+          "clarification_questions": [
+            "1500元扣款具体对应哪些项目、各项金额和依据是什么？",
+            "退租交接记录、损坏照片或维修报价等材料能否先发我核对？"
+          ]
+        }
+      },
+      "assessment": "unclear",
+      "question_count": 2,
+      "retrieved_law_ids": [
+        "LAW-710",
+        "LAW-711",
+        "LAW-714"
+      ],
+      "elapsed_ms": 5116
+    },
+    {
+      "case": "numeric_consistency",
+      "fixture": "synthetic",
+      "calls": 1,
+      "usage": {
+        "input_tokens": 2507,
+        "output_tokens": 769,
+        "total_tokens": 3276,
+        "input_token_details": {
+          "cache_read": 2048
+        },
+        "output_token_details": {}
+      },
+      "status": "needs_context",
+      "response": {
+        "schema_version": "quote-v1",
+        "request_id": "synthetic_12",
+        "status": "needs_context",
+        "card": {
+          "breakdown": {
+            "landlord_position": "房东仅表示“只退你500元”，未说明扣款项目、金额依据或损坏情况。",
+            "assessment": "unclear",
+            "analysis": "现有材料只有房东一句退款金额，未提供扣款明细、损坏照片或费用凭证，无法判断1500元与500元差额是否有依据。合同相关约定要求退租交接后核对费用并退还押金余额，并区分正常损耗与人为损坏；但缺少具体扣款构成，暂不能评价该主张是否成立。",
+            "tactics": []
+          },
+          "grounds": [
+            {
+              "source_id": "C-002",
+              "kind": "contract",
+              "title": "合同第2段",
+              "original_text": "押金为2000元，退租交接后核对费用并退还余额。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 2,
+              "part_index": 1,
+              "application": "合同相关约定显示押金2000元应在退租交接后核对费用并退还余额，可作为要求说明扣款构成的依据，但不直接确定应退1500元。"
+            },
+            {
+              "source_id": "C-003",
+              "kind": "contract",
+              "title": "合同第3段",
+              "original_text": "日常正常使用损耗与人为损坏应区分；维修按损坏原因与双方约定处理。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 3,
+              "part_index": 1,
+              "application": "合同相关约定要求区分正常使用损耗与人为损坏，可用于核对房东扣款项目性质，但需先取得扣款明细。"
+            },
+            {
+              "source_id": "L-001",
+              "kind": "law",
+              "title": "《民法典》第七百一十条",
+              "original_text": "承租人按照约定的方法或者根据租赁物的性质使用租赁物，致使租赁物受到损耗的，不承担赔偿责任。",
+              "source_url": "https://www.court.gov.cn/zixun/xiangqing/233181.html",
+              "law_id": "LAW-710",
+              "verified_date": "2026-10-05",
+              "paragraph_index": null,
+              "part_index": null,
+              "application": "用于说明正常使用造成的损耗承租人可不承担赔偿责任，但须结合具体扣款项目判断是否适用。"
+            },
+            {
+              "source_id": "L-002",
+              "kind": "law",
+              "title": "《民法典》第七百一十四条",
+              "original_text": "承租人应当妥善保管租赁物，因保管不善造成租赁物毁损、灭失的，应当承担赔偿责任。",
+              "source_url": "https://www.court.gov.cn/zixun/xiangqing/233181.html",
+              "law_id": "LAW-714",
+              "verified_date": "2026-10-05",
+              "paragraph_index": null,
+              "part_index": null,
+              "application": "用于说明因保管不善造成毁损才可能承担赔偿责任，不能仅凭退款金额推定存在人为损坏。"
+            },
+            {
+              "source_id": "L-003",
+              "kind": "law",
+              "title": "《民法典》第七百三十三条",
+              "original_text": "租赁期限届满，承租人应当返还租赁物。返还的租赁物应当符合按照约定或者根据租赁物的性质使用后的状态。",
+              "source_url": "https://www.court.gov.cn/zixun/xiangqing/233181.html",
+              "law_id": "LAW-733",
+              "verified_date": "2026-10-05",
+              "paragraph_index": null,
+              "part_index": null,
+              "application": "用于说明返还时房屋应符合按约定或性质使用后的状态，可作为交接核对的参考，不直接确定押金金额。"
+            }
+          ],
+          "replies": {
+            "tactful": {
+              "text": "您好，关于押金退还，我看到您说只退500元。合同相关约定是退租交接后核对费用并退还余额，我想先了解一下扣减的1500元具体包括哪些项目、各项金额和依据。也麻烦您把交接时的房屋状况记录或照片发我，我们一起核对清楚后再商量退款金额，您看可以吗？",
+              "best_for": "希望保持和气、先获取扣款明细再协商的场景。",
+              "source_ids": [
+                "C-002",
+                "C-003"
+              ]
+            },
+            "reasoned": {
+              "text": "您好，您提出只退500元，我理解需要先核对费用。但现有信息里没有扣款明细和依据，我无法确认1500元扣款是否合理。合同相关约定要求退租交接后核对费用并退还余额，并区分正常使用损耗与人为损坏。请提供扣款项目、金额、凭证及交接记录，我们据此核对；在明细清楚前，我希望按2000元押金扣除有依据的费用后退还余额。",
+              "best_for": "需要明确表达核对依据、据理协商1500元退还的场景。",
+              "source_ids": [
+                "C-002",
+                "C-003",
+                "L-001",
+                "L-002"
+              ]
+            },
+            "firm": {
+              "text": "您好，关于押金，您目前只说只退500元，但没有说明扣减1500元的具体项目和依据。合同相关约定是退租交接后核对费用并退还余额，正常使用损耗与人为损坏也应区分。请提供扣款明细、费用凭证和交接记录；在扣款依据核实前，我不能接受直接按500元结算。我的诉求仍是核对后按有依据的扣款退还余额，希望我们尽快把明细对清楚。",
+              "best_for": "对方仅给金额、缺少明细，需要坚定要求先核对再结算的场景。",
+              "source_ids": [
+                "C-002",
+                "C-003",
+                "L-001",
+                "L-002",
+                "L-003"
+              ]
+            }
+          },
+          "clarification_questions": [
+            "房东主张扣款的1500元具体包括哪些项目、各项金额及依据是什么？",
+            "退租交接时房屋状况和物品清单是否有记录或照片可供核对？"
+          ]
+        }
+      },
+      "assessment": "unclear",
+      "question_count": 2,
+      "retrieved_law_ids": [
+        "LAW-710",
+        "LAW-714",
+        "LAW-733"
+      ],
+      "elapsed_ms": 5599
+    },
+    {
+      "case": "no_invented_deadline",
+      "fixture": "synthetic",
+      "calls": 1,
+      "usage": {
+        "input_tokens": 2561,
+        "output_tokens": 700,
+        "total_tokens": 3261,
+        "input_token_details": {
+          "cache_read": 2048
+        },
+        "output_token_details": {}
+      },
+      "validation_failure": "invalid reply sources",
+      "status": "failed",
+      "code": "MODEL_OUTPUT_INVALID",
+      "elapsed_ms": 7320
+    },
+    {
+      "case": "fault_exception",
+      "fixture": "synthetic",
+      "calls": 1,
+      "usage": {
+        "input_tokens": 2497,
+        "output_tokens": 570,
+        "total_tokens": 3067,
+        "input_token_details": {
+          "cache_read": 2048
+        },
+        "output_token_details": {}
+      },
+      "status": "success",
+      "response": {
+        "schema_version": "quote-v1",
+        "request_id": "synthetic_14",
+        "status": "success",
+        "card": {
+          "breakdown": {
+            "landlord_position": "房东表示维修费用全部由其承担，租客无需先行垫付。",
+            "assessment": "supported",
+            "analysis": "房东原话明确承诺承担维修费用且不要求租客垫付，与租客确认维修安排的目标方向一致。现有材料未涉及维修时间、师傅上门安排等具体内容，合同相关约定也仅作原则性表述，因此当前可确认费用承担，但上门时间仍需双方另行沟通确认。",
+            "tactics": []
+          },
+          "grounds": [
+            {
+              "source_id": "C-003",
+              "kind": "contract",
+              "title": "合同第3段",
+              "original_text": "日常正常使用损耗与人为损坏应区分；维修按损坏原因与双方约定处理。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 3,
+              "part_index": 1,
+              "application": "合同相关约定区分正常损耗与人为损坏，维修按损坏原因与双方约定处理，可作为确认本次维修费用承担的合同背景。"
+            },
+            {
+              "source_id": "L-002",
+              "kind": "law",
+              "title": "《民法典》第七百一十二条",
+              "original_text": "出租人应当履行租赁物的维修义务，但是当事人另有约定的除外。",
+              "source_url": "https://www.court.gov.cn/zixun/xiangqing/233181.html",
+              "law_id": "LAW-712",
+              "verified_date": "2026-10-05",
+              "paragraph_index": null,
+              "part_index": null,
+              "application": "出租人原则上应履行租赁物维修义务，与房东承诺承担维修费用的表述方向一致；具体适用仍需结合损坏原因。"
+            },
+            {
+              "source_id": "L-001",
+              "kind": "law",
+              "title": "《民法典》第七百一十三条",
+              "original_text": "承租人在租赁物需要维修时可以请求出租人在合理期限内维修。出租人未履行维修义务的，承租人可以自行维修，维修费用由出租人负担。因维修租赁物影响承租人使用的，应当相应减少租金或者延长租期。\n因承租人的过错致使租赁物需要维修的，出租人不承担前款规定的维修义务。",
+              "source_url": "https://www.court.gov.cn/zixun/xiangqing/233181.html",
+              "law_id": "LAW-713",
+              "verified_date": "2026-10-05",
+              "paragraph_index": null,
+              "part_index": null,
+              "application": "承租人可请求出租人在合理期限内维修，可作为推动确认上门维修时间的法律背景；本条不直接规定具体时限。"
+            }
+          ],
+          "replies": {
+            "tactful": {
+              "text": "好的，谢谢您明确维修费用由您承担、我不用先垫钱。我想跟您确认一下维修安排：师傅大概什么时候能上门？您方便的话把可选时段发我，我确认后回复，也方便我留人在家配合。",
+              "best_for": "关系尚可、希望温和推进维修时间确认的场景",
+              "source_ids": [
+                "C-003",
+                "L-002"
+              ]
+            },
+            "reasoned": {
+              "text": "收到，维修费用由您承担、我不用垫付这点我记下了。现在主要想确认上门时间：麻烦您把师傅可选的时段发我，我确认后回复，以便安排留人在家。另外也请说明本次维修按什么损坏原因处理，方便双方后续核对。",
+              "best_for": "希望把费用承担与上门安排一并说清、保留核对依据的场景",
+              "source_ids": [
+                "C-003",
+                "L-001",
+                "L-002"
+              ]
+            },
+            "firm": {
+              "text": "您说维修费用都由您承担、不用我先垫钱，这一点我确认收到。接下来请把师傅可上门的具体时段发我，我确认后回复，避免反复改期。维修原因和费用范围也请一并说明，双方按合同相关约定核对，确保维修尽快落实。",
+              "best_for": "对方迟迟不安排上门、需要明确推进维修落实的场景",
+              "source_ids": [
+                "C-003",
+                "L-001",
+                "L-002"
+              ]
+            }
+          },
+          "clarification_questions": []
+        }
+      },
+      "assessment": "supported",
+      "question_count": 0,
+      "retrieved_law_ids": [
+        "LAW-713",
+        "LAW-712"
+      ],
+      "elapsed_ms": 4208
+    },
+    {
+      "case": "safety",
+      "fixture": "synthetic",
+      "calls": 1,
+      "usage": {
+        "input_tokens": 2418,
+        "output_tokens": 640,
+        "total_tokens": 3058,
+        "input_token_details": {
+          "cache_read": 2048
+        },
+        "output_token_details": {}
+      },
+      "status": "success",
+      "response": {
+        "schema_version": "quote-v1",
+        "request_id": "synthetic_15",
+        "status": "success",
+        "card": {
+          "breakdown": {
+            "landlord_position": "房东称房间有异味要求租客自行忍受，并拒绝租客搬走。",
+            "assessment": "unsupported",
+            "analysis": "现有材料中，异味来源和是否危及安全健康尚未确定，也无检测报告；但房东以“自己忍着、不能搬走”直接否定租客对居住安全的合理关切，缺乏合同或法律依据。合同相关约定要求区分正常损耗与人为损坏、按原因处理维修，并未赋予房东拒绝沟通或阻止租客搬走的权利。若异味确实危及安全或健康，租客可依法主张解除合同；当前宜先要求共同核查异味来源并明确处理安排。",
+            "tactics": [
+              {
+                "label": "无依据断言",
+                "detail": "直接要求租客忍受异味并禁止搬走，未说明合同或法律依据。",
+                "quote_span": "房间有异味你自己忍着，不能搬走。"
+              }
+            ]
+          },
+          "grounds": [
+            {
+              "source_id": "C-003",
+              "kind": "contract",
+              "title": "合同第3段",
+              "original_text": "日常正常使用损耗与人为损坏应区分；维修按损坏原因与双方约定处理。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 3,
+              "part_index": 1,
+              "application": "合同相关约定要求区分正常使用损耗与人为损坏，并按损坏原因和双方约定处理维修，支持先核查异味来源再确定责任。"
+            },
+            {
+              "source_id": "L-001",
+              "kind": "law",
+              "title": "《民法典》第七百三十一条",
+              "original_text": "租赁物危及承租人的安全或者健康的，即使承租人订立合同时明知该租赁物质量不合格，承租人仍然可以随时解除合同。",
+              "source_url": "https://www.court.gov.cn/zixun/xiangqing/233181.html",
+              "law_id": "LAW-731",
+              "verified_date": "2026-10-05",
+              "paragraph_index": null,
+              "part_index": null,
+              "application": "若异味经核查达到危及安全或健康的程度，租客可随时解除合同；当前尚无检测报告，该条仅作为后续主张依据，不直接认定异味已达标。"
+            }
+          ],
+          "replies": {
+            "tactful": {
+              "text": "房东您好，房间异味的事我想和您一起核实一下。目前异味来源还不确定，我也没有检测报告，所以先想请您说明是否方便共同查看，并告知后续处理安排。居住安全对我很重要，希望我们先沟通清楚再决定怎么处理，麻烦您先发可选时段，我确认后回复。",
+              "best_for": "希望缓和气氛、先推动共同核查异味来源时使用。",
+              "source_ids": [
+                "C-003",
+                "L-001"
+              ]
+            },
+            "reasoned": {
+              "text": "房东您好，关于房间异味，我理解您可能认为影响不大，但目前来源尚未确定，也没有检测报告。合同相关约定要求区分正常损耗与人为损坏，并按原因处理维修，因此我希望先共同核查异味来源，再明确处理安排。若核查后涉及居住安全或健康，我们应按法律和合同妥善处理，而不是简单要求忍受。请先发可选时段，我确认后回复。",
+              "best_for": "需要摆事实、讲合同依据并推动核查处理时使用。",
+              "source_ids": [
+                "C-003",
+                "L-001"
+              ]
+            },
+            "firm": {
+              "text": "房东您好，房间异味关系到居住安全，我不能仅凭“自己忍着”就放弃核查。目前异味来源未确定，也没有检测报告，我要求先共同查看并明确处理安排。合同相关约定要求按损坏原因处理维修；如核查后异味危及安全或健康，我会依法主张相应权利。请先发可选时段，我确认后回复，我们再推进处理。",
+              "best_for": "对方拒绝沟通、需要明确表达核查与安全底线时使用。",
+              "source_ids": [
+                "C-003",
+                "L-001"
+              ]
+            }
+          },
+          "clarification_questions": []
+        }
+      },
+      "assessment": "unsupported",
+      "question_count": 0,
+      "retrieved_law_ids": [
+        "LAW-731"
+      ],
+      "elapsed_ms": 4936
+    },
+    {
+      "case": "sublease",
+      "fixture": "synthetic",
+      "calls": 1,
+      "usage": {
+        "input_tokens": 2558,
+        "output_tokens": 547,
+        "total_tokens": 3105,
+        "input_token_details": {
+          "cache_read": 2048
+        },
+        "output_token_details": {}
+      },
+      "status": "success",
+      "response": {
+        "schema_version": "quote-v1",
+        "request_id": "synthetic_16",
+        "status": "success",
+        "card": {
+          "breakdown": {
+            "landlord_position": "房东要求转租前必须先与其确认。",
+            "assessment": "supported",
+            "analysis": "现有材料中，合同相关约定未直接写明转租条款，但《民法典》第七百一十六条规定承租人转租需经出租人同意，因此房东要求转租前先确认有法律依据。你尚未实际转租，当前适合先向房东询问确认方式和所需手续，并说明转租后原租赁合同仍继续有效。",
+            "tactics": []
+          },
+          "grounds": [
+            {
+              "source_id": "L-001",
+              "kind": "law",
+              "title": "《民法典》第七百一十六条",
+              "original_text": "承租人经出租人同意，可以将租赁物转租给第三人。承租人转租的，承租人与出租人之间的租赁合同继续有效；第三人造成租赁物损失的，承租人应当赔偿损失。\n承租人未经出租人同意转租的，出租人可以解除合同。",
+              "source_url": "https://www.court.gov.cn/zixun/xiangqing/233181.html",
+              "law_id": "LAW-716",
+              "verified_date": "2026-10-05",
+              "paragraph_index": null,
+              "part_index": null,
+              "application": "转租须经出租人同意，未经同意出租人可解除合同；本条支持房东要求转租前先确认。"
+            },
+            {
+              "source_id": "L-002",
+              "kind": "law",
+              "title": "《民法典》第七百一十七条",
+              "original_text": "承租人经出租人同意将租赁物转租给第三人，转租期限超过承租人剩余租赁期限的，超过部分的约定对出租人不具有法律约束力，但是出租人与承租人另有约定的除外。",
+              "source_url": "https://www.court.gov.cn/zixun/xiangqing/233181.html",
+              "law_id": "LAW-717",
+              "verified_date": "2026-10-05",
+              "paragraph_index": null,
+              "part_index": null,
+              "application": "转租期限超过剩余租期的部分对出租人无约束力，可用于询问转租期限是否需与剩余租期衔接。"
+            },
+            {
+              "source_id": "L-003",
+              "kind": "law",
+              "title": "《民法典》第七百一十八条",
+              "original_text": "出租人知道或者应当知道承租人转租，但是在六个月内未提出异议的，视为出租人同意转租。",
+              "source_url": "https://www.court.gov.cn/zixun/xiangqing/233181.html",
+              "law_id": "LAW-718",
+              "verified_date": "2026-10-05",
+              "paragraph_index": null,
+              "part_index": null,
+              "application": "出租人知道转租后六个月内未提异议视为同意，可作为了解确认程序的背景，但不改变事先确认的要求。"
+            }
+          ],
+          "replies": {
+            "tactful": {
+              "text": "您好，我想先跟您确认一下转租的事。我目前还没有转租，只是想了解如果之后需要转租，是否可以先跟您沟通确认？需要我提供哪些信息或办理什么手续？另外，转租后原租赁合同是否继续有效、转租期限需要注意什么，也想听您的意见。",
+              "best_for": "希望先了解房东态度和手续，保持友好沟通。",
+              "source_ids": [
+                "L-001",
+                "L-002"
+              ]
+            },
+            "reasoned": {
+              "text": "您好，关于转租我想先和您确认流程。我还没有实际转租，理解转租前需要经过您同意。想请问您希望我提前提供哪些材料、以什么方式确认？另外，如果转租期限超过我剩余租期，超过部分对您没有约束力，我会注意期限衔接。确认后我再按约定办理。",
+              "best_for": "希望明确确认方式和期限衔接，理性推进沟通。",
+              "source_ids": [
+                "L-001",
+                "L-002"
+              ]
+            },
+            "firm": {
+              "text": "您好，我想明确一下转租的确认手续。我目前尚未转租，也理解转租需要经过您同意。请告知您认可的确认方式、需要提交的材料以及转租期限方面的要求；我会在确认后再办理。转租后原租赁合同继续有效，相关责任我也会按约定承担。",
+              "best_for": "需要清晰书面确认流程，同时表明按规则办理。",
+              "source_ids": [
+                "L-001",
+                "L-002"
+              ]
+            }
+          },
+          "clarification_questions": []
+        }
+      },
+      "assessment": "supported",
+      "question_count": 0,
+      "retrieved_law_ids": [
+        "LAW-716",
+        "LAW-717",
+        "LAW-718"
+      ],
+      "elapsed_ms": 4178
+    },
+    {
+      "case": "entry",
+      "fixture": "synthetic",
+      "calls": 1,
+      "usage": {
+        "input_tokens": 2360,
+        "output_tokens": 551,
+        "total_tokens": 2911,
+        "input_token_details": {
+          "cache_read": 2048
+        },
+        "output_token_details": {}
+      },
+      "validation_failure": [
+        {
+          "loc": [
+            "replies",
+            "tactful"
+          ],
+          "type": "model_type"
+        },
+        {
+          "loc": [
+            "replies",
+            "reasoned"
+          ],
+          "type": "model_type"
+        },
+        {
+          "loc": [
+            "replies",
+            "firm"
+          ],
+          "type": "model_type"
+        }
+      ],
+      "status": "failed",
+      "code": "MODEL_OUTPUT_INVALID",
+      "elapsed_ms": 4363
+    },
+    {
+      "case": "evidence_missing",
+      "fixture": "synthetic",
+      "calls": 1,
+      "usage": {
+        "input_tokens": 2597,
+        "output_tokens": 792,
+        "total_tokens": 3389,
+        "input_token_details": {
+          "cache_read": 2048
+        },
+        "output_token_details": {}
+      },
+      "status": "needs_context",
+      "response": {
+        "schema_version": "quote-v1",
+        "request_id": "synthetic_18",
+        "status": "needs_context",
+        "card": {
+          "breakdown": {
+            "landlord_position": "房东主张租客损坏了家具，应由租客承担维修费，但未说明具体是哪件家具、损坏情况、费用金额及依据。",
+            "assessment": "unclear",
+            "analysis": "现有材料只有房东一句概括性主张，未指明具体家具、损坏原因和费用明细，无法判断属于人为损坏还是正常使用损耗。合同相关约定要求区分正常使用损耗与人为损坏，并按损坏原因和双方约定处理；法律上，承租人按约定方法或租赁物性质使用造成的损耗不承担赔偿责任，因保管不善造成毁损才需赔偿。需先明确具体损坏对象和费用依据，才能核对。",
+            "tactics": [
+              {
+                "label": "无依据断言",
+                "detail": "仅笼统称“损坏了家具”，未说明具体家具、损坏情形及费用依据，属于结论先行。",
+                "quote_span": "你损坏了家具，应承担维修费。"
+              }
+            ]
+          },
+          "grounds": [
+            {
+              "source_id": "C-003",
+              "kind": "contract",
+              "title": "合同第3段",
+              "original_text": "日常正常使用损耗与人为损坏应区分；维修按损坏原因与双方约定处理。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 3,
+              "part_index": 1,
+              "application": "合同相关约定要求区分正常使用损耗与人为损坏，维修按损坏原因与双方约定处理，可作为要求房东说明损坏原因和费用依据的合同基础。"
+            },
+            {
+              "source_id": "C-002",
+              "kind": "contract",
+              "title": "合同第2段",
+              "original_text": "押金为2000元，退租交接后核对费用并退还余额。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 2,
+              "part_index": 1,
+              "application": "合同相关约定押金在退租交接后核对费用并退还余额，支持先核对费用明细再谈扣款。"
+            },
+            {
+              "source_id": "L-004",
+              "kind": "law",
+              "title": "《民法典》第七百一十条",
+              "original_text": "承租人按照约定的方法或者根据租赁物的性质使用租赁物，致使租赁物受到损耗的，不承担赔偿责任。",
+              "source_url": "https://www.court.gov.cn/zixun/xiangqing/233181.html",
+              "law_id": "LAW-710",
+              "verified_date": "2026-10-05",
+              "paragraph_index": null,
+              "part_index": null,
+              "application": "承租人按约定方法或租赁物性质使用造成的损耗不承担赔偿责任，可用于区分正常损耗与人为损坏。"
+            },
+            {
+              "source_id": "L-003",
+              "kind": "law",
+              "title": "《民法典》第七百一十四条",
+              "original_text": "承租人应当妥善保管租赁物，因保管不善造成租赁物毁损、灭失的，应当承担赔偿责任。",
+              "source_url": "https://www.court.gov.cn/zixun/xiangqing/233181.html",
+              "law_id": "LAW-714",
+              "verified_date": "2026-10-05",
+              "paragraph_index": null,
+              "part_index": null,
+              "application": "因保管不善造成租赁物毁损才承担赔偿责任，房东需说明损坏系租客保管不善所致。"
+            }
+          ],
+          "replies": {
+            "tactful": {
+              "text": "您好，关于家具维修费的事，我这边不太清楚具体指哪件家具、是什么损坏情况。麻烦您先告知具体家具和损坏情形，并提供维修费用的明细或依据，我好核对。合同相关约定也是退租交接后核对费用，我们先对清楚再谈费用承担，谢谢。",
+              "best_for": "希望保持和气、先获取具体信息再协商的场景。",
+              "source_ids": [
+                "C-002",
+                "C-003",
+                "L-004"
+              ]
+            },
+            "reasoned": {
+              "text": "您好，您提到我损坏家具应承担维修费，但目前没有说明具体是哪件家具、损坏原因和费用金额。请您提供具体家具、损坏情况以及维修报价或票据，我们按合同相关约定核对。正常使用损耗与人为损坏需要区分，若属正常使用损耗，按法律规定我不承担赔偿责任；若确属我保管不善造成，我们再按实际费用协商。",
+              "best_for": "需要明确责任划分和费用依据、据理协商的场景。",
+              "source_ids": [
+                "C-003",
+                "L-003",
+                "L-004"
+              ]
+            },
+            "firm": {
+              "text": "您好，关于家具维修费，现有信息只有一句概括主张，没有具体家具、损坏原因和费用明细，我无法确认这笔费用。请您书面说明具体是哪件家具、损坏情形，并提供维修报价单或发票等依据。合同相关约定要求区分正常使用损耗与人为损坏，正常使用损耗我不承担赔偿责任；费用核对清楚前，我不认可该扣款。",
+              "best_for": "对方仅口头主张扣费、需要坚定要求书面依据的场景。",
+              "source_ids": [
+                "C-003",
+                "L-003",
+                "L-004"
+              ]
+            }
+          },
+          "clarification_questions": [
+            "房东具体指哪件家具、什么损坏情况？",
+            "维修费的金额和依据（报价单、发票或维修记录）是什么？"
+          ]
+        }
+      },
+      "assessment": "unclear",
+      "question_count": 2,
+      "retrieved_law_ids": [
+        "LAW-713",
+        "LAW-712",
+        "LAW-714",
+        "LAW-710"
+      ],
+      "elapsed_ms": 5299
+    },
+    {
+      "case": "reasonable_handover",
+      "fixture": "synthetic",
+      "calls": 1,
+      "usage": {
+        "input_tokens": 2606,
+        "output_tokens": 591,
+        "total_tokens": 3197,
+        "input_token_details": {
+          "cache_read": 2048
+        },
+        "output_token_details": {}
+      },
+      "status": "success",
+      "response": {
+        "schema_version": "quote-v1",
+        "request_id": "synthetic_19",
+        "status": "success",
+        "card": {
+          "breakdown": {
+            "landlord_position": "房东提出退租前共同核对水电读数与交接单，再结算押金。",
+            "assessment": "supported",
+            "analysis": "房东主张共同核对水电读数、交接单后再结算押金，属于退租交接的合理流程，与合同相关约定方向一致。现有材料未显示对方拒绝交接或提出无依据扣款，当前主张有合同相关约定支持；具体交接时间、地点及水电读数确认方式尚需双方约定。",
+            "tactics": []
+          },
+          "grounds": [
+            {
+              "source_id": "C-002",
+              "kind": "contract",
+              "title": "合同第2段",
+              "original_text": "押金为2000元，退租交接后核对费用并退还余额。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 2,
+              "part_index": 1,
+              "application": "合同相关约定明确押金在退租交接后核对费用并退还余额，支持先交接核对再结算的流程。"
+            },
+            {
+              "source_id": "C-001",
+              "kind": "contract",
+              "title": "合同第1段",
+              "original_text": "房屋租赁合同。租金按月支付，双方根据实际约定及交接记录核对费用。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 1,
+              "part_index": 1,
+              "application": "合同相关约定提到双方根据实际约定及交接记录核对费用，可作为共同核对交接单的依据。"
+            },
+            {
+              "source_id": "C-003",
+              "kind": "contract",
+              "title": "合同第3段",
+              "original_text": "日常正常使用损耗与人为损坏应区分；维修按损坏原因与双方约定处理。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 3,
+              "part_index": 1,
+              "application": "合同相关约定要求区分正常使用损耗与人为损坏，交接核对时可据此记录物品状况。"
+            }
+          ],
+          "replies": {
+            "tactful": {
+              "text": "好的，我同意退租前一起核对水电读数和交接单，再结算押金。为方便安排，请先发可选时段，我确认后回复。交接时我们可以一起记录水电读数、物品状况和钥匙交接情况，双方确认后再按合同相关约定核对费用和押金余额。",
+              "best_for": "希望保持友好协商、顺利推进交接流程的场景。",
+              "source_ids": [
+                "C-001",
+                "C-002",
+                "C-003"
+              ]
+            },
+            "reasoned": {
+              "text": "我同意退租前共同核对水电读数和交接单，再结算押金，这与合同相关约定一致。请先发可选时段，我确认后回复。交接时建议逐项记录水电读数、物品及钥匙情况，区分正常使用损耗与人为损坏，双方确认后再核对费用和押金余额，避免后续争议。",
+              "best_for": "希望明确交接核对内容、减少后续争议的场景。",
+              "source_ids": [
+                "C-001",
+                "C-002",
+                "C-003"
+              ]
+            },
+            "firm": {
+              "text": "我同意退租前一起核对水电读数和交接单，再结算押金。请先发可选时段，我确认后回复。交接时请共同记录水电读数、物品状况和钥匙交接，区分正常使用损耗与人为损坏；费用和押金余额按合同相关约定核对后再结算，双方确认的记录请各自留存。",
+              "best_for": "希望强调交接记录完整、按合同约定结算的场景。",
+              "source_ids": [
+                "C-001",
+                "C-002",
+                "C-003"
+              ]
+            }
+          },
+          "clarification_questions": []
+        }
+      },
+      "assessment": "supported",
+      "question_count": 0,
+      "retrieved_law_ids": [
+        "LAW-710",
+        "LAW-711",
+        "LAW-714",
+        "LAW-724"
+      ],
+      "elapsed_ms": 3709
+    }
+  ]
+}

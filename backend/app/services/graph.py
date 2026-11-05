@@ -17,7 +17,7 @@ from backend.app.schemas.knowledge import EvidenceItem
 from backend.app.schemas.review import ReviewClauseResult, ReviewFailureCode, ReviewTraceEvent, RiskLevel
 from backend.app.services.review_trace import FAILURE_MESSAGES, append_trace
 from backend.app.services.vector_store import mask_sensitive_text
-from backend.app.services.model_gateway import invoke_model
+from backend.app.services.model_gateway import invoke_model, cloud_error_chain, check_deadline
 
 logger = logging.getLogger(__name__)
 _RESULTS_ADAPTER = TypeAdapter(list[ReviewClauseResult])
@@ -193,8 +193,11 @@ def drafting_node(state: ReviewState, runtime: Runtime[ReviewContext]) -> dict:
         response = invoke_model(runtime.context["llm"], messages)
         content = response.content
     except Exception as error:
+        # SDKs may wrap our transport deadline in APIConnectionError.
+        check_deadline()
         # Exception messages can contain keys or personal data.
-        logger.warning("Review chat call failed (%s)", type(error).__name__)
+        logger.warning("Review chat call failed (%s), elapsed_ms=%.1f",
+                       cloud_error_chain(error), (perf_counter() - started) * 1000)
         failure = (ReviewFailureCode.CHAT_TIMEOUT if isinstance(error, (TimeoutError, httpx.TimeoutException, APITimeoutError))
                    else ReviewFailureCode.CHAT_CALL_FAILED)
         return _traced_update(state, runtime, {

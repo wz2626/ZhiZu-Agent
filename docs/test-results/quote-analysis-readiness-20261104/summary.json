@@ -1,0 +1,167 @@
+{
+  "fixture": "synthetic, de-identified; not real tenant data",
+  "offline": {
+    "pytest_passed": 1122,
+    "quote_tests_included": 189,
+    "warnings": 1,
+    "quote_browser_groups": 17,
+    "real_local_import_browser_groups": 17
+  },
+  "first_batch": {
+    "cases": 20,
+    "statuses": {
+      "success": 9,
+      "needs_context": 7,
+      "out_of_scope": 2,
+      "failed": 2
+    },
+    "median_ms": 4694.5,
+    "p95_ms": 7320
+  },
+  "all_live_calls": 23,
+  "automatic_retries": 0,
+  "calls_per_request": 1,
+  "note": "First batch 18 valid / 2 rejected. Two retests: one valid / one rejected. One additional diagnostic request was valid; no single-batch 20/20 claim.",
+  "selected_valid_outputs_rechecked": [
+    {
+      "case": "deposit_wear",
+      "status": "success",
+      "assessment": "unsupported",
+      "questions": 0,
+      "local_final_validation": "passed"
+    },
+    {
+      "case": "repair_request",
+      "status": "success",
+      "assessment": "supported",
+      "questions": 0,
+      "local_final_validation": "passed"
+    },
+    {
+      "case": "rent_overdue",
+      "status": "needs_context",
+      "assessment": "unclear",
+      "questions": 2,
+      "local_final_validation": "passed"
+    },
+    {
+      "case": "unclear_reference",
+      "status": "needs_context",
+      "assessment": "unclear",
+      "questions": 2,
+      "local_final_validation": "passed"
+    },
+    {
+      "case": "early_exit",
+      "status": "success",
+      "assessment": "unsupported",
+      "questions": 0,
+      "local_final_validation": "passed"
+    },
+    {
+      "case": "rent_raise",
+      "status": "success",
+      "assessment": "unsupported",
+      "questions": 0,
+      "local_final_validation": "passed"
+    },
+    {
+      "case": "utility_bill",
+      "status": "success",
+      "assessment": "unsupported",
+      "questions": 0,
+      "local_final_validation": "passed"
+    },
+    {
+      "case": "unrelated",
+      "status": "out_of_scope",
+      "assessment": null,
+      "questions": 0,
+      "local_final_validation": "passed"
+    },
+    {
+      "case": "prompt_injection",
+      "status": "out_of_scope",
+      "assessment": null,
+      "questions": 0,
+      "local_final_validation": "passed"
+    },
+    {
+      "case": "landlord_threat",
+      "status": "needs_context",
+      "assessment": "unclear",
+      "questions": 2,
+      "local_final_validation": "passed"
+    },
+    {
+      "case": "claimed_lawsuit",
+      "status": "needs_context",
+      "assessment": "unclear",
+      "questions": 2,
+      "local_final_validation": "passed"
+    },
+    {
+      "case": "goal_without_concession",
+      "status": "needs_context",
+      "assessment": "unclear",
+      "questions": 2,
+      "local_final_validation": "passed"
+    },
+    {
+      "case": "numeric_consistency",
+      "status": "needs_context",
+      "assessment": "unclear",
+      "questions": 2,
+      "local_final_validation": "passed"
+    },
+    {
+      "case": "fault_exception",
+      "status": "success",
+      "assessment": "supported",
+      "questions": 0,
+      "local_final_validation": "passed"
+    },
+    {
+      "case": "safety",
+      "status": "success",
+      "assessment": "unsupported",
+      "questions": 0,
+      "local_final_validation": "passed"
+    },
+    {
+      "case": "sublease",
+      "status": "success",
+      "assessment": "supported",
+      "questions": 0,
+      "local_final_validation": "passed"
+    },
+    {
+      "case": "evidence_missing",
+      "status": "needs_context",
+      "assessment": "unclear",
+      "questions": 2,
+      "local_final_validation": "passed"
+    },
+    {
+      "case": "reasonable_handover",
+      "status": "success",
+      "assessment": "supported",
+      "questions": 0,
+      "local_final_validation": "passed"
+    },
+    {
+      "case": "entry",
+      "status": "success",
+      "assessment": "unsupported",
+      "questions": 0,
+      "local_final_validation": "passed"
+    },
+    {
+      "case": "no_invented_deadline",
+      "status": "needs_context",
+      "assessment": "unclear",
+      "questions": 2,
+      "local_final_validation": "passed"
+    }
+  ]
+}

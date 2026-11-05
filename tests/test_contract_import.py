@@ -147,6 +147,34 @@ def test_word_api_preserves_order_and_table_and_only_returns_text():
     assert response.headers["cache-control"] == "no-store"
 
 
+@pytest.mark.parametrize("format_name", ["docx", "pdf"])
+def test_news_document_can_be_extracted_but_not_accepted_as_a_rental_contract(monkeypatch, format_name):
+    from backend.app.services import review as review_module
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("news input must stop before model initialization, retrieval or context creation")
+
+    monkeypatch.setattr(review_module.ContractReviewService, "_initialize_chat_if_needed", forbidden)
+    monkeypatch.setattr(review_module, "LawVectorStoreService", forbidden)
+    monkeypatch.setattr(review_module.review_graph, "invoke", forbidden)
+    monkeypatch.setattr(review_module.review_context_store, "create", forbidden)
+    text = "各位观众晚上好，欢迎收看今天的《新闻联播》。\n今天的主要内容：各地积极应对降温天气。"
+    raw = word(text) if format_name == "docx" else pdf([text])
+    with TestClient(app) as client:
+        extracted = client.post("/api/contracts/parse", headers=HEADERS,
+                                files={"file": ("新闻稿." + format_name, raw)})
+        assert extracted.status_code == 200, extracted.text
+        assert "欢迎收看" in extracted.json()["text"]
+        response = client.post("/api/review/analyze-detailed", headers=HEADERS,
+                               json={"contract_text": extracted.json()["text"]})
+    assert response.status_code == 200, response.text
+    result = response.json()
+    assert result["status"] == "needs_review" and result["failure_code"] == "OUT_OF_SCOPE"
+    assert result["results"] == [] and result["review_context_id"] is None
+    assert result["evidence_by_id"] == {} and result["retry_count"] == 0
+    assert [event["node"] for event in result["trace"]] == ["input_guard"]
+
+
 def test_actual_10mib_file_accepted_not_confused_with_spool_threshold():
     raw = padded_word()
     assert len(raw) == FILE_BYTES

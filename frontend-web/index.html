@@ -432,7 +432,6 @@
     .risk-navigation .risk-level{padding:2px 6px;font-size:11px;font-weight:600}
     .task-explanation{padding:24px}.task-title-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.task-title-row h2{margin:0;font-size:17px;font-weight:600}
     .clause-token{display:inline-flex;align-items:center;min-height:25px;padding:3px 8px;border:1px solid #0f766e30;border-radius:6px;background:#0f766e09;color:var(--accent);font:11px/1.4 'Cascadia Code',Consolas,monospace;letter-spacing:.04em}
-    .task-explanation .task-reading-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:24px;padding-top:18px;border-top:1px solid var(--line-soft)}
     .task-explanation .practice-copy{color:var(--text-secondary);line-height:1.95}
     .task-explanation details{border-top:1px solid var(--line-soft);padding-top:13px}.task-explanation details summary{color:var(--text-secondary)}
     mark.current{background:var(--accent-soft);box-shadow:0 0 0 1px #4e9280}
@@ -506,7 +505,7 @@
     .dossier-head-actions .btn svg {flex:none}
     .contract-editor {display:flex;flex-direction:column;gap:14px}
     .contract-editor-surface {display:flex;flex-direction:column;min-width:0;border:1px solid var(--line-control);border-radius:12px;overflow:hidden;background:var(--paper);transition:border-color 140ms,box-shadow 140ms}
-    .contract-editor-surface:focus-within {border-color:var(--focus-edge);box-shadow:0 0 0 3px rgba(70,104,88,.07)}
+    .contract-editor-surface:focus-within {border-color:var(--accent);box-shadow:0 0 0 3px rgba(16,102,93,.12)}
     .keyboard-navigation .contract-editor-surface:has(#contract-input:focus-visible) {outline:2px solid var(--focus-keyboard);outline-offset:3px}
     .contract-editor-caption {display:flex;align-items:center;gap:12px;padding:14px 16px 4px;color:var(--text-secondary);font-size:13px;font-weight:500}
     .dossier .contract-editor-surface #contract-input {display:block;width:100%;border:0;border-radius:0;background:transparent;box-shadow:none;padding:10px 16px 14px;line-height:1.85}
@@ -660,6 +659,56 @@
     .checklist-goal {margin:16px 0 12px}.checklist-goal .practice-copy {font-size:14px;line-height:1.9}
     #negotiation-more {margin-top:16px;font-size:12px;line-height:1.85}#negotiation-more>summary {cursor:pointer;color:var(--ink);font-size:13px}#negotiation-more>summary small {margin-left:6px;color:var(--muted);font-size:11px;font-weight:400}
     .checklist-save {margin-top:22px;padding-top:16px;border-top:1px solid var(--line-soft)}.checklist-save>.practice-source {margin-top:0;font-size:13px;color:var(--ink)}.checklist-save .btn {margin-top:8px}
+
+    /* Spec 07: normal-flow strategy cards inside the existing task scroll host. */
+    .tool-mode-switch {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3px;padding:4px;margin:20px 20px 0;border-radius:12px;background:var(--surface-3)}
+    .tool-mode-switch button {appearance:none;min-height:40px;padding:8px 6px;border:0;border-radius:9px;background:transparent;color:var(--muted);font:inherit;font-size:13px;line-height:1.4;cursor:pointer;transition:background-color 150ms,color 150ms,box-shadow 150ms}
+    .tool-mode-switch button[aria-pressed=true] {background:var(--surface-2);color:var(--ink);font-weight:600;box-shadow:0 1px 4px #1f293714}
+    .tool-mode-switch button:focus-visible {outline:2px solid var(--accent);outline-offset:2px}
+    .tool-mode-switch button:disabled {cursor:default;opacity:.65}
+    #proactive-panel {padding:20px;min-width:0;display:flex;flex-direction:column;gap:16px}
+    #proactive-panel h2 {font-size:20px;line-height:1.4;font-weight:650;margin:0 0 6px}
+    #proactive-panel p {margin:0;line-height:1.75;overflow-wrap:anywhere}
+    #proactive-panel .tool-hint {font-size:12px;color:var(--muted)}
+    #proactive-panel .tool-context {display:grid;gap:8px;padding:12px;border:1px solid var(--line-soft);border-radius:12px;font-size:13px}
+    #proactive-panel label {font-size:13px}
+    #proactive-panel textarea,#proposal-clause,#scenario-select {font-size:16px;line-height:1.75}
+    #proactive-panel .proposal-tool {margin:0}
+    #proactive-panel .proposal-tool .assistant-boundary {margin-bottom:16px}
+    #proactive-panel .proposal-action-reason {flex-basis:100%;font-size:12px}
+    #proactive-panel .proposal-preview {margin:0}
+    #proactive-panel .proposal-reference-footer {margin-top:16px}
+    #proactive-panel .proposal-reference-footer .proposal-law-references {margin:0}
+    @media(prefers-reduced-motion:reduce){.tool-mode-switch button{transition:none}}
+    @media(max-width:600px){.tool-mode-switch{margin:16px 16px 0}#proactive-panel{padding:16px}}
+    #quote-panel {padding:20px;min-width:0;display:flex;flex-direction:column;gap:16px}
+    #quote-panel h2 {font-size:20px;line-height:1.4;font-weight:650;margin:0 0 6px}
+    #quote-panel h3 {font-size:15px;font-weight:650;margin:0 0 10px}
+    #quote-panel h4 {font-size:14px;font-weight:650;margin:0}
+    #quote-panel p {margin:0;line-height:1.75;overflow-wrap:anywhere}
+    #quote-panel label {display:block;font-weight:550;font-size:13px;margin-bottom:7px}
+    #quote-panel textarea {width:100%;font-size:16px;line-height:1.75;resize:vertical;min-height:96px}
+    #quote-panel .quote-hint {font-size:12px;color:var(--muted)}
+    #quote-panel .quote-input-meta {display:flex;justify-content:space-between;gap:10px;margin-top:6px}
+    #quote-panel .quote-more {border:1px solid var(--line-soft);border-radius:12px;padding:12px}
+    #quote-panel .quote-more[open] summary {margin-bottom:14px}
+    #quote-panel .quote-more label:not(:first-child) {margin-top:12px}
+    #quote-panel .quote-actions {display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+    #quote-panel .quote-actions>.btn-primary {flex:1;min-height:44px}
+    #quote-panel .quote-card {display:flex;flex-direction:column;gap:22px;border-top:1px solid var(--line);padding-top:20px}
+    #quote-panel .quote-tactic {padding:10px 12px;margin-top:10px;background:var(--surface-3);border-radius:10px}
+    #quote-panel blockquote {border-left:2px solid var(--line);padding-left:10px;margin:8px 0 0;white-space:pre-wrap;font-size:13px}
+    #quote-panel .quote-source {padding:12px 0;border-bottom:1px solid var(--line-soft)}
+    #quote-panel .quote-source pre {white-space:pre-wrap;overflow-wrap:anywhere;font-family:inherit;font-size:13px;line-height:1.8;margin:10px 0}
+    #quote-panel .quote-reply {padding:16px;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;margin-top:12px}
+    #quote-panel .quote-reply-head {display:flex;align-items:center;justify-content:space-between;gap:8px}
+    #quote-panel .quote-reply-text {white-space:pre-wrap;margin-top:12px;line-height:1.85}
+    #quote-panel .quote-questions {background:var(--accent-soft);padding:14px;border-radius:12px}
+    #quote-panel .quote-questions ol {padding-left:20px;margin:8px 0}
+    #quote-panel .quote-stale {padding:10px;border-radius:8px;background:var(--surface-3);font-size:12px}
+    #quote-clause-context {margin:0;padding:20px 20px 0}
+    #proactive-panel .assistant-icon {width:23px;height:23px}
+    @media(max-width:600px){#quote-panel{padding:16px}#quote-clause-context{padding:16px 16px 0}#quote-panel .quote-reply{padding:12px}}
   </style>
 </head>
 <body>
@@ -667,8 +716,8 @@
   <noscript><div class="boot">此工作台需要启用 JavaScript 才能在本地脱敏与确认。</div></noscript>
   <div id="workspace-app" v-cloak>
   <div id="app" class="shell" :class="{'motion-ready':motionReady,'keyboard-navigation':keyboardNavigation}" @pointerdown.capture="keyboardNavigation=false" @keydown.tab.capture="keyboardNavigation=true">
-    <header class="topbar"><div class="brand"><span class="brand-mark" aria-hidden="true"><span class="brand-glyph">租</span></span><strong>智租博弈</strong><span class="muted">租房合同检查与沟通准备</span></div><div class="topbar-actions"><button id="service-status" type="button" class="service-status" :data-state="health.checking?'checking':health.status" :disabled="health.checking" :title="health.note+' 点击可重新检查。'" :aria-label="healthLabel+'。'+health.note+' 点击重新检查连接。'" @click="checkHealth"><span class="service-status-dot" aria-hidden="true"></span><span role="status" aria-live="polite">{{ healthLabel }}</span></button><nav class="task-tabs" aria-label="主要任务"><button id="check-contract" class="btn" @click="returnToDossier">检查合同</button><button id="standalone-practice" class="btn" @click="openStandalone">常见场景练习</button></nav></div></header>
-    <div class="workspace-status"><div><h1>合同工作台</h1><p role="status">{{ phase==='reviewing' ? '正在分析已提交的合同，编辑不会改变本次请求。' : phase==='failed' ? '本次分析未完成，已有内容仍然保留。' : readyReview ? '新分析已完成，可点击查看结果；当前任务仍然保留。' : results.length ? '选择一条提醒，查看原因和沟通建议。' : '粘贴合同，检查隐私后开始分析。' }}</p></div><button v-if="readyReview" id="view-ready-review" class="btn review-ready" type="button" @click="selectReview(readyReview.id)">新分析已就绪 · 查看结果 →</button><nav class="pane-switcher" aria-label="工作区面板"><button type="button" @click="setActivePane('risk')" :aria-pressed="activePane==='risk'" aria-controls="risk-navigation">合同提醒{{ results.length?' · '+totalRisks:'' }}</button><button type="button" @click="setActivePane('contract')" :aria-pressed="activePane==='contract'" aria-controls="dossier">合同</button><button type="button" @click="setActivePane('task')" :aria-pressed="activePane==='task'" aria-controls="task-panel">{{ taskPanel==='explanation'?'条款与建议':'协商任务' }}</button></nav></div>
+    <header class="topbar"><div class="brand"><span class="brand-mark" aria-hidden="true"><span class="brand-glyph">租</span></span><strong>智租博弈</strong><span class="muted">租房合同检查与沟通准备</span></div><div class="topbar-actions"><button id="service-status" type="button" class="service-status" :data-state="health.checking?'checking':health.status" :disabled="health.checking" :title="health.note+' 点击可重新检查。'" :aria-label="healthLabel+'。'+health.note+' 点击重新检查连接。'" @click="checkHealth"><span class="service-status-dot" aria-hidden="true"></span><span role="status" aria-live="polite">{{ healthLabel }}</span></button></div></header>
+    <div class="workspace-status"><div><h1>合同工作台</h1><p role="status">{{ phase==='reviewing' ? '正在分析已提交的合同，编辑不会改变本次请求。' : phase==='failed' ? '本次分析未完成，已有内容仍然保留。' : readyReview ? '新分析已完成，可点击查看结果；当前任务仍然保留。' : results.length ? '选择一条提醒，查看原因和沟通建议。' : '粘贴合同，检查隐私后开始分析。' }}</p></div><button v-if="readyReview" id="view-ready-review" class="btn review-ready" type="button" @click="selectReview(readyReview.id)">新分析已就绪 · 查看结果 →</button><nav class="pane-switcher" aria-label="工作区面板"><button type="button" @click="setActivePane('risk')" :aria-pressed="activePane==='risk'" aria-controls="risk-navigation">合同提醒{{ results.length?' · '+totalRisks:'' }}</button><button type="button" @click="setActivePane('contract')" :aria-pressed="activePane==='contract'" aria-controls="dossier">合同</button><button type="button" @click="setActivePane('task')" :aria-pressed="activePane==='task'" aria-controls="task-panel">沟通工具</button></nav></div>
     <main id="workspace" class="workspace workspace-grid" :data-focus="selectedClauseId || undefined" :data-active-pane="activePane" :class="{'is-reviewing':phase==='reviewing','has-results':results.length, 'has-task':taskPanel!=='explanation'}" @keydown.esc="exitFocus">
       <aside id="risk-navigation" data-pane="risk" class="panel risk-navigation ui-surface min-w-0" aria-label="合同提醒">
         <h2>合同提醒</h2>
@@ -689,10 +738,10 @@
           <div class="dossier-head-actions"><select v-if="successfulReviews.length" class="ui-field ui-num" aria-label="查看分析版本" :value="reviewVersionId" @change="selectReview($event.target.value)"><option v-if="!reviewVersionId" value="" disabled>分析结果待查看</option><option v-for="(version,index) in successfulReviews" :key="version.id" :value="version.id">第 {{ index+1 }} 次分析</option></select><button id="upload-contract" v-show="editing" type="button" class="btn" :disabled="!privacyReady||contractComposing||contractImport.state==='loading'||contractImport.state==='applying'" @click="chooseContractFile"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13V3m-4 4 4-4 4 4M3 12v4a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-4"/></svg>上传合同 (Word/PDF)</button><input id="contract-file" type="file" hidden accept=".docx,.pdf,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" @change="contractFileChosen"><button id="load-sample" v-show="editing" type="button" class="btn" @click="loadSample"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="12" height="14" rx="2"/><path d="M7 7h6M7 10h6M7 13h3"/></svg>使用示例合同</button><button id="edit-contract" v-show="!editing" class="text-btn" @click="editContract">修改合同</button><button v-if="submittedText" v-show="editing" class="text-btn" @click="editing=false">查看分析原文</button></div>
         </div>
         <div id="contract-scroll" class="dossier-body" tabindex="0" role="region" aria-label="合同内容，可在面板内滚动">
-          <p v-if="oldVersion" class="notice notice-warn">当前编辑内容与分析版本不同。下方结果和练习仍属于已提交的旧版合同。</p>
+          <p v-if="oldVersion" class="notice notice-warn">当前编辑内容与分析版本不同。下方结果和沟通草稿仍属于已提交的旧版合同。</p>
           <div v-show="editing" :inert="!editing" class="contract-editor">
             <div class="contract-editor-surface" :class="{'is-file-hover':contractImport.dragDepth>0}" :aria-busy="contractImport.state==='loading'||contractImport.state==='applying'" @dragenter="contractDragEnter" @dragover="contractDragOver" @dragleave="contractDragLeave" @drop="contractFileDrop">
-              <div class="contract-editor-caption"><label for="contract-input">合同正文</label></div>
+              <div class="contract-editor-caption"><label for="contract-input">合同正文 · 可编辑</label></div>
               <textarea class="ui-field w-full resize-y px-4 py-3 text-base leading-[1.85]" id="contract-input" :value="rawText" @input="contractInput" @paste="queueMask(true)" @compositionstart="contractComposing=true" @compositionend="finishContractComposition" rows="12" spellcheck="false" placeholder="在此粘贴合同全文，或拖入 Word / PDF…" aria-describedby="input-hint contract-count import-status" :aria-invalid="charCount(rawText)>5000?'true':undefined"></textarea>
               <div class="contract-editor-meta"><span id="import-status" class="import-status" role="status" aria-live="polite"><span v-if="contractImport.state==='loading'" class="import-spinner" aria-hidden="true"></span>{{contractImport.notice}}<button v-if="contractImport.state==='loading'" type="button" class="text-btn" @click="cancelContractImport">取消</button></span><span id="contract-count" class="contract-counter" :class="{'is-over-limit':overImportLimit}">{{ charCount(rawText) }} / 5000 字</span></div>
               <div v-if="contractImport.dragDepth>0" class="contract-drop-hint" aria-hidden="true">释放以导入 Word / PDF · 单个文件 ≤10 MiB</div>
@@ -703,34 +752,76 @@
             <p v-if="overImportLimit" id="import-over-limit" class="import-warning" role="status">超出分析上限 {{(charCount(rawText)-5000).toLocaleString('zh-CN')}} 字，请手动删减后再分析。</p>
             <p v-if="rawText.trim()&&charCount(rawText)<10" id="import-too-short" class="import-warning" role="status">正文不足 10 字，请补充合同内容后再分析。</p>
             <p id="input-hint" class="contract-privacy"><span>号码自动在本机遮蔽；姓名、详细地址不会自动识别，请自行检查。</span><span>点击分析后，当前脱敏正文才会提交云端模型。</span></p>
-            <div class="contract-actions"><p v-if="privacyNotice" role="status" class="contract-status"><svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M8 7v4M8 4.5v.2"/></svg><span>{{ privacyNotice }}</span></p><button id="analyze-contract" class="btn btn-primary" @click="submitAnalysis" :disabled="!privacyReady || !validText(rawText) || importBlocksAnalysis || contractComposing || contractRevealing || (phase==='reviewing' && rawText===pendingReviewText)">{{ oldVersion ? '已检查隐私，用新版分析' : '已检查隐私，开始分析' }}</button></div>
+            <div class="contract-actions"><p v-if="privacyNotice" role="status" class="contract-status"><svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M8 7v4M8 4.5v.2"/></svg><span>{{ privacyNotice }}</span></p><button id="analyze-contract" class="btn btn-primary" @click="submitAnalysis" :disabled="!privacyReady || !validText(rawText) || importBlocksAnalysis || contractComposing || contractRevealing || (phase==='reviewing' && rawText===pendingReviewText)">{{ oldVersion ? '分析修改后的合同' : '开始分析' }}</button></div>
           </div>
           <p v-if="!privacyReady" class="notice notice-warn" role="status">{{negotiationApi.checking?'正在加载隐私规则，暂不上传内容。':'隐私规则未就绪或已更新，请重新检查服务或刷新页面。'}}<button class="text-btn" @click="checkNegotiationApi" :disabled="negotiationApi.checking">重新检查服务</button></p><p v-if="inputError" role="alert" class="notice notice-error">{{ inputError }}</p><p v-if="reviewError" role="alert" class="notice notice-error">{{ reviewError }}</p><div v-if="phase==='reviewing'" class="analysis-wait"><p role="status"><span class="wait-beacon" aria-hidden="true"></span>正在分析合同 · 已用时 {{ reviewElapsed }} 秒</p><p class="practice-note">等待完整结果，合同保留在原处。</p><div class="risk-skeleton" aria-hidden="true"><span class="skeleton-bar ui-skeleton"></span><span class="skeleton-bar ui-skeleton"></span><span class="skeleton-bar ui-skeleton"></span></div></div>
           <div v-show="!editing" :inert="editing"><p class="practice-note">{{ results.length ? '本次分析使用的合同 · '+totalRisks+' 项待关注风险' : phase==='reviewing' ? '正在分析这份合同，风险结果尚未就绪。' : '合同原文 · 尚未选择分析结果' }}</p><div v-if="selectedClause" id="location-notice" class="ui-num"><span v-if="clauseMatches.length">原句位置 {{ activeMatch+1 }} / {{ clauseMatches.length }}</span><span v-else>未找到对应原句，请人工核对。</span><button v-if="clauseMatches.length>1" class="text-btn" @click="moveMatch(-1)">上一处</button><button v-if="clauseMatches.length>1" class="text-btn" @click="moveMatch(1)">下一处</button></div><div id="submitted-document" class="manuscript" aria-label="本次分析使用的合同"><p v-for="(row,index) in documentParts" :key="row.start" class="document-paragraph whitespace-pre-wrap [overflow-wrap:anywhere] text-base leading-[1.85]" :data-start="row.start"><template v-for="part in row.parts" :key="part.start"><mark v-if="part.clauses.length" :id="'source-'+part.start" :data-start="part.start" :data-end="part.end" :data-clauses="part.clauses.join(' ')" :class="{current:part.current,'source-arrived':part.current && sourceArrived,'source-high':part.clauses.some(id=>results.find(item=>item.clause_id===id)?.risk_level==='HIGH'),'source-neutral':part.clauses.every(id=>results.find(item=>item.clause_id===id)?.risk_level==='NONE')}" role="button" tabindex="0" @click="selectSource(part)" @keydown.enter.prevent="selectSource(part)" @keydown.space.prevent="selectSource(part)">{{ part.text }}</mark><span v-else>{{ part.text }}</span></template></p></div></div>
         </div><p class="scope-note">依据范围：《民法典》租赁合同第 703–734 条。范围外问题需补充依据。</p>
       </section>
-      <aside id="task-panel" data-pane="task" class="panel task-panel ui-surface min-w-0" tabindex="0" aria-label="条款解读与协商任务，可在面板内滚动" :class="{'is-standby':taskPanel==='explanation'&&!selectedClause}"><div v-show="taskPanel==='explanation'" :inert="taskPanel!=='explanation'" class="task-explanation"><template v-if="selectedClause">
-        <div class="task-title-row"><h2>条款解读</h2><span class="clause-token">{{ selectedClause.clause_id }}</span></div>
-        <p id="clause-explanation" class="practice-copy" :class="{'content-arrive':taskArrived}">{{ selectedClause.explanation }}</p>
-        <details id="negotiation-advice"><summary id="advice-summary">协商建议</summary><div class="advice-card"><p id="clause-advice">{{ selectedClause.negotiation_tip }}</p><div class="advice-card-meta"><span>对应条款</span><span id="advice-clause">{{ selectedClause.clause_id }}</span></div></div></details>
-        <details><summary>查看法律依据</summary><law-evidence :ids="selectedClause.evidence_ids" :evidence="evidenceById"></law-evidence></details>
-        <div class="task-reading-actions"><button id="prepare-communication" class="btn btn-primary" @click="enterNegotiation(selectedClause.clause_id)">准备沟通</button></div>
-      </template><template v-else>
-        <div class="panel-head standby-head"><h2>沟通准备</h2><span class="standby-label">{{ results.length?'待选择条款':phase==='reviewing'?'等待分析结果':'待开始' }}</span></div>
-        <div id="task-standby" class="standby-body">
-          <div class="standby-intro"><h3>{{ results.length?'分析已就绪，选一条提醒开始':'从一份合同，到一份沟通清单' }}</h3><p>{{ results.length?'选择左侧条款，查看解释、核对依据，再准备沟通。':'先看清合同约定，再整理你的诉求和待确认事项。' }}</p></div>
-          <ol class="standby-steps" aria-label="合同检查与沟通步骤">
-            <li class="standby-step" :aria-current="!results.length?'step':undefined"><span class="standby-step-number" aria-hidden="true">01</span><div><strong>粘贴并检查合同<span class="standby-step-note">{{ results.length?'已完成':phase==='reviewing'?'正在分析':'从左侧开始' }}</span></strong><p>检查本机打码后的内容，再提交云端分析。</p></div></li>
-            <li class="standby-step" :aria-current="results.length?'step':undefined"><span class="standby-step-number" aria-hidden="true">02</span><div><strong>选择一条合同提醒</strong><p>原句、风险说明与法律依据会在这里对齐呈现。</p></div></li>
-            <li class="standby-step"><span class="standby-step-number" aria-hidden="true">03</span><div><strong>准备表达与条件演练</strong><p>参考稿帮助整理表达；固定条件演练后可带走清单。</p></div></li>
-          </ol>
-          <div class="standby-preview" aria-hidden="true"><p>你的沟通记录将在这里展开</p><div class="standby-preview-row"><span>条款</span><i style="--placeholder-width:70%"></i></div><div class="standby-preview-row"><span>诉求</span><i style="--placeholder-width:48%"></i></div><div class="standby-preview-row"><span>待确认</span><i style="--placeholder-width:58%"></i></div></div>
-          <div class="standby-alternative"><span>暂时没有合同？</span><button id="standby-practice" type="button" class="text-btn" @click="openStandalone">先练习核对条件 <span aria-hidden="true">↗</span></button></div>
+      <aside id="task-panel" data-pane="task" class="panel task-panel ui-surface min-w-0" tabindex="0" aria-label="沟通工具与条款解读，可在面板内滚动">
+        <section id="quote-clause-context" class="task-explanation" v-if="selectedClause" aria-labelledby="clause-title">
+          <div class="task-title-row"><h2 id="clause-title">条款解读</h2><span class="clause-token">{{selectedClause.clause_id}}</span></div>
+          <p id="clause-explanation" class="practice-copy" :class="{'content-arrive':taskArrived}">{{selectedClause.explanation}}</p>
+          <details id="negotiation-advice"><summary id="advice-summary">协商建议</summary><div class="advice-card"><p id="clause-advice">{{selectedClause.negotiation_tip}}</p><div class="advice-card-meta"><span>对应条款</span><span id="advice-clause">{{selectedClause.clause_id}}</span></div></div></details>
+          <details><summary>查看法律依据</summary><law-evidence :ids="selectedClause.evidence_ids" :evidence="evidenceById"></law-evidence></details>
+        </section>
+        <div class="tool-mode-switch" role="group" aria-label="沟通方式">
+          <button id="mode-proactive" type="button" :aria-pressed="toolMode==='proactive'" aria-controls="proactive-panel" @click="setToolMode('proactive')" :disabled="composing||quote.composing">沟通草拟</button>
+          <button id="mode-reactive" type="button" :aria-pressed="toolMode==='reactive'" aria-controls="quote-panel" @click="setToolMode('reactive')" :disabled="composing||quote.composing">回复分析</button>
         </div>
-      </template></div>
-      <section id="negotiation-panel" v-show="taskPanel!=='explanation'" :inert="taskPanel==='explanation'" class="panel negotiation-panel" :class="{'motion-ready':motionReady}" :data-layout="spatialLayout" aria-labelledby="negotiation-title" :aria-busy="negotiation.pending">
-                  <div class="scenario-settings"><div><div class="scenario-heading"><label for="scenario-select">沟通方向</label><small>{{ communicationOnly?'表达准备':'可更换方向，练习进度分别保留' }}</small></div>
-          <select class="ui-field" id="scenario-select" :value="scenarioChosen ? negotiation.scenario : ''" @change="selectScenario($event.target.value)" aria-describedby="direction-guidance"><option value="" disabled hidden>选择沟通方向</option><option v-for="direction in communicationDirections" :key="direction.value" :value="direction.value">{{ direction.label }}</option></select></div>
+        <section id="proactive-panel" v-show="toolMode==='proactive'" :inert="toolMode!=='proactive'" :aria-hidden="toolMode!=='proactive'" aria-labelledby="proactive-title" :aria-busy="proposal.pending">
+          <header><h2 id="proactive-title" class="assistant-title"><svg class="assistant-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M9 3h6M4 12H2m20 0h-2"/><rect x="4" y="6" width="16" height="14" rx="4"/><path d="M9 15h6"/><circle cx="8.5" cy="11" r=".6"/><circle cx="15.5" cy="11" r=".6"/></svg>表达助手</h2><p class="tool-hint">说明沟通诉求，结合已检查的合同生成沟通草稿。</p></header>
+          <div v-if="!reviewContextId" id="proposal-context-required" class="tool-context" role="status"><p>先完成合同检查，再选择要沟通的条款。</p><button id="proposal-check-contract" type="button" class="text-btn" @click="returnToDossier">去检查合同 →</button></div>
+          <div v-else class="tool-context"><label for="proposal-clause">关联条款</label><select id="proposal-clause" class="ui-field w-full" :value="selectedClauseId||''" @change="selectProposalClause($event.target.value)" :disabled="composing"><option value="" disabled>选择条款</option><option v-for="item in results" :key="item.clause_id" :value="item.clause_id">{{item.clause_id}}</option></select><label for="scenario-select">沟通方向</label><select id="scenario-select" class="ui-field w-full" :value="scenarioChosen?negotiation.scenario:''" @change="selectScenario($event.target.value)" :disabled="composing||!selectedClause" aria-describedby="proposal-direction-guidance"><option value="" disabled>选择沟通方向</option><option v-for="direction in communicationDirections" :key="direction.value" :value="direction.value">{{direction.label}}</option></select><p id="proposal-direction-guidance" class="tool-hint"><span v-if="clauseRecordSource==='recommended'">已根据当前条款推荐，可更换。 </span>{{directionGuidance}}</p><p v-if="oldVersion" class="tool-hint">以下草稿仍依据上一次检查的合同；编辑后的内容需重新检查。</p></div>
+          <section id="proposal-tool" class="proposal-tool" aria-label="表达助手输入">
+            <p class="practice-note assistant-boundary">云端模型生成 · 供沟通参考。</p>
+            <div class="proposal-goal-heading"><label for="proposal-goal">本次协商目标</label><small>可随时补充或修改</small></div>
+            <textarea class="ui-field w-full resize-y rounded-[10px] px-4 py-3 text-base leading-7" id="proposal-goal"  :value="proposal.goal" @input="changeGoal($event.target.value)" @compositionstart="beginComposition" @compositionend="endComposition" rows="4" maxlength="2000" autocomplete="off" spellcheck="false" :placeholder="directionGoalHint" :disabled="!reviewContextId||!selectedClause"></textarea>
+            <fieldset class="expression-styles"><legend>表达风格</legend><div class="expression-style-options"><label v-for="style in expressionStyles" :key="style.value" class="expression-style-choice"><input type="radio" name="expression-style" :id="'expression-style-'+style.value" :value="style.value" :checked="proposal.expressionStyle===style.value" @change="changeExpressionStyle(style.value)" :disabled="composing"><span>{{style.label}}</span></label></div></fieldset>
+            <p class="practice-note privacy-hint">号码自动在本机遮蔽；姓名、详细地址不会自动识别，请自行检查。</p>
+            <p v-if="proposal.notice && !proposal.pending && proposal.notice!=='沟通草稿已就绪，可核对后复制或补充信息更新。'" id="proposal-status" class="practice-note" role="status">{{ proposal.notice }}</p>
+            <p v-if="proposal.error" id="proposal-error" class="notice notice-warn" role="alert">{{ proposal.error }}</p>
+            <p v-if="proposal.result && !proposal.pending" class="proposal-ready" role="status"><button type="button" class="text-btn proposal-preview-link" @click="viewProposalDraft">{{proposal.notice==='沟通草稿已就绪，可核对后复制或补充信息更新。'?'参考稿已就绪 · 查看沟通草稿 ↓':'查看沟通草稿 ↓'}}</button></p>
+            <div v-if="proposal.answers.length" id="proposal-answers" class="supplement-help" aria-labelledby="supplement-heading"><h4 id="supplement-heading" class="supplement-title">补充信息<span v-if="groupedAnswers[0].items.length" class="ui-num">选填 · {{groupedAnswers[0].items.length}} 项</span></h4><p v-if="groupedAnswers[0].items.length" id="supplement-hint" class="supplement-intro">补充后可更新草稿，也可以直接使用当前版本。</p>
+            <p v-if="!groupedAnswers[0].items.length" class="practice-note">当前草稿没有新的补充问题，可以直接使用。</p>
+            <template v-for="group in groupedAnswers" :key="group.kind"><component v-if="group.items.length" :is="group.retained?'details':'section'" :id="group.retained?'retained-answers':'current-answers'" :class="{'retained-answers':group.retained,'current-answers':!group.retained}" :open="group.retained && (proposal.retainedExpanded||retainedNeedsReview)" @toggle="toggleRetainedGroup($event)">
+              <summary v-if="group.retained" class="supplement-title">{{ group.label }}<span class="ui-num">{{ group.items.length }} 项 · 可修改</span></summary>
+              <p v-if="group.retained && retainedNeedsReview" class="practice-note notice-warn" role="status">字数超限，已展开保留的回答，请结合下方字数提示精简。</p>
+              <div v-for="answer in group.items" :key="answer.question_id" class="answer-item"><div class="answer-heading"><label :for="!group.retained||proposal.editingAnswerId===answer.question_id||retainedNeedsReview ? 'answer-'+answer.question_id : undefined">{{ answer.question }}</label><button v-if="group.retained" type="button" class="text-btn answer-edit" :aria-expanded="proposal.editingAnswerId===answer.question_id||retainedNeedsReview" :aria-controls="'answer-editor-'+answer.question_id" @click="editRetainedAnswer(answer.question_id)">{{ proposal.editingAnswerId===answer.question_id?'完成修改':'修改' }}</button></div><p v-if="group.retained && proposal.editingAnswerId!==answer.question_id && !retainedNeedsReview" class="answer-excerpt"><span class="answer-excerpt-label">你的回答</span><span class="answer-excerpt-text">{{ answerExcerpt(answer.text) }}</span></p><div class="answer-field" :id="'answer-editor-'+answer.question_id" v-show="!group.retained||proposal.editingAnswerId===answer.question_id||retainedNeedsReview"><textarea class="ui-field w-full resize-y rounded-[10px] px-4 py-3 text-base leading-7" :aria-describedby="'answer-count-'+answer.question_id" :id="'answer-'+answer.question_id" :value="answer.text" @input="changeAnswer(answer.question_id,$event.target.value)" @blur="finishAnswerEdit(answer.question_id,$event)" @compositionstart="beginComposition" @compositionend="endAnswerComposition(answer.question_id,$event)" rows="2" maxlength="2000" placeholder="填写已知信息；不确定可留空"></textarea><p :id="'answer-count-'+answer.question_id" class="answer-count ui-num" title="按字符计数，包含空格和换行。" :class="{'notice-warn':charCount(answer.text)>1000}">{{charCount(answer.text)}} / 1000 字符<span v-if="charCount(answer.text)>1000"> · 请删减 {{charCount(answer.text)-1000}} 字符</span></p></div></div>
+            </component></template></div>
+            <div class="proposal-controls proposal-submit-row flex flex-wrap items-center gap-2">
+              <button id="generate-proposal" class="btn" type="button" @click="generateProposal" :disabled="!canGenerateProposal" aria-describedby="proposal-generate-readiness">{{ proposal.pending ? '生成中…' : proposal.request ? '重试同一草稿请求' : proposal.result ? '检查并更新参考稿' : '生成沟通草稿' }}</button>
+              <button v-if="proposal.result" id="supplement-goal" type="button" class="text-btn" @click="supplementGoal">修改目标 ↑</button>
+              <p id="proposal-generate-readiness" class="practice-note proposal-action-reason" :class="{'notice-warn':!proposal.pending && !proposalActionState.allowed,'is-ready':proposalActionState.allowed}" role="status"><template v-if="proposal.pending"><span class="proposal-wait-text">正在生成参考稿</span><span class="proposal-wait-time" role="timer" aria-live="off"> · 已用时 {{ proposalElapsed }} 秒</span><span v-if="proposal.result"> · 旧稿已保留</span></template><template v-else><span id="proposal-budget" v-show="proposalActionState.allowed" class="ui-num proposal-budget-count" title="协商目标和所有补充回答共用2000字符额度">合计 {{ proposalBudget }} / 2000 字符 · 含空格和换行</span><span v-if="!proposalActionState.allowed">{{ proposalActionState.reason }}</span></template></p>
+            </div>
+          </section>
+          <div v-if="proposal.result" id="proposal-preview" class="proposal-preview ui-inset min-w-0 space-y-3">
+            <h4>{{ proposal.stale ? '修改前的沟通草稿' : '沟通草稿' }}<span class="draft-style-label">{{expressionStyleLabel(proposal.result.expressionStyle)}}</span></h4><p v-if="proposal.stale" class="practice-note">{{proposal.result.expressionStyle!==proposal.expressionStyle?'表达风格已修改，更新后生效；旧稿与回答保留。':'目标或补充信息已修改，旧稿与问题保留；更新后生效。'}}</p><p id="proposed-message" class="proposal-message ui-ink whitespace-pre-wrap [overflow-wrap:anywhere] text-sm leading-7" :class="{'ink-arrive':proposalArrived && !proposal.stale && charCount(proposal.result.message)<=400,'content-arrive':proposalArrived && !proposal.stale && charCount(proposal.result.message)>400}" @pointerdown="finishProposalCue" @selectstart="finishProposalCue">{{ proposal.result.message }}</p>
+            <div class="proposal-controls flex flex-wrap items-center gap-2"><button id="copy-proposal" class="btn btn-primary" type="button" @click="copyProposalDraft" :disabled="composing||proposal.copying">{{proposal.copying?'正在复制…':'复制沟通草稿'}}</button></div>
+            <p v-if="proposal.copyNotice" id="proposal-copy-status" class="practice-note" role="status">{{proposal.copyNotice}}</p>
+            <div v-if="proposal.copyText"><label for="proposal-copy-fallback">可手动复制的沟通草稿</label><textarea id="proposal-copy-fallback" class="ui-field w-full" readonly :value="proposal.copyText" @focus="$event.target.select()"></textarea></div>
+            <div class="proposal-reference-footer"><details v-if="proposal.result.evidenceIds.length" class="proposal-law-references"><summary>本稿参考：{{ proposalEvidenceLabel }} · 查看法条</summary><law-evidence :ids="proposal.result.evidenceIds" :evidence="evidenceById"></law-evidence></details><p v-else class="practice-note">本稿用于整理诉求与澄清问题，未引用具体法条。</p></div>
+          </div>
+        </section>
+        <section id="quote-panel" v-show="toolMode==='reactive'" :inert="toolMode!=='reactive'" :aria-hidden="toolMode!=='reactive'" aria-labelledby="quote-title" :aria-busy="quote.pending">
+          <header><h2 id="quote-title">回复分析</h2><p class="quote-hint">结合当前合同，分析对方诉求与依据，生成可选回复。</p></header>
+          <div><label for="landlord-quote">房东发来的原话</label><textarea id="landlord-quote" class="ui-field rounded-[10px] px-3 py-3" :value="quote.landlordQuote" @input="changeQuoteField('landlordQuote',$event.target.value)" @blur="maskQuoteField('landlordQuote')" @compositionstart="quote.composing=true;quote.composingField='landlordQuote'" @compositionend="finishQuoteComposition('landlordQuote',$event.target.value)" @keydown="quoteKeydown" rows="5" maxlength="2000" placeholder="粘贴房东刚发来的消息…" aria-describedby="quote-privacy quote-readiness"></textarea><div class="quote-input-meta quote-hint"><span id="quote-privacy">号码自动遮蔽；姓名和详细地址请自行检查。</span><span>{{charCount(quote.landlordQuote)}} / 2000</span></div></div>
+          <details id="quote-more" class="quote-more" :open="quote.moreOpen" @toggle="quote.moreOpen=$event.target.open"><summary>补充情况 · 选填</summary><label for="quote-goal">你希望怎么解决？</label><textarea id="quote-goal" class="ui-field rounded-[10px] px-3 py-2" :value="quote.userGoal" @input="changeQuoteField('userGoal',$event.target.value)" @blur="maskQuoteField('userGoal')" @compositionstart="quote.composing=true;quote.composingField='userGoal'" @compositionend="finishQuoteComposition('userGoal',$event.target.value)" rows="2" placeholder="例如：希望核对扣款明细，再协商退还押金。"></textarea><label for="quote-context">补充背景</label><textarea id="quote-context" class="ui-field rounded-[10px] px-3 py-2" :value="quote.contextNote" @input="changeQuoteField('contextNote',$event.target.value)" @blur="maskQuoteField('contextNote')" @compositionstart="quote.composing=true;quote.composingField='contextNote'" @compositionend="finishQuoteComposition('contextNote',$event.target.value)" rows="3" placeholder="例如：目前是否已经退租，有哪些照片或交接记录。"></textarea><p class="quote-hint">目标 {{charCount(quote.userGoal)}} / 300 · 背景 {{charCount(quote.contextNote)}} / 1000</p></details>
+          <div><p class="quote-hint">点击后将当前脱敏合同、原话及补充信息发送至云端模型。</p><div class="quote-actions"><button id="analyze-quote" type="button" class="btn btn-primary" @click="analyzeQuote" :disabled="!canAnalyzeQuote" aria-describedby="quote-readiness">{{quote.pending?'正在拆解并生成回复…':'拆解并生成回复'}}</button><span v-if="quote.pending" id="quote-timer" class="quote-hint" role="timer" aria-live="off">已用时 {{quote.elapsed}} 秒</span></div><p id="quote-readiness" class="quote-hint" role="status">{{quoteReadiness}}</p><button v-if="!privacyReady" id="quote-recheck" class="text-btn" type="button" @click="checkQuoteApi" :disabled="quoteMetaPending">重新检查服务</button></div>
+          <p v-if="quote.error" id="quote-error" class="notice notice-error" role="alert">{{quote.error}}</p><p v-if="quote.notice" id="quote-notice" class="quote-hint" role="status">{{quote.notice}}</p>
+          <article v-if="quote.result?.card" id="quote-result" class="quote-card" tabindex="-1" aria-label="沟通策略卡片">
+            <p v-if="quoteResultStale" id="quote-stale" class="quote-stale">输入或合同已修改，以下保留对应旧内容的结果；需要时请重新生成。</p>
+            <section><h3>🔍 话术拆解</h3><p class="quote-hint">对方主张：{{quotePositionText}}</p><p class="quote-hint">材料支持情况：{{quoteAssessments[quote.result.card.breakdown.assessment]}}</p><p>{{quote.result.card.breakdown.analysis}}</p><div v-for="(tactic,index) in quote.result.card.breakdown.tactics" :key="index" class="quote-tactic"><strong>{{tactic.label}}</strong><p>{{tactic.detail}}</p><blockquote>{{tactic.quote_span}}</blockquote></div></section>
+            <section><h3>⚖️ 合同与法理依据</h3><div v-for="source in quote.result.card.grounds" :key="source.source_id" class="quote-source"><strong>{{source.title}}</strong><p>{{source.application}}</p><details><summary>核对原文</summary><pre>{{source.original_text}}</pre><a v-if="source.kind==='law'" :href="quoteSourceUrl(source.source_url)" target="_blank" rel="noopener noreferrer">核对权威来源 ↗</a><p v-if="source.verified_date" class="quote-hint">资料核对日期：{{source.verified_date}}</p></details></div><p v-if="!quote.result.card.grounds.length" class="quote-hint">当前材料未提供直接依据，不代表不存在适用规则。</p></section>
+            <section v-if="quote.result.card.clarification_questions.length" id="quote-questions" class="quote-questions"><h3>补充这些信息，回复会更准确</h3><ol><li v-for="question in quote.result.card.clarification_questions" :key="question">{{question}}</li></ol><button type="button" class="text-btn" @click="openQuoteContext">到上方补充情况 ↑</button><p class="quote-hint">下方是可先发送的澄清型回复。</p></section>
+            <section><h3>💬 选择一种回复</h3><div v-for="style in quoteStyles" :key="style.key" class="quote-reply" :data-tone="style.key"><div class="quote-reply-head"><h4>{{style.label}}</h4><button type="button" class="btn" :id="'copy-quote-'+style.key" @click="copyQuoteReply(style.key)" :disabled="quote.copying">复制</button></div><p class="quote-hint">{{quote.result.card.replies[style.key].best_for}}</p><p class="quote-reply-text">{{quote.result.card.replies[style.key].text}}</p></div></section>
+            <p class="quote-hint">AI建议，发送前请核对事实与依据；不保证法律判断或处理结果。</p>
+          </article>
+          <p v-if="quote.copyNotice" id="quote-copy-status" class="quote-hint" role="status">{{quote.copyNotice}}</p><div v-if="quote.copyText"><label for="quote-copy-fallback">可手动复制的本次回复</label><textarea id="quote-copy-fallback" class="ui-field" readonly :value="quote.copyText" @focus="$event.target.select()"></textarea></div>
+        </section>
+      <section id="negotiation-panel" v-show="false" inert aria-hidden="true" data-legacy="deprecated" class="panel negotiation-panel" :class="{'motion-ready':motionReady}" :data-layout="spatialLayout" aria-labelledby="negotiation-title" :aria-busy="negotiation.pending">
+                  <div class="scenario-settings"><div><div class="scenario-heading"><label for="legacy-scenario-select">沟通方向</label><small>{{ communicationOnly?'表达准备':'可更换方向，练习进度分别保留' }}</small></div>
+          <select class="ui-field" id="legacy-scenario-select" :value="scenarioChosen ? negotiation.scenario : ''" @change="selectScenario($event.target.value)" aria-describedby="direction-guidance"><option value="" disabled hidden>选择沟通方向</option><option v-for="direction in communicationDirections" :key="direction.value" :value="direction.value">{{ direction.label }}</option></select></div>
           <p id="direction-guidance" v-show="taskPanel==='communication'" class="practice-note"><span v-if="clauseRecordSource==='recommended'">已根据当前条款推荐，可更换。 </span>{{ directionGuidance }}</p>
           <p v-if="communicationOnly" id="communication-only-notice" class="practice-note">此方向暂不提供固定条件演练；可生成参考稿、编辑并复制沟通消息。</p>
           <template v-else><p v-show="taskPanel==='communication'" class="practice-note">最多五轮，模拟条件按成功轮次预设；表达助手不改变报价。</p><p v-show="taskPanel==='communication'" class="practice-note" id="condition-cloud-label">模拟条件：服务端固定规则生成，不调用云端模型。</p></template></div>
@@ -784,37 +875,7 @@
           <div v-if="exportState.manualText" class="copy-fallback"><label for="checklist-copy" class="text-xs">本次点击复制时的清单（可手动复制）</label><textarea id="checklist-copy" class="ui-field w-full resize-y rounded-[10px] px-4 py-3 text-base leading-7 export-preview ui-inset" readonly :value="exportState.manualText" @focus="$event.target.select()"></textarea></div>
           </section>
         </div>
-        <div id="negotiation-composer" class="negotiation-composer" v-show="taskPanel==='communication'" :inert="taskPanel!=='communication'">          <details v-show="!!selectedClause" id="proposal-tool" class="proposal-tool" @toggle="fitAnswerEditors">
-            <summary><span class="assistant-title"><svg class="assistant-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M9 3h6M4 12H2m20 0h-2"/><rect x="4" y="6" width="16" height="14" rx="4"/><path d="M9 15h6"/><circle cx="8.5" cy="11" r=".6"/><circle cx="15.5" cy="11" r=".6"/></svg>表达助手</span><span v-if="groupedAnswers[0].items.length" class="assistant-question-count ui-num">{{groupedAnswers[0].items.length}} 项可补充</span></summary>
-            <p class="assistant-intro">写下你的诉求，整理成一份可修改的沟通草稿。</p>
-            <p class="practice-note assistant-boundary">云端模型生成 · 供沟通参考。</p>
-            <p v-if="!reviewContextId" class="practice-note">当前审查没有可用的草稿上下文，请重新完成合同审查；仍可直接填写协商消息。</p>
-            <div class="proposal-goal-heading"><label for="proposal-goal">本次协商目标</label><small>可随时补充或修改</small></div>
-            <textarea class="ui-field w-full resize-y rounded-[10px] px-4 py-3 text-base leading-7" id="proposal-goal"  :value="proposal.goal" @input="changeGoal($event.target.value)" @compositionstart="beginComposition" @compositionend="endComposition" rows="3" maxlength="4000" autocomplete="off" spellcheck="false" :placeholder="directionGoalHint" :disabled="!reviewContextId"></textarea>
-            <fieldset class="expression-styles"><legend>表达风格</legend><div class="expression-style-options"><label v-for="style in expressionStyles" :key="style.value" class="expression-style-choice"><input type="radio" name="expression-style" :id="'expression-style-'+style.value" :value="style.value" :checked="proposal.expressionStyle===style.value" @change="changeExpressionStyle(style.value)" :disabled="composing"><span>{{style.label}}</span></label></div></fieldset>
-            <p class="practice-note privacy-hint">号码自动在本机遮蔽；姓名、详细地址不会自动识别，请自行检查。</p>
-            <p v-if="proposal.notice && !proposal.pending && proposal.notice!=='参考稿已就绪，可在问题旁补充回答，或明确填入消息。'" id="proposal-status" class="practice-note" role="status">{{ proposal.notice }}</p>
-            <p v-if="proposal.error" id="proposal-error" class="notice notice-warn" role="alert">{{ proposal.error }}</p>
-            <p v-if="proposal.result && !proposal.pending" class="proposal-ready" role="status"><button type="button" class="text-btn proposal-preview-link" @click="viewProposalDraft">{{proposal.notice==='参考稿已就绪，可在问题旁补充回答，或明确填入消息。'?'参考稿已就绪 · 查看沟通草稿 ↓':'查看沟通草稿 ↓'}}</button></p>
-            <div v-if="proposal.answers.length" id="proposal-answers" class="supplement-help" aria-labelledby="supplement-heading"><h4 id="supplement-heading" class="supplement-title">补充信息<span v-if="groupedAnswers[0].items.length" class="ui-num">选填 · {{groupedAnswers[0].items.length}} 项</span></h4><p v-if="groupedAnswers[0].items.length" id="supplement-hint" class="supplement-intro">补充后可更新草稿，也可以直接使用当前版本。</p>
-            <p v-if="!groupedAnswers[0].items.length" class="practice-note">当前草稿没有新的补充问题，可以直接使用。</p>
-            <template v-for="group in groupedAnswers" :key="group.kind"><component v-if="group.items.length" :is="group.retained?'details':'section'" :id="group.retained?'retained-answers':'current-answers'" :class="{'retained-answers':group.retained,'current-answers':!group.retained}" :open="group.retained && (proposal.retainedExpanded||retainedNeedsReview)" @toggle="toggleRetainedGroup($event)">
-              <summary v-if="group.retained" class="supplement-title">{{ group.label }}<span class="ui-num">{{ group.items.length }} 项 · 可修改</span></summary>
-              <p v-if="group.retained && retainedNeedsReview" class="practice-note notice-warn" role="status">字数超限，已展开保留的回答，请结合下方字数提示精简。</p>
-              <div v-for="answer in group.items" :key="answer.question_id" class="answer-item"><div class="answer-heading"><label :for="!group.retained||proposal.editingAnswerId===answer.question_id||retainedNeedsReview ? 'answer-'+answer.question_id : undefined">{{ answer.question }}</label><button v-if="group.retained" type="button" class="text-btn answer-edit" :aria-expanded="proposal.editingAnswerId===answer.question_id||retainedNeedsReview" :aria-controls="'answer-editor-'+answer.question_id" @click="editRetainedAnswer(answer.question_id)">{{ proposal.editingAnswerId===answer.question_id?'完成修改':'修改' }}</button></div><p v-if="group.retained && proposal.editingAnswerId!==answer.question_id && !retainedNeedsReview" class="answer-excerpt"><span class="answer-excerpt-label">你的回答</span><span class="answer-excerpt-text">{{ answerExcerpt(answer.text) }}</span></p><div class="answer-field" :id="'answer-editor-'+answer.question_id" v-show="!group.retained||proposal.editingAnswerId===answer.question_id||retainedNeedsReview"><textarea class="ui-field w-full resize-y rounded-[10px] px-4 py-3 text-base leading-7" :aria-describedby="'answer-count-'+answer.question_id" :id="'answer-'+answer.question_id" :value="answer.text" @input="changeAnswer(answer.question_id,$event.target.value)" @compositionstart="beginComposition" @compositionend="endComposition" rows="2" maxlength="2000" placeholder="填写已知信息；不确定可留空"></textarea><p :id="'answer-count-'+answer.question_id" class="answer-count ui-num" :class="{'notice-warn':charCount(answer.text)>1000}">{{charCount(answer.text)}} / 1000 字<span v-if="charCount(answer.text)>1000"> · 请删减 {{charCount(answer.text)-1000}} 字</span></p></div></div>
-            </component></template></div>
-            <div class="proposal-controls proposal-submit-row flex flex-wrap items-center gap-2">
-              <button id="generate-proposal" class="btn" type="button" @click="generateProposal" :disabled="!canGenerateProposal" aria-describedby="proposal-generate-readiness">{{ proposal.pending ? '生成中…' : proposal.request ? '重试同一草稿请求' : proposal.result ? '检查并更新参考稿' : '检查并生成参考稿' }}</button>
-              <button v-if="proposal.result" id="supplement-goal" type="button" class="text-btn" @click="supplementGoal">修改目标 ↑</button>
-              <p id="proposal-generate-readiness" class="practice-note proposal-action-reason" :class="{'notice-warn':!proposal.pending && !proposalActionState.allowed,'is-ready':proposalActionState.allowed}" role="status"><template v-if="proposal.pending"><span class="proposal-wait-text">正在生成参考稿</span><span class="proposal-wait-time" role="timer" aria-live="off"> · 已用时 {{ proposalElapsed }} 秒</span><span v-if="proposal.result"> · 旧稿已保留</span></template><template v-else><span id="proposal-budget" v-show="proposalActionState.allowed" class="ui-num proposal-budget-count" title="协商目标和所有补充回答共用2000字额度">合计 {{ proposalBudget }} / 2000 字</span><span v-if="!proposalActionState.allowed">{{ proposalActionState.reason }}</span></template></p>
-            </div>
-          </details>
-          <div v-if="proposal.result" id="proposal-preview" class="proposal-preview ui-inset min-w-0 space-y-3">
-            <h4>{{ proposal.stale ? '修改前的沟通草稿' : '沟通草稿' }}<span class="draft-style-label">{{expressionStyleLabel(proposal.result.expressionStyle)}}</span></h4><p v-if="proposal.stale" class="practice-note">{{proposal.result.expressionStyle!==proposal.expressionStyle?'表达风格已修改，更新后生效；旧稿与回答保留。':'目标或补充信息已修改，旧稿与问题保留；更新后生效。'}}</p><p id="proposed-message" class="proposal-message ui-ink whitespace-pre-wrap [overflow-wrap:anywhere] text-sm leading-7" :class="{'ink-arrive':proposalArrived && !proposal.stale && charCount(proposal.result.message)<=400,'content-arrive':proposalArrived && !proposal.stale && charCount(proposal.result.message)>400}" @pointerdown="finishProposalCue" @selectstart="finishProposalCue">{{ proposal.result.message }}</p>
-            <details v-if="proposal.result.evidenceIds.length" class="proposal-law-references"><summary>本稿参考：{{ proposalEvidenceLabel }} · 查看法条</summary><law-evidence :ids="proposal.result.evidenceIds" :evidence="evidenceById"></law-evidence></details><p v-else class="practice-note">本稿用于整理诉求与澄清问题，未引用具体法条。</p>
-            <div class="proposal-controls flex flex-wrap items-center gap-2"><button id="fill-proposal" class="btn" type="button" @click="fillProposal" :disabled="composing">填入协商消息 ↗</button></div>
-            <div v-if="proposal.replacement" id="proposal-overwrite" class="proposal-confirm"><p>当前输入框已有内容。请先核对草稿，再决定是否替换。</p><button id="confirm-fill-proposal" class="text-btn" type="button" @click="fillProposal(true)">确认替换当前消息</button><button class="text-btn ml-3" type="button" @click="proposal.replacement=null">保留原消息</button></div>
-          </div>
+        <div id="negotiation-composer" class="negotiation-composer" v-show="taskPanel==='communication'" :inert="taskPanel!=='communication'">
           <div id="negotiation-api-status" v-if="!communicationOnly && negotiationApi.status !== 'ready'" class="notice notice-warn mb-3" role="status">{{ negotiationApi.note }}<button id="retry-negotiation-api" type="button" class="text-btn block mt-1" @click="checkNegotiationApi" :disabled="negotiationApi.checking">{{ negotiationApi.checking ? '正在检查' : '重新检查谈判功能' }}</button></div>
           <div class="composer-heading"><label for="negotiation-draft">我的协商消息</label><button v-if="committed.roundCount" type="button" class="text-btn text-[11px] font-normal" @click="showLatestResult">查看本轮结果 ↗</button><span v-else class="muted text-[10px] font-normal">发送前检查隐私</span></div>
           <textarea class="ui-field w-full resize-y rounded-[10px] px-4 py-3 text-base leading-7" id="negotiation-draft" :value="negotiation.draft" @input="changeMessage($event.target.value)" @compositionstart="beginComposition" @compositionend="endComposition" @keydown="handleNegotiationKeydown" rows="6" maxlength="2000" autocomplete="off" spellcheck="false" placeholder="我想就这条约定进一步确认…"></textarea>
@@ -837,7 +898,7 @@
           <div v-if="negotiation.error" id="negotiation-error" class="composer-status notice notice-error" role="alert" tabindex="-1"><strong>{{ negotiation.request ? '本次提交结果尚未确认' : '本次协商未提交' }}</strong><p class="m-0 mt-1">{{ negotiation.error }}</p><span>页面继续保留上一回合的分数、已确认条件与轮次。</span></div>
         </div>
       </section>
-<button class="text-btn task-detail-link" @click="showTrace">查看本次任务的处理详情</button></aside>
+ <button v-show="!!activeTrace" class="text-btn task-detail-link" @click="showTrace">查看合同审查的处理详情</button></aside>
     </main>    <section id="trace-console" v-show="traceExpanded" class="trace-section trace-console" :class="{ expanded: traceExpanded, 'is-idle': !activeTrace && !requestWaiting }" aria-labelledby="trace-title" @keydown.esc.stop="closeTrace">
       <div class="trace-seal"><button id="trace-toggle" class="text-btn" :aria-expanded="traceExpanded" aria-controls="trace-details" @click="traceExpanded = !traceExpanded">{{ traceExpanded ? '收起' : '展开' }}处理详情 {{ traceExpanded ? '⌄' : '⌃' }}</button><h2 id="trace-title">{{ activeTrace?.replayed ? '缓存响应回放' : activeTrace && activeTrace.id !== latestTraceId ? '历史执行回放' : '本次执行回放' }}</h2>
         <span v-if="requestWaiting" id="trace-waiting" class="trace-waiting" role="status">已提交 · 等待完整响应 · 已用时 {{ proposal.pending ? proposalElapsed : negotiation.pending ? negotiationElapsed : reviewElapsed }} 秒</span>
@@ -851,7 +912,7 @@
           <ol class="trace-list"><li v-for="event in visibleTraceEvents" :key="activeTrace.id + ':' + event.sequence" :id="'trace-event-'+event.sequence" tabindex="-1" class="trace-event" :data-sequence="event.sequence" :data-node="event.node" :data-attempt="event.attempt" :data-duration="event.duration_ms" :data-status="event.status"><div class="flex justify-between gap-3"><strong class="text-xs">{{ event.sequence }}. {{ traceEventName(event) }}</strong><span class="chip">{{ traceStatusLabels[event.status] }}</span></div><div class="trace-meta"><span>{{ event.node }} · 生成编号 {{ event.attempt }}</span><span class="trace-duration">{{ formatDuration(event.duration_ms) }} ms</span></div><p class="trace-feedback text-[11px] leading-6 mb-0">{{ event.node === 'critic' ? 'Critic 反馈摘要' : '反馈摘要' }}：{{ event.feedback.length ? event.feedback.join('；') : '未返回反馈摘要' }}</p><div class="trace-evidence muted text-[10px] mt-2">证据：{{ event.evidence_ids.length ? event.evidence_ids.join('、') : '无' }}</div></li></ol>
         </template>
       </div>
-    </section><footer><span>本页内容仅保存在当前页面；刷新或关闭会丢失。AI 辅助分析与模拟练习不代表真实协商结果。</span><details><summary>开发者信息</summary><a href="/docs" target="_blank" rel="noopener noreferrer">开发接口说明</a></details></footer>
+    </section><footer><span>本页内容仅保存在当前页面；刷新或关闭会丢失。</span><details><summary>开发者信息</summary><a href="/docs" target="_blank" rel="noopener noreferrer">开发接口说明</a></details></footer>
   </div>
   </div>
   <script>
@@ -912,6 +973,15 @@
           const reviewVersions=reactive(new Map()), clauseRecords=reactive(new Map()), practiceRecords=reactive(new Map());
           const taskPanel=ref('explanation'), standalone=ref(false), contractComposing=ref(false);
           const activePane=ref('contract'); // Presentation only; all editors remain mounted.
+          const toolMode=ref('proactive'); // Keep both tool trees and their drafts mounted.
+          function setToolMode(value){
+            if(!['proactive','reactive'].includes(value)||composing.value||quote.value.composing)return;
+            toolMode.value=value;activePane.value='task';clearDecorations();nextTick(fitAnswerEditors);
+          }
+          function selectProposalClause(id){
+            if(!results.value.some(item=>item.clause_id===id))return;
+            switchSafely(()=>{ensureClauseRecord(reviewVersionId.value+':'+id);standalone.value=false;selectedClauseId.value=id;activeMatch.value=0;recommendClauseDirection();taskPanel.value='communication';activePane.value='task';clearDecorations();});
+          }
           const keyboardNavigation=ref(true); // Focus styling only; never a send/consent gate.
           function setActivePane(value){if(['risk','contract','task'].includes(value))switchSafely(()=>{activePane.value=value;clearDecorations();});}
           const paneVisible=value=>!!document.querySelector(`[data-pane="${value}"]`)?.getClientRects().length;
@@ -924,7 +994,7 @@
           function clauseRecord(key=clauseKey.value) {return clauseRecords.get(key);}
           function ensureClauseRecord(key) {
             if(clauseRecords.has(key))return clauseRecords.get(key);
-            clauseRecords.set(key,{scenario:null,scenarioSource:'',practices:{},proposal:{goal:'',expressionStyle:'gentle',revision:0,epoch:0,tx:newTx(),revealing:false,elapsed:0,result:null,error:'',notice:'',answers:[],replacement:null,retainedExpanded:false,editingAnswerId:null,
+            clauseRecords.set(key,{scenario:null,scenarioSource:'',practices:{},proposal:{goal:'',expressionStyle:'gentle',revision:0,epoch:0,tx:newTx(),revealing:false,elapsed:0,result:null,error:'',notice:'',answers:[],replacement:null,retainedExpanded:false,editingAnswerId:null,copying:false,copyText:'',copyNotice:'',copyEpoch:0,
               get pending(){return this.tx.state==='inflight';},get request(){return this.tx.snapshot?.body||null;},get stale(){return !!this.result&&this.result.goalRevision!==this.revision;}}});
             clauseRecords.get(key).practices['']=createPractice(key,'');
             return clauseRecords.get(key);
@@ -968,6 +1038,11 @@
             const matches=Object.entries(patterns).filter(([,pattern])=>pattern.test(text)).map(([value])=>value);
             return matches.length===1?matches[0]:matches.length===0?'other':null;
           }
+          function recommendClauseDirection(){
+            if(clauseRecord().scenario||!selectedClause.value)return;
+            const recommended=recommendScenario(selectedClause.value.original_clause);
+            if(recommended)selectScenario(recommended,'recommended');
+          }
           const practiceSessions=computed(()=>[...practiceRecords.values()].filter(record=>record.ownerKey===clauseKey.value&&record.negotiation.scenario===activePractice.value.negotiation.scenario));
           function selectPractice(key){switchSafely(()=>{const record=practiceRecords.get(key);if(record?.ownerKey!==clauseKey.value)return;clauseRecord().practices[record.negotiation.scenario]=key;clearDecorations();});}
           function newPractice(carry=false){carry=carry===true;switchSafely(()=>{const c=clauseRecord(),old=activePractice.value,n=old.negotiation;if(!c.scenario||communicationOnly.value||n.pending||n.tx.state==='unknown'&&!carry&&old.lifecycle==='active')return;const text=carry?n.draft:'';if(carry&&old.lifecycle==='active')old.lifecycle='archived';c.practices[c.scenario]=createPractice(clauseKey.value,c.scenario);activePractice.value.negotiation.draft=text;setTask('communication');});}
@@ -1001,6 +1076,8 @@
             el.style.height=Math.min(limit,Math.max(parseFloat(style.minHeight),el.scrollHeight+parseFloat(style.borderTopWidth)+parseFloat(style.borderBottomWidth)))+'px';
             el.scrollTop=scroll;
           }
+          // 仅用于布局；不参与请求、会话、候选或正式状态。
+          const workspaceMode = ref('dossier');
           watch(()=>[negotiation.draft,activePractice.value.key,taskPanel.value,activePane.value,workspaceMode.value],()=>nextTick(fitMessageEditor),{flush:'post'});
 
           function changeGoal(text){if(text===proposal.goal)return;proposal.goal=text;proposal.revision++;invalidateProposal();queueEditorMask('goal');}
@@ -1009,6 +1086,21 @@
             proposal.expressionStyle=value;proposal.revision++;invalidateProposal();proposal.notice='';
           }
           function changeAnswer(id,text){const p=clauseRecord().proposal,item=p.answers.find(a=>a.question_id===id);if(!item||item.text===text)return;item.text=text;p.revision++;invalidateProposal();queueEditorMask('goal');}
+          // Keep meaningful line breaks and the server's code-point budget.
+          // Only finish an all-whitespace answer; never clear an IME candidate.
+          function finishAnswerEdit(id,event){
+            if(composing.value||event.isComposing)return;
+            const el=event.target;
+            if(el.value && !el.value.trim()){changeAnswer(id,'');el.value='';}
+          }
+          function endAnswerComposition(id,event){
+            // Commit the final IME value before any queued clause switch.
+            const el=event.target,text=el.value;
+            const finished=document.activeElement!==el;
+            changeAnswer(id,finished&&!text.trim()?'':text);
+            if(finished&&!text.trim())el.value='';
+            endComposition(event);
+          }
           function fitAnswerEditors(){
             for(const el of document.querySelectorAll('#proposal-answers textarea')){
               if(!el.checkVisibility())continue;
@@ -1043,8 +1135,6 @@
             privacyNotice.value='已在本机隐藏号码。请核对更新后的文字，再点击分析。';
             contractRevealing.value=true;nextTick(()=>{contractRevealing.value=false;if(document.activeElement===el)el.setSelectionRange(nextStart,nextEnd);});return true;
           }
-          // 仅用于布局；不参与请求、会话、候选或正式状态。
-          const workspaceMode = ref('dossier');
           const spatialLayout = ref('wide');
           const focusMode = ref(false);
           const traceExpanded = ref(false);
@@ -1173,7 +1263,7 @@
             const d=candidate.document;contractImport.notice='已提取 '+(d.format==='pdf'?d.page_count+' 页':'Word 正文')+' · '+charCount(safe.text).toLocaleString('zh-CN')+' 字'+(d.table_count?' · 含 '+d.table_count+' 个表格':'')+'，请核对隐私与条款';
             const phones=candidate.counts.phone+safe.counts.phone,ids=candidate.counts.id+safe.counts.id;
             const masked=[phones?'手机号 '+phones+' 处':'',ids?'身份证号 '+ids+' 处':''].filter(Boolean).join('、');
-            inputError.value='';privacyNotice.value=(masked?'本次已在本机遮蔽'+masked+'。':'本次未发现规则可识别的号码。')+'尚未开始分析，请核对姓名、地址与条款后再点击分析。';contractImport.candidate=null;
+            inputError.value='';privacyNotice.value=(masked?'本次已在本机遮蔽'+masked+'。':'本次未发现规则可识别的号码。')+'尚未开始分析。请隐藏姓名、详细地址，并核对合同内容后再开始分析。';contractImport.candidate=null;
             await nextTick();if(epoch===importEpoch){contractRevealing.value=false;contractImport.state='success';}
           }
           watch([editing,reviewVersionId],()=>{if(!editing.value)invalidateContractImport();},{flush:'sync'});
@@ -1215,14 +1305,15 @@
           const recoveryState=computed(()=>negotiation.tx.state!=='unknown'?'none':negotiation.revision===negotiation.tx.snapshot.editorRevision?'unknown_same':'unknown_dirty');
           const canRecoverNegotiation=computed(()=>!composing.value&&negotiation.tx.state==='unknown'&&negotiationApi.status==='ready'&&activePractice.value.lifecycle!=='invalid');
           const proposalActionState = computed(() => {
-            const budget=`合计 ${proposalBudget.value} / 2000 字`,issues=[];
-            if(proposalBudget.value>2000)issues.push(`${budget}，请删减 ${proposalBudget.value-2000} 字后更新`);
+            const budget=`合计 ${proposalBudget.value} / 2000 字符`,issues=[];
+            if(proposalBudget.value>2000)issues.push(`${budget}，请删减 ${proposalBudget.value-2000} 字符后更新`);
             const oversized=proposal.answers.map(answer=>{const retained=!currentQuestions.value.has(answer.question_id),items=groupedAnswers.value[retained?1:0].items;return {index:items.findIndex(item=>item.question_id===answer.question_id),retained,length:charCount(answer.text)};}).filter(answer=>answer.length>1000);
-            if(oversized.length){const first=oversized[0];issues.push(`${first.retained?'已保留信息中':'本次补充中'}第 ${first.index+1} 项回答为 ${first.length} / 1000 字，请删减 ${first.length-1000} 字${oversized.length>1?`；另有 ${oversized.length-1} 项回答超限，请逐项精简`:''}`);}
+            if(oversized.length){const first=oversized[0];issues.push(`${first.retained?'已保留信息中':'本次补充中'}第 ${first.index+1} 项回答为 ${first.length} / 1000 字符，请删减 ${first.length-1000} 字符${oversized.length>1?`；另有 ${oversized.length-1} 项回答超限，请逐项精简`:''}`);}
             const blocked=reason=>({allowed:false,reason});
             if(issues.length)return blocked(issues.join('；')+'。已有内容完整保留。');
             if(!privacyReady.value)return blocked('隐私规则尚未就绪，请重新检查服务或刷新页面。');
-            if(!reviewContextId.value||!selectedClause.value)return blocked('当前条款没有可用的审查上下文，请重新分析合同。');
+            if(!reviewContextId.value)return blocked(results.value.length?'当前分析缺少草稿所需上下文，请重新分析合同。':'请先完成合同检查，再选择条款生成沟通草稿。');
+            if(!selectedClause.value)return blocked('请先选择要沟通的合同条款。');
             if(proposal.pending)return blocked('正在生成参考稿，请等待本次结果。');
             if(proposal.revealing)return blocked('正在更新脱敏预览，请核对后再次执行。');
             if(composing.value)return blocked('请先完成当前文字输入。');
@@ -1247,7 +1338,7 @@
           const canSendNegotiation = computed(() => sendState.value.allowed);
           function recoverSend(){if(sendState.value.action==='scenario'){const el=document.getElementById('scenario-select');el.scrollIntoView({block:'nearest',behavior:'instant'});el.focus();}else if(sendState.value.action==='service')checkNegotiationApi();}
           function viewProposalDraft(){document.getElementById('proposal-preview')?.scrollIntoView({block:'start',behavior:'instant'});}
-          function supplementGoal(){document.getElementById('proposal-tool').open=true;nextTick(()=>{const el=document.getElementById('proposal-goal');el.scrollIntoView({block:'nearest',behavior:'instant'});el.focus();});}
+          function supplementGoal(){setToolMode('proactive');nextTick(()=>{const el=document.getElementById('proposal-goal');el.scrollIntoView({block:'nearest',behavior:'instant'});el.focus();});}
           const confirmedTermLines = computed(() => termLines(committed.value.confirmedTerms));
 
           // Presentation-only lifetimes: accepted requests are remembered even while hidden.
@@ -1288,7 +1379,7 @@
             const key=JSON.stringify([request.review_context_id,request.clause_id,request.draft_request_id]);
             if(acceptedProposals.has(key))return;
             acceptedProposals.add(key);
-            const isCurrent=()=>paneVisible('task')&&clauseKey.value===ownerKey&&taskPanel.value==='communication'&&
+            const isCurrent=()=>paneVisible('task')&&toolMode.value==='proactive'&&clauseKey.value===ownerKey&&
               clauseRecord(ownerKey).proposal.result?.requestId===request.draft_request_id&&!clauseRecord(ownerKey).proposal.stale;
             if(replayed || !isCurrent())return;
             cue('advisor',advisorPulse,900,{isCurrent});cue('proposal-ink',proposalArrived,300,{isCurrent});
@@ -1326,6 +1417,10 @@
           }
           async function changeWorkspace(mode){workspaceMode.value=mode;}
           let traceTrigger=null;async function showTrace(){traceTrigger=document.activeElement;traceExpanded.value=true;await nextTick();document.getElementById('trace-toggle').focus({preventScroll:true});}
+          async function openCommunicationWorkbench(){
+            activePane.value='task';await nextTick();document.querySelector('.tool-mode-switch')?.scrollIntoView({block:'start',behavior:'instant'});document.getElementById(toolMode.value==='reactive'?'landlord-quote':reviewContextId.value&&selectedClause.value?'proposal-goal':reviewContextId.value?'proposal-clause':'proposal-check-contract')?.focus({preventScroll:true});
+          }
+          async function openQuoteWorkbench(){setToolMode('reactive');if(toolMode.value==='reactive')await openCommunicationWorkbench();}
           async function revealTask(){activePane.value='task';await nextTick();document.getElementById('task-panel').scrollTo({top:0,behavior:'instant'});}
           function enterNegotiation(id){switchSafely(()=>{if(id){ensureClauseRecord(reviewVersionId.value+':'+id);standalone.value=false;selectedClauseId.value=id;
             if(!clauseRecord().scenario){const recommended=recommendScenario(selectedClause.value?.original_clause||'');if(recommended)selectScenario(recommended,'recommended');}
@@ -1457,6 +1552,7 @@
           function invalidateProposal(p=clauseRecord().proposal,key=clauseKey.value){
             if(key===clauseKey.value)finishProposalCue();
             proposalControllers.get(key)?.abort();stopWait('proposal:'+key);p.epoch++;p.tx=newTx();p.error='';p.replacement=null;
+            p.copyEpoch++;p.copyText='';p.copyNotice='';
           }
           function resetProposal(){invalidateProposal();}
           function previewFields(detail){
@@ -1489,7 +1585,7 @@
                   p.revision++;invalidateProposal(p,key);p.revealing=true;p.notice='服务端补充隐藏了号码，请检查目标和回答后再次生成。';nextTick(()=>p.revealing=false);return;}
                 if([400,404,409,410,422,429].includes(response.status)){
                   const detail=response.status===410?await response.json().catch(()=>null):null;
-                  p.tx=newTx();p.error=response.status===410?(detail?.detail?.code==='OPERATION_EXPIRED'?'原操作已超过处理期限，结果不会发布；目标与回答已保留，可重新生成。':'审查上下文已过期，请重新审查；参考稿与回答仍保留。'):response.status===429?'当前审查的草稿请求已达上限，请重新审查合同。':response.status===422?'目标与回答需合计不超过2000字，并属于当前条款的问题。':'当前草稿上下文或请求不可用，请核对后重新生成。';return;}
+                  p.tx=newTx();p.error=response.status===410?(detail?.detail?.code==='OPERATION_EXPIRED'?'原操作已超过处理期限，结果不会发布；目标与回答已保留，可重新生成。':'审查上下文已过期，请重新审查；参考稿与回答仍保留。'):response.status===429?'当前审查的草稿请求已达上限，请重新审查合同。':response.status===422?'目标与回答需合计不超过2000字符，并属于当前条款的问题。':'当前草稿上下文或请求不可用，请核对后重新生成。';return;}
                 throw new Error('transport');
               }
               const data=await response.json();if(!current())return;
@@ -1502,10 +1598,18 @@
               const retained=p.answers.filter(a=>a.text.trim()),known=new Set(retained.map(a=>a.question_id));
               p.answers=[...retained,...data.question_items.filter(q=>!known.has(q.question_id)).map(q=>({...q,text:'',question:q.text}))];p.retainedExpanded=false;p.editingAnswerId=null;
               // Retained entries keep their original question labels and IDs.
-              p.tx=newTx();p.notice='参考稿已就绪，可在问题旁补充回答，或明确填入消息。';
+              p.tx=newTx();p.notice='沟通草稿已就绪，可核对后复制或补充信息更新。';p.copyEpoch++;p.copyText='';p.copyNotice='';
               acceptProposalDecoration(request,key,data.replayed);
             }catch(error){if(current()){p.tx.state='unknown';p.error='尚未收到有效参考稿，可重试同一草稿请求；修改目标或回答后将创建新请求。';}}
             finally{clearTimeout(timer);requestControllers.delete(controller);if(p.epoch===epoch){stopWait('proposal:'+key);proposalControllers.delete(key);if(p.tx.state==='inflight')p.tx.state='unknown';}}
+          }
+          async function copyProposalDraft(){
+            const owner=clauseRecord().proposal,result=owner.result;
+            if(!result||owner.copying||composing.value)return;
+            const epoch=++owner.copyEpoch;owner.copying=true;owner.copyText='';owner.copyNotice='';
+            try{if(!navigator.clipboard?.writeText)throw Error('clipboard');await navigator.clipboard.writeText(result.message);if(owner.copyEpoch===epoch&&owner.result===result)owner.copyNotice='沟通草稿已复制，请核对后自行发送。';}
+            catch{if(owner.copyEpoch===epoch&&owner.result===result){owner.copyText=result.message;owner.copyNotice='浏览器未允许自动复制，请在下方手动复制。';}}
+            finally{owner.copying=false;}
           }
           function fillProposal(confirm=false){
             finishProposalCue();
@@ -1566,9 +1670,103 @@
             tracePlaying.value = false;
           }
 
+          // Spec 07: request-local strategy cards; legacy state below is dormant.
+          const quoteRecords=reactive(new Map()),quoteMetaPending=ref(false);
+          let quoteMetaPromise=null;
+          const quoteStyles=[{key:'tactful',label:'体面协商版'},{key:'reasoned',label:'据理力争版'},{key:'firm',label:'坚定维权版'}];
+          const quoteAssessments={supported:'有材料支持，仍需核对适用条件',unsupported:'当前材料不支持该主张',unclear:'信息不足，先澄清事实'};
+          const quoteContract=computed(()=>(editing.value?rawText.value:submittedText.value).replace(/\r\n?/g,'\n'));
+          const quoteOwnerKey=computed(()=>editing.value?'editor':'review:'+(reviewVersionId.value||'visible'));
+          function newQuoteRecord(){return {maskKey:newId(),landlordQuote:'',userGoal:'',contextNote:'',moreOpen:false,composing:false,composingField:'',pending:false,elapsed:0,error:'',notice:'',result:null,resultSnapshot:null,attempt:0,copying:false,copyText:'',copyNotice:'',copyEpoch:0};}
+          watch(quoteOwnerKey,key=>{if(!quoteRecords.has(key))quoteRecords.set(key,newQuoteRecord());},{immediate:true,flush:'sync'});
+          const quote=computed(()=>quoteRecords.get(quoteOwnerKey.value));
+          // The view owns the label; strip only matching labels at the start of the summary.
+          const quotePositionText=computed(()=>(quote.value.result?.card?.breakdown?.landlord_position||'').trim().replace(/^(?:(?:对方|房东|房主)主张\s*[:：]\s*)+/u,''));
+          const quoteSignature=(owner=quote.value,contract=quoteContract.value)=>JSON.stringify([contract,owner.landlordQuote,owner.userGoal,owner.contextNote]);
+          const quoteResultStale=computed(()=>!!quote.value.resultSnapshot&&quoteSignature()!==quote.value.resultSnapshot.signature);
+          const quoteReadiness=computed(()=>{
+            if(!privacyReady.value)return '隐私规则尚未就绪，请重新检查服务。';
+            if(quote.value.pending)return '正在处理本次快照；你可以继续编辑，修改后的内容不会混入本次请求。';
+            if(quote.value.composing||contractComposing.value)return '请先完成当前文字输入。';
+            if(charCount(quoteContract.value)<10||!quoteContract.value.trim())return '请先在左侧提供至少10字的合同，无需先做风险审查。';
+            if(charCount(quoteContract.value)>5000)return '左侧合同超过5000字，请核对后精简；不会截断发送。';
+            if(!quote.value.landlordQuote.trim())return '粘贴房东原话即可开始，无需选择条款。';
+            if(charCount(quote.value.landlordQuote)>2000)return '房东原话超过2000字，请精简后提交。';
+            if(charCount(quote.value.userGoal)>300||charCount(quote.value.contextNote)>1000)return '请将目标控制在300字、背景控制在1000字以内。';
+            return '';
+          });
+          const canAnalyzeQuote=computed(()=>!quoteReadiness.value);
+          const quoteMaskTimers=new Map();
+          function changeQuoteField(field,value){const owner=quote.value;owner[field]=value.replace(/\r\n?/g,'\n');owner.error='';owner.notice='';const key=owner.maskKey+':'+field;clearTimeout(quoteMaskTimers.get(key));if(!owner.composing)quoteMaskTimers.set(key,setTimeout(()=>{quoteMaskTimers.delete(key);maskQuoteField(field,owner);},500));}
+          function maskQuoteField(field,owner=quote.value){if(!privacyReady.value||owner.composing&&owner.composingField===field)return false;const safe=redact(owner[field]).text;if(safe===owner[field])return false;owner[field]=safe;owner.notice='已在本机隐藏号码，请核对当前内容后提交。';return true;}
+          function finishQuoteComposition(field,value){quote.value.composing=false;quote.value.composingField='';changeQuoteField(field,value);maskQuoteField(field);}
+          function quoteKeydown(event){if((event.ctrlKey||event.metaKey)&&event.key==='Enter'){event.preventDefault();if(!event.isComposing&&!quote.value.composing&&canAnalyzeQuote.value)void analyzeQuote();}}
+          async function checkQuoteApi(){
+            if(quoteMetaPromise)return quoteMetaPromise;
+            quoteMetaPending.value=true;
+            quoteMetaPromise=(async()=>{const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),5000);requestControllers.add(controller);
+              try{const response=await fetch('/api/negotiation/quote-meta',{cache:'no-store',signal:controller.signal});const data=await response.json();if(!response.ok||data.schema_version!=='quote-v1'||data.limits?.contract_text!==5000||data.limits?.landlord_quote!==2000)throw Error('metadata');privacyRules=compilePrivacyPolicy(data.privacy_policy);privacyReady.value=true;return true;}
+              catch{privacyReady.value=false;return false;}
+              finally{clearTimeout(timer);requestControllers.delete(controller);quoteMetaPending.value=false;quoteMetaPromise=null;}
+            })();return quoteMetaPromise;
+          }
+          function quoteSourceUrl(value){try{const url=new URL(value);return url.protocol==='https:'&&url.hostname==='www.court.gov.cn'?url.href:'';}catch{return '';}}
+          function readQuoteCard(data,snapshot){
+            if(!isRecord(data)||data.schema_version!=='quote-v1'||data.request_id!==snapshot.body.request_id||!['success','needs_context','out_of_scope'].includes(data.status))return null;
+            if(data.status==='out_of_scope')return data.card===null?data:null;
+            const card=data.card;if(!isRecord(card)||!isRecord(card.breakdown)||!isRecord(card.replies)||!Array.isArray(card.grounds)||card.grounds.length>6||!isStringList(card.clarification_questions)||card.clarification_questions.length>2)return null;
+            const text=(value,max)=>typeof value==='string'&&!!value.trim()&&charCount(value)<=max&&redact(value).text===value;
+            const b=card.breakdown;if(!text(b.landlord_position,200)||!text(b.analysis,500)||!Object.hasOwn(quoteAssessments,b.assessment)||!Array.isArray(b.tactics)||b.tactics.length>3)return null;
+            if(b.tactics.some(t=>!isRecord(t)||!text(t.label,20)||!text(t.detail,200)||!text(t.quote_span,200)||!snapshot.body.landlord_quote.includes(t.quote_span)))return null;
+            if(card.grounds.some(g=>!isRecord(g)||!/^([CL])-\d{3,4}$/.test(g.source_id)||!['contract','law'].includes(g.kind)||!text(g.title,200)||!text(g.original_text,5000)||!text(g.application,200)||g.kind==='law'&&!quoteSourceUrl(g.source_url)))return null;
+            const ids=new Set(card.grounds.map(g=>g.source_id));if(ids.size!==card.grounds.length)return null;
+            if(quoteStyles.some(style=>{const r=card.replies[style.key];return !isRecord(r)||!text(r.text,500)||!text(r.best_for,60)||!isStringList(r.source_ids)||r.source_ids.some(id=>!ids.has(id));}))return null;
+            if(card.clarification_questions.some(q=>!text(q,100)))return null;
+            if(data.status==='success'&&(card.clarification_questions.length||!['supported','unsupported'].includes(b.assessment))||data.status==='needs_context'&&(!card.clarification_questions.length||b.assessment!=='unclear'))return null;
+            return data;
+          }
+          function applyQuotePreview(detail,snapshot,owner){
+            if(detail?.code!=='PRIVACY_PREVIEW_REQUIRED'||!Array.isArray(detail.fields)||detail.privacy_policy_version!==privacyRules.version){void checkQuoteApi();return false;}
+            const names={landlord_quote:'landlordQuote',user_goal:'userGoal',context_note:'contextNote'};let applied=false;
+            for(const item of detail.fields){if(typeof item.safe_text!=='string'||redact(item.safe_text).text!==item.safe_text)continue;
+              if(item.field==='contract_text'){
+                if(quoteOwnerKey.value===snapshot.ownerKey&&quoteContract.value===snapshot.body.contract_text&&editing.value){rawText.value=item.safe_text;editRevision++;applied=true;}
+              }else{const field=names[item.field];if(field&&owner[field]===snapshot.body[item.field]){owner[field]=item.safe_text;applied=true;}}
+            }
+            return applied;
+          }
+          async function analyzeQuote(){
+            if(!canAnalyzeQuote.value)return;
+            const owner=quote.value;let masked=false;
+            for(const field of ['landlordQuote','userGoal','contextNote'])masked=maskQuoteField(field,owner)||masked;
+            const safeContract=redact(quoteContract.value).text;
+            if(safeContract!==quoteContract.value){if(editing.value){rawText.value=safeContract;editRevision++;}owner.notice='合同中发现新的号码，请在左侧核对后再次提交。';return;}
+            if(masked)return;
+            const snapshot={ownerKey:quoteOwnerKey.value,signature:quoteSignature(owner),body:{request_id:newId(),contract_text:quoteContract.value,landlord_quote:owner.landlordQuote,user_goal:owner.userGoal,context_note:owner.contextNote}};
+            const attempt=++owner.attempt,controller=new AbortController(),started=performance.now();owner.pending=true;owner.elapsed=0;owner.error='';owner.notice='';owner.copyEpoch++;
+            requestControllers.add(controller);const timer=setInterval(()=>owner.elapsed=Math.floor((performance.now()-started)/1000),250),timeout=setTimeout(()=>controller.abort(),50000);
+            try{const response=await fetch('/api/negotiation/analyze-quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(snapshot.body),signal:controller.signal});const data=await response.json();if(owner.attempt!==attempt)return;
+              if(!response.ok){if(response.status===428){const applied=applyQuotePreview(data.detail,snapshot,owner);owner.error=applied?'服务端已隐藏新增号码，请核对当前显示内容后再次提交。':'需要重新核对隐私；新编辑保留，请回到左侧编辑合同并重新检查服务。';return;}
+                if(response.status===502&&data.detail?.code==='MODEL_OUTPUT_UNSAFE'){owner.error='本次回复触发内容安全规则，未予展示；请核对原话与诉求后再生成。';return;}
+                const errors={422:'字段或字数不符合要求，请核对后提交。',413:'请求内容过大，请精简后提交。',429:'请求过于频繁，请稍后再试。',502:'本次结果的结构、状态或引用未通过检查，输入与旧结果保留。可补充信息后重新生成。',503:'服务繁忙、依据或模型暂不可用，请保留输入后重试。',504:'等待模型超时；输入与旧结果保留，重新生成可能再次计费。'};
+                owner.error=errors[response.status]||'本次分析未完成，请保留内容后重试。';return;}
+              const accepted=readQuoteCard(data,snapshot);if(!accepted)throw Error('invalid-card');
+              if(accepted.status==='out_of_scope'){owner.result=null;owner.resultSnapshot=null;owner.copyEpoch++;owner.copyText='';owner.copyNotice='';owner.notice='这段内容暂无法作为租房沟通分析，请补充与合同有关的原话。';return;}
+              owner.result=accepted;owner.resultSnapshot=snapshot;owner.copyText='';owner.copyNotice='';
+              owner.notice=accepted.status==='needs_context'?'已生成三档澄清回复；可在补充情况中回答下方问题。':'三档回复已生成，可核对依据后复制。';
+              if(accepted.status==='needs_context'&&quote.value===owner&&quoteSignature(owner)===snapshot.signature)owner.moreOpen=true;
+            }catch{if(owner.attempt===attempt)owner.error='未收到可确认的完整结果；输入与旧结果保留。请明确重新生成，可能再次计费。';}
+            finally{clearInterval(timer);clearTimeout(timeout);requestControllers.delete(controller);if(owner.attempt===attempt)owner.pending=false;}
+          }
+          async function openQuoteContext(){quote.value.moreOpen=true;await nextTick();document.getElementById('quote-context')?.focus();}
+          async function copyQuoteReply(style){const owner=quote.value,result=owner.result;if(!result?.card||owner.copying)return;const text=result.card.replies[style]?.text;if(!text)return;const epoch=++owner.copyEpoch;owner.copying=true;owner.copyText='';owner.copyNotice='';
+            try{if(!navigator.clipboard?.writeText)throw Error('clipboard');await navigator.clipboard.writeText(text);if(owner.copyEpoch===epoch&&owner.result===result)owner.copyNotice='回复正文已复制；尚未发送给任何人。';}
+            catch{if(owner.copyEpoch===epoch&&owner.result===result){owner.copyText=text;owner.copyNotice='浏览器未允许自动复制，请在下方文本框中手动复制。';}}
+            finally{owner.copying=false;}
+          }
+
           function checkNegotiationApi() {
-            if(!discoveryPromise)discoveryPromise=discoverNegotiationApi().finally(()=>{discoveryPromise=null;});
-            return discoveryPromise;
+            return checkQuoteApi();
           }
           async function discoverNegotiationApi() {
             negotiationApi.checking = true;
@@ -1818,10 +2016,10 @@
             locationTimer=setTimeout(()=>{if(!isCurrent())return;if(visible())emphasize();locationObserver?.disconnect();locationObserver=null;locationScrollActive=false;locationTimer=null;},1000);
           }
           async function selectClause(id){
-            switchSafely(async()=>{activePane.value='contract';ensureClauseRecord(reviewVersionId.value+':'+id);standalone.value=false;selectedClauseId.value=id;activeMatch.value=0;taskPanel.value='explanation';workspaceMode.value='dossier';editing.value=false;clearDecorations();document.getElementById('task-panel').scrollTop=0;
+            switchSafely(async()=>{activePane.value='contract';ensureClauseRecord(reviewVersionId.value+':'+id);standalone.value=false;selectedClauseId.value=id;recommendClauseDirection();activeMatch.value=0;taskPanel.value='explanation';workspaceMode.value='dossier';editing.value=false;clearDecorations();document.getElementById('task-panel').scrollTop=0;
               const ownerKey=clauseKey.value;cue('task',taskArrived,200,{scope:'workspace',isCurrent:()=>clauseKey.value===ownerKey});await scrollToMatch();});
           }
-          function selectSource(part){switchSafely(()=>{standalone.value=false;selectedClauseId.value=part.clauses.includes(selectedClauseId.value)?selectedClauseId.value:part.clauses[0];ensureClauseRecord(reviewVersionId.value+':'+selectedClauseId.value);activeMatch.value=Math.max(0,allMatches.value[selectedClauseId.value].findIndex(m=>m.start<=part.start&&m.end>part.start));taskPanel.value='explanation';workspaceMode.value='dossier';editing.value=false;clearDecorations();
+          function selectSource(part){switchSafely(()=>{standalone.value=false;selectedClauseId.value=part.clauses.includes(selectedClauseId.value)?selectedClauseId.value:part.clauses[0];ensureClauseRecord(reviewVersionId.value+':'+selectedClauseId.value);recommendClauseDirection();activeMatch.value=Math.max(0,allMatches.value[selectedClauseId.value].findIndex(m=>m.start<=part.start&&m.end>part.start));taskPanel.value='explanation';workspaceMode.value='dossier';editing.value=false;clearDecorations();
             const ownerKey=clauseKey.value;cue('task',taskArrived,200,{scope:'workspace',isCurrent:()=>clauseKey.value===ownerKey});void scrollToMatch({scroll:false,anchorStart:part.start});});}
           function moveMatch(direction){switchSafely(()=>{const count=clauseMatches.value.length;if(count){activeMatch.value=(activeMatch.value+direction+count)%count;void scrollToMatch();}});}
           watch([reviewVersionId,selectedClauseId,activeMatch,editing,taskPanel],invalidateLocation,{flush:'sync'});
@@ -1905,8 +2103,9 @@
             } catch { health.status = 'offline'; health.note = '请确认本地服务已启动，并通过同源首页打开。'; }
             finally { clearTimeout(timer); health.checking = false; healthController = null; }
           }
-          onMounted(() => { document.addEventListener('dragover',preventFileNavigation);document.addEventListener('drop',preventFileNavigation);motionQuery.addEventListener('change',updateMotion);window.addEventListener('blur',onDecorationBlur);window.addEventListener('focus',onDecorationFocus);document.addEventListener('visibilitychange',onDecorationVisibility);boot.hidden = true; checkHealth(); healthPollTimer=setInterval(()=>{if(!document.hidden)void checkHealth();},30000); checkNegotiationApi().finally(startSpatialLayout); });
+          onMounted(() => { document.addEventListener('dragover',preventFileNavigation);document.addEventListener('drop',preventFileNavigation);motionQuery.addEventListener('change',updateMotion);window.addEventListener('blur',onDecorationBlur);window.addEventListener('focus',onDecorationFocus);document.addEventListener('visibilitychange',onDecorationVisibility);boot.hidden = true; checkHealth(); healthPollTimer=setInterval(()=>{if(!document.hidden)void checkHealth();},30000); checkQuoteApi().finally(startSpatialLayout); });
           onBeforeUnmount(() => {
+            for(const timer of quoteMaskTimers.values())clearTimeout(timer);
             invalidateContractImport();document.removeEventListener('dragover',preventFileNavigation);document.removeEventListener('drop',preventFileNavigation);
             clearDecorations();motionQuery.removeEventListener('change',updateMotion);clearTimeout(maskTimer);for(const timer of editorMaskTimers.values())clearTimeout(timer);for(const controller of requestControllers)controller.abort();requestControllers.clear();
             layoutReady = false;
@@ -1921,9 +2120,11 @@
             for (const key of waitTimers.keys()) stopWait(key);
           });
           return {
+            toolMode,setToolMode,selectProposalClause,openCommunicationWorkbench,copyProposalDraft,
+            quote,quoteStyles,quoteAssessments,quotePositionText,quoteMetaPending,quoteReadiness,canAnalyzeQuote,quoteResultStale,changeQuoteField,maskQuoteField,finishQuoteComposition,quoteKeydown,checkQuoteApi,quoteSourceUrl,analyzeQuote,openQuoteContext,copyQuoteReply,openQuoteWorkbench,
             contractImport,overImportLimit,importBlocksAnalysis,validText,chooseContractFile,contractFileChosen,contractDragEnter,contractDragOver,contractDragLeave,contractFileDrop,cancelContractImport,applyContractImport,
             communicationDirections,communicationOnly,clauseRecordSource,directionGuidance,directionGoalHint,practiceScope,
-            expressionStyles,expressionStyleLabel,changeExpressionStyle,fitAnswerEditors,answerTooLong,proposalBudget,currentQuestions,groupedAnswers,retainedNeedsReview,answerExcerpt,toggleRetainedGroup,editRetainedAnswer,recoveryState,canRecoverNegotiation,recoverNegotiation,adoptPrivacyReplacement,changeAnswer,privacyReady,negotiationMeta,composing,contractRevealing,activePractice,practiceSessions,selectPractice,newPractice,successfulReviews,readyReview,selectReview,reviewVersionId,reviewVersions,editing,pendingReviewText,oldVersion,taskPanel,scenarioChosen,openStandalone,setTask,selectScenario,contractInput,queueMask,contractComposing,finishContractComposition,beginComposition,endComposition,endChecklistComposition,changeMessage,changeGoal,rawText, submittedText, phase, maskCounts, inputError, privacyNotice,
+            expressionStyles,expressionStyleLabel,changeExpressionStyle,fitAnswerEditors,answerTooLong,proposalBudget,currentQuestions,groupedAnswers,retainedNeedsReview,answerExcerpt,toggleRetainedGroup,editRetainedAnswer,recoveryState,canRecoverNegotiation,recoverNegotiation,adoptPrivacyReplacement,changeAnswer,finishAnswerEdit,endAnswerComposition,privacyReady,negotiationMeta,composing,contractRevealing,activePractice,practiceSessions,selectPractice,newPractice,successfulReviews,readyReview,selectReview,reviewVersionId,reviewVersions,editing,pendingReviewText,oldVersion,taskPanel,scenarioChosen,openStandalone,setTask,selectScenario,contractInput,queueMask,contractComposing,finishContractComposition,beginComposition,endComposition,endChecklistComposition,changeMessage,changeGoal,rawText, submittedText, phase, maskCounts, inputError, privacyNotice,
             landlordState,advisorState,landlordPulse,advisorPulse,motionReady,lastSuccessfulEffect,
             sourceArrived,taskArrived,proposalArrived,riskCounts,activeRiskFilter,riskFilters,filteredResults,selectionOutsideFilter,toggleRiskFilter,finishProposalCue,
             results, evidenceById, reviewContextId, totalRisks, selectedClauseId, selectedClause, activeMatch, clauseMatches, documentParts,

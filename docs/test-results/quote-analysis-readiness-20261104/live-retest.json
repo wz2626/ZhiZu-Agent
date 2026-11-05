@@ -1,0 +1,114 @@
+{
+  "fixture": "synthetic, de-identified; live configured model; no automatic retries",
+  "cases": [
+    {
+      "case": "no_invented_deadline",
+      "fixture": "synthetic",
+      "calls": 1,
+      "usage": {
+        "input_tokens": 2677,
+        "output_tokens": 672,
+        "total_tokens": 3349,
+        "input_token_details": {
+          "cache_read": 768
+        },
+        "output_token_details": {}
+      },
+      "validation_failure": "invalid reply sources",
+      "status": "failed",
+      "code": "MODEL_OUTPUT_INVALID",
+      "elapsed_ms": 6114
+    },
+    {
+      "case": "entry",
+      "fixture": "synthetic",
+      "calls": 1,
+      "usage": {
+        "input_tokens": 2476,
+        "output_tokens": 589,
+        "total_tokens": 3065,
+        "input_token_details": {
+          "cache_read": 768
+        },
+        "output_token_details": {}
+      },
+      "status": "success",
+      "response": {
+        "schema_version": "quote-v1",
+        "request_id": "synthetic_17",
+        "status": "success",
+        "card": {
+          "breakdown": {
+            "landlord_position": "房东主张其持有钥匙即可随时进入出租房屋，未提及提前通知或征得租客同意。",
+            "assessment": "unsupported",
+            "analysis": "现有材料中，合同相关约定只涉及租金、押金退还及维修责任区分，未约定房东可随时入室；房东原话也未说明入室的具体事由、时间或是否提前告知。租客目标是与房东提前沟通入室时间与安排，属于合理的居住安宁与沟通请求。现有材料不足以支持“想进去就进去”这一主张，但也不宜据此认定房东已实施入室行为。",
+            "tactics": [
+              {
+                "label": "无依据断言",
+                "detail": "房东以持有钥匙为由主张可随时进入，但未说明合同依据或提前告知安排。",
+                "quote_span": "我有钥匙，想进去就进去。"
+              }
+            ]
+          },
+          "grounds": [
+            {
+              "source_id": "C-001",
+              "kind": "contract",
+              "title": "合同第1段",
+              "original_text": "房屋租赁合同。租金按月支付，双方根据实际约定及交接记录核对费用。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 1,
+              "part_index": 1,
+              "application": "合同相关约定仅涉及租金支付与费用核对，未赋予房东随时入室的权利，可用于说明入室需另行沟通。"
+            },
+            {
+              "source_id": "C-003",
+              "kind": "contract",
+              "title": "合同第3段",
+              "original_text": "日常正常使用损耗与人为损坏应区分；维修按损坏原因与双方约定处理。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 3,
+              "part_index": 1,
+              "application": "合同相关约定区分正常损耗与人为损坏，涉及维修处理，可作为入室检查需事先沟通事由的参照，但不直接规定入室程序。"
+            }
+          ],
+          "replies": {
+            "tactful": {
+              "text": "您好，看到您说想进房子看看。我理解您可能有检查或维修的安排，但目前合同里没有约定可以随时入室。为了不影响居住和避免误会，麻烦您提前告诉我入室的事由和可选时段，我确认后回复，再一起商定具体安排。",
+              "best_for": "希望保持和气、先了解房东入室事由并协商时间的场景。",
+              "source_ids": [
+                "C-001",
+                "C-003"
+              ]
+            },
+            "reasoned": {
+              "text": "您好，关于入室，我想先和您确认一下安排。合同相关约定只涉及租金、押金和维修责任，并没有约定您可以随时进入。我并非拒绝沟通，但希望入室前说明事由并提前约定时间，由双方确认后再进行。请先发可选时段，我确认后回复。",
+              "best_for": "需要明确合同依据、坚持提前沟通再安排入室的场景。",
+              "source_ids": [
+                "C-001",
+                "C-003"
+              ]
+            },
+            "firm": {
+              "text": "您好，您说“有钥匙想进去就进去”，这一点我无法认同。合同相关约定并未赋予随时入室的权利，居住期间需要提前沟通并约定时间。如有检查或维修需要，请说明具体事由和可选时段，我确认后回复，双方商定后再安排入室。",
+              "best_for": "对方坚持可随时入室、需要明确表达居住安排须经沟通的场景。",
+              "source_ids": [
+                "C-001",
+                "C-003"
+              ]
+            }
+          },
+          "clarification_questions": []
+        }
+      },
+      "assessment": "unsupported",
+      "question_count": 0,
+      "retrieved_law_ids": [],
+      "elapsed_ms": 5464
+    }
+  ]
+}

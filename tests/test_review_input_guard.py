@@ -19,6 +19,39 @@ from backend.app.services.review_trace import FAILURE_MESSAGES, public_feedback
 from backend.app.services.vector_store import LawVectorStoreService, load_authoritative_laws, mask_sensitive_text
 
 
+BROADCAST_TEXT = (
+    "各位观众晚上好，欢迎收看今天的《新闻联播》。今天节目的主要内容有："
+    "全国多地迎来降温天气，各地相关部门积极采取应对措施，保障群众温暖过冬，"
+    "确保供暖设备平稳运行。此外，我国自主研发的新一代人工智能大模型在各类行业"
+    "应用中取得显著成果，有效赋能了实体经济转型升级。"
+)
+
+
+@pytest.mark.parametrize("text", [
+    BROADCAST_TEXT,
+    "各位听众朋友们大家好！欢迎收听今天的新闻播报。下面请听详细报道。",
+    "欢迎收看今晚的新闻联播，今天的主要内容有：各地持续推动科技创新。",
+    "新闻播报稿\n各位观众晚上好，欢迎收看今天的新闻。下面请看详细报道。",
+    "<p>各位观众晚上好，</p><p>欢迎收看今天的《新闻联播》。</p>",
+])
+def test_explicit_news_broadcast_without_lease_content_is_out_of_scope(text):
+    assert classify_review_input(text) == ReviewFailureCode.OUT_OF_SCOPE
+
+
+@pytest.mark.parametrize("text", [
+    "房屋租赁合同：房东提供电视，可收看新闻联播；承租人每月支付租金。",
+    "合同附件摘录：各位观众晚上好，欢迎收看今天的新闻联播。",
+    "房东在新闻联播后发来消息，押金什么时候退还还没说清楚。",
+    "各位观众晚上好，欢迎收看今天的新闻联播。\n押金不退。",
+    "各位观众晚上好，欢迎收看今天的新闻联播。\n未经同意不得转租。",
+    BROADCAST_TEXT + "\n租赁条款：承租人应当每月支付租金2000元。",
+    "这不是新闻播报稿，请帮我看看现有约定。",
+    "今天看了新闻，想问一下房屋维修责任应当如何约定。",
+])
+def test_news_mentions_and_mixed_rental_fragments_are_not_rejected(text):
+    assert classify_review_input(text) is None
+
+
 @pytest.mark.parametrize("text", [
     "二手车买卖合同：卖方把轿车出售给买方，保证金用于买卖履约，售后维修另约。",
     "劳动合同：用人单位聘用劳动者，住房补贴随工资发放，公司不出租住宅。",
@@ -167,6 +200,7 @@ def assert_legacy_mock(payload, text):
 
 
 @pytest.mark.parametrize("text,code", [
+    (BROADCAST_TEXT, ReviewFailureCode.OUT_OF_SCOPE),
     ("劳动合同：工资和加班费按双方约定支付，另有住房补贴。", ReviewFailureCode.OUT_OF_SCOPE),
     ("家政服务合同：房东负责提供房屋钥匙，家政人员按次清洁。", ReviewFailureCode.OUT_OF_SCOPE),
     ("<script>document.title = 'local';</script>", ReviewFailureCode.INVALID_CONTRACT_TEXT),
@@ -175,6 +209,7 @@ def assert_legacy_mock(payload, text):
 @pytest.mark.parametrize("endpoint", ["analyze", "analyze-detailed"])
 def test_api_guard_stops_before_real_clients_retrieval_and_graph(client, monkeypatch, text, code, endpoint):
     forbid_downstream_initialization(monkeypatch)
+    monkeypatch.setattr(review_module.review_context_store, "create", lambda *a, **k: pytest.fail("rejected input must not create a drafting context"))
     result = client.post(f"/api/review/{endpoint}", json={"contract_text": text})
     assert result.status_code == 200
     if endpoint == "analyze":
@@ -183,6 +218,7 @@ def test_api_guard_stops_before_real_clients_retrieval_and_graph(client, monkeyp
     response = ReviewDetailedResponse.model_validate(result.json())
     assert response.status == "needs_review" and response.failure_code == code
     assert response.results == [] and response.total_risks == 0 and response.retry_count == 0
+    assert response.review_context_id is None and response.evidence_by_id == {}
     assert response.reason == FAILURE_MESSAGES[code]
     assert response.errors == [FAILURE_MESSAGES[code]]
     assert [event.node for event in response.trace] == ["input_guard"]

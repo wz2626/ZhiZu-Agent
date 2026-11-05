@@ -2,6 +2,8 @@
 
 模块契约以总Spec与对应模块Spec为准；实际完成度和验证以测试报告为准。
 
+2026-11-04起，新主工作流以[Spec 07](spec-07-quote-analysis.md)为准。Spec 03/04 deprecated兼容保留，Spec 05保留旧接口。
+
 | 文档 | 契约 |
 | --- | --- |
 | [Spec 00](spec-00-architecture.md) | 系统边界、双图、双重脱敏、V4统一工作区、动作确认与快照恢复 |
@@ -11,3 +13,4 @@
 | [Spec 04](spec-04-negotiation-api-and-scenarios.md) | 谈判HTTP、三场景、V4实例/轮次保护、幂等及真实Trace |
 | [Spec 05](spec-05-proposal-drafting.md) | 短时审查上下文、独立草稿、校验与幂等；V4稳定问题ID、结构化回答、2000字预算与旧稿保留 |
 | [Spec 06](spec-06-contract-import.md) | Word/PDF离线提取、流式限额、ParseJob所有权、扫描件防漏审及人工确认回填 |
+| [Spec 07](spec-07-quote-analysis.md) | 无状态全文合同、一次模型、本地检索、来源回填与三档微信回复 |

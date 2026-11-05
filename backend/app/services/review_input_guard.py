@@ -42,6 +42,12 @@ _OTHER_DOMAIN = re.compile(
     r"(?:家政|保洁|上门清洁).{0,20}(?:服务费|收费|服务协议)"
 )
 _DOMAIN_NEGATION = re.compile(r"(?:不是|并非|而非|不属于|不涉及|不适用|区别于|无关的)[^。！？；;，,]{0,6}$")
+_NEWS_BROADCAST_OPENING = re.compile(
+    r"^\s*(?:(?:新闻(?:联播|播报)?稿|节目主持稿)\s*[:：。]\s*)?"
+    r"(?:(?:各位|亲爱的)?(?:观众|听众)(?:朋友们?)?"
+    r"[^。！？；;\n]{0,12}好[。！？；;：:\s]*)?"
+    r"欢迎(?:大家)?(?:收看|收听)[^。！？；;\n]{0,40}(?:新闻|联播)"
+)
 _ROLE = r"(?:出租人|出租方|承租人|承租方|房东|租客|租户)"
 _ROLE_DUTY = re.compile(
     _ROLE + r"[^。！？；;，,\n]{0,20}"
@@ -121,6 +127,11 @@ def classify_review_input(text: str) -> ReviewFailureCode | None:
         if any(not _DOMAIN_NEGATION.search(clause[:match.start()])
                for match in _OTHER_DOMAIN.finditer(clause)):
             return ReviewFailureCode.OUT_OF_SCOPE
+
+    # Match an actual broadcast opening, not a news mention inside a contract.
+    # Even short lease fragments in mixed documents must remain reviewable.
+    if _NEWS_BROADCAST_OPENING.search(readable) and not _CONTRACT_FRAGMENT.search(readable):
+        return ReviewFailureCode.OUT_OF_SCOPE
 
     # Drop only recognizable synthetic metadata, placeholders and corrupt runs.
     # Unrecognized prose, including incomplete rental questions, is not rejected.

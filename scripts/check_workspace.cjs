@@ -1,3 +1,5 @@
+// OBSOLETE UI contract since 2026-11-04: legacy practice DOM only.
+// Current acceptance: check_quote_panel.cjs; preserve this file for the separate cleanup step.
 // Shared interaction contract. Runs against Day 8 review doubles and Day 10 real local graphs.
 module.exports=async function({cdp,click,fill,until,pause,assert,real,requests,responses=[],pass,mode,shot}){
  const ev=e=>cdp.evaluate(e);

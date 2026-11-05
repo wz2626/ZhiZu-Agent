@@ -11,10 +11,22 @@ from threading import BoundedSemaphore
 from time import monotonic
 
 from backend.app.core.privacy import redact_pii
+from backend.app.core.model_payload import decode_model_payload
 from backend.app.services.operation_store import OperationBusy, OperationExpired
 
 _deadline = ContextVar("cloud_deadline", default=None)
 logger = logging.getLogger(__name__)
+
+
+def cloud_error_chain(error):
+    """Bounded diagnostics: types only, never exception text or request data."""
+    names, seen = [], set()
+    while error is not None and id(error) not in seen and len(names) < 8:
+        seen.add(id(error))
+        name = type(error).__name__
+        names.append(name if name.isidentifier() and len(name) <= 80 else "Exception")
+        error = error.__cause__ or error.__context__
+    return " -> ".join(names)
 
 
 def check_deadline():
@@ -41,15 +53,15 @@ def execution_deadline(seconds):
         _deadline.reset(token)
 
 
-def invoke_model(llm, messages):
+def invoke_model(llm, messages, *, max_chars=48000):
     check_deadline()
     # Conservative character admission, not a claim of tokenizer equivalence.
     text = "".join(message.content for message in messages if isinstance(message.content, str))
-    if len(text) > 48000:
+    if len(text) > max_chars:
         raise ValueError("unsafe or oversized model payload")
     # Payload envelope is assembled by the server. Do not treat opaque server
     # IDs as free text: a UUID can coincidentally contain a phone-shaped run.
-    data = json.loads(messages[1].content)
+    data = decode_model_payload(messages[1].content)
     pending = [data]
     while pending:
         value = pending.pop()

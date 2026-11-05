@@ -3,6 +3,7 @@
 import logging
 import math
 import re
+from urllib.parse import urlsplit
 from typing import Protocol
 from time import perf_counter
 
@@ -73,6 +74,12 @@ class ContractReviewService:
                     max_retries=0,
                     use_responses_api=False,
                     http_client=self._http_client,
+                    # Quality-first review explicitly retains high reasoning.
+                    # Keep provider-specific options off unrelated endpoints.
+                    **({"extra_body": {"thinking": {"type": "enabled"}},
+                        "reasoning_effort": "high"}
+                       if urlsplit(self.settings.chat_base_url).hostname == "api.deepseek.com"
+                       and self.settings.chat_model == "deepseek-flash" else {}),
                 )
                 self._owns_llm = True
             except Exception as error:

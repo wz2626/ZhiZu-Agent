@@ -1,5 +1,7 @@
 # 智租博弈：三大技术亮点与答辩证据
 
+版本提示（2026-11-04）：本文保留旧演练架构及早期计划的历史技术说明，不作为当前主流程或比赛验收要求。当前微信破招按[Spec 07](specs/spec-07-quote-analysis.md)实现；旧评分与固定房东仅保留后端兼容。
+
 本文用于 Day 13/14 答辩，依据仓库中的实现、测试与已归档实测结果编写。系统围绕押金扣留、维修责任、提前退租，完成“合同风险审查 → 模拟谈判 → 协商清单”的闭环。运行步骤见[根目录 README](../README.md)，契约见 [Spec 00](specs/spec-00-architecture.md)、[Spec 02](specs/spec-02-risk-review.md)、[Spec 03](specs/spec-03-negotiation-scoring.md) 与 [Spec 04](specs/spec-04-negotiation-api-and-scenarios.md)。
 
 答辩主线：把算分、状态提交、拒绝路径和引用身份交给可执行规则，把生成内容放在校验之后展示。当前 HTTP 谈判采用固定策略的离线模拟房东，不调用云模型；它验证的是可复现的协商流程与提交约束，不宣称能预测真实房东反应。

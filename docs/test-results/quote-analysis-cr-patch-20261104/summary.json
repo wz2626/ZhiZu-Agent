@@ -1,0 +1,223 @@
+{
+  "fixture": "synthetic de-identified, live configured model; no automatic retries",
+  "batch_statuses": {
+    "needs_context": 13,
+    "success": 4,
+    "out_of_scope": 2,
+    "failed": 1
+  },
+  "final_cases": [
+    {
+      "case": "deposit_wear",
+      "status": "needs_context",
+      "assessment": "unclear",
+      "questions": 2,
+      "calls": 1,
+      "final_local_validation": "passed"
+    },
+    {
+      "case": "repair_request",
+      "status": "success",
+      "assessment": "supported",
+      "questions": 0,
+      "calls": 1,
+      "final_local_validation": "passed"
+    },
+    {
+      "case": "rent_overdue",
+      "status": "needs_context",
+      "assessment": "unclear",
+      "questions": 2,
+      "calls": 1,
+      "final_local_validation": "passed"
+    },
+    {
+      "case": "unclear_reference",
+      "status": "needs_context",
+      "assessment": "unclear",
+      "questions": 2,
+      "calls": 1,
+      "final_local_validation": "passed"
+    },
+    {
+      "case": "early_exit",
+      "status": "needs_context",
+      "assessment": "unclear",
+      "questions": 2,
+      "calls": 1,
+      "final_local_validation": "passed"
+    },
+    {
+      "case": "rent_raise",
+      "status": "needs_context",
+      "assessment": "unclear",
+      "questions": 2,
+      "calls": 1,
+      "final_local_validation": "passed"
+    },
+    {
+      "case": "utility_bill",
+      "status": "needs_context",
+      "assessment": "unclear",
+      "questions": 2,
+      "calls": 1,
+      "final_local_validation": "passed"
+    },
+    {
+      "case": "unrelated",
+      "status": "out_of_scope",
+      "assessment": null,
+      "questions": 0,
+      "calls": 1,
+      "final_local_validation": "passed"
+    },
+    {
+      "case": "prompt_injection",
+      "status": "out_of_scope",
+      "assessment": null,
+      "questions": 0,
+      "calls": 1,
+      "final_local_validation": "passed"
+    },
+    {
+      "case": "landlord_threat",
+      "status": "needs_context",
+      "assessment": "unclear",
+      "questions": 2,
+      "calls": 1,
+      "final_local_validation": "passed"
+    },
+    {
+      "case": "claimed_lawsuit",
+      "status": "needs_context",
+      "assessment": "unclear",
+      "questions": 2,
+      "calls": 1,
+      "final_local_validation": "passed"
+    },
+    {
+      "case": "goal_without_concession",
+      "status": "needs_context",
+      "assessment": "unclear",
+      "questions": 2,
+      "calls": 1,
+      "final_local_validation": "passed"
+    },
+    {
+      "case": "numeric_consistency",
+      "status": "needs_context",
+      "assessment": "unclear",
+      "questions": 2,
+      "calls": 1,
+      "final_local_validation": "passed"
+    },
+    {
+      "case": "no_invented_deadline",
+      "status": "needs_context",
+      "assessment": "unclear",
+      "questions": 2,
+      "calls": 1,
+      "final_local_validation": "passed"
+    },
+    {
+      "case": "fault_exception",
+      "status": "success",
+      "assessment": "supported",
+      "questions": 0,
+      "calls": 1,
+      "final_local_validation": "passed"
+    },
+    {
+      "case": "safety",
+      "status": "needs_context",
+      "assessment": "unclear",
+      "questions": 2,
+      "calls": 1,
+      "final_local_validation": "passed"
+    },
+    {
+      "case": "sublease",
+      "status": "success",
+      "assessment": "supported",
+      "questions": 0,
+      "calls": 1,
+      "final_local_validation": "passed"
+    },
+    {
+      "case": "entry",
+      "status": "needs_context",
+      "assessment": "unclear",
+      "questions": 2,
+      "calls": 1,
+      "final_local_validation": "passed"
+    },
+    {
+      "case": "evidence_missing",
+      "status": "needs_context",
+      "assessment": "unclear",
+      "questions": 2,
+      "calls": 1,
+      "final_local_validation": "passed"
+    },
+    {
+      "case": "reasonable_handover",
+      "status": "success",
+      "assessment": "supported",
+      "questions": 0,
+      "calls": 1,
+      "final_local_validation": "passed"
+    }
+  ],
+  "median_ms": 4477.0,
+  "p95_ms": 5404,
+  "retrieval": {
+    "押金全扣": [
+      "LAW-710",
+      "LAW-711",
+      "LAW-714"
+    ],
+    "押金不退": [
+      "LAW-710",
+      "LAW-711",
+      "LAW-714"
+    ],
+    "退还押金": [
+      "LAW-710",
+      "LAW-714",
+      "LAW-711",
+      "LAW-733"
+    ],
+    "维修费用": [
+      "LAW-713",
+      "LAW-712"
+    ],
+    "当事人应当按照约定": []
+  },
+  "development_runs": [
+    {
+      "artifact": "quote-cr-live-20.json",
+      "cases": 20
+    },
+    {
+      "artifact": "quote-cr-live-final.json",
+      "cases": 20
+    },
+    {
+      "artifact": "quote-cr-state-order-probe.json",
+      "cases": 3
+    },
+    {
+      "artifact": "quote-cr-acceptance-final.json",
+      "cases": 20
+    },
+    {
+      "artifact": "quote-cr-threat-retest.json",
+      "cases": 1
+    },
+    {
+      "artifact": "quote-cr-threat-retest-2.json",
+      "cases": 1
+    }
+  ],
+  "development_calls": 65
+}

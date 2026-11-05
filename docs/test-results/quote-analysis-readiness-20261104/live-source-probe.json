@@ -1,0 +1,98 @@
+{
+  "fixture": "synthetic, de-identified; live configured model; no automatic retries",
+  "cases": [
+    {
+      "case": "no_invented_deadline",
+      "fixture": "synthetic",
+      "calls": 1,
+      "usage": {
+        "input_tokens": 2677,
+        "output_tokens": 528,
+        "total_tokens": 3205,
+        "input_token_details": {
+          "cache_read": 2432
+        },
+        "output_token_details": {}
+      },
+      "status": "needs_context",
+      "response": {
+        "schema_version": "quote-v1",
+        "request_id": "synthetic_13",
+        "status": "needs_context",
+        "card": {
+          "breakdown": {
+            "landlord_position": "房东表示押金退还事宜之后再谈，具体退还时间目前无法确定。",
+            "assessment": "unclear",
+            "analysis": "现有材料显示合同约定退租交接后核对费用并退还押金余额，但尚未约定具体交接和退还日期，房东也未说明不定的原因。缺少退租交接是否已完成、费用是否已核对等关键事实，暂无法判断该主张是否合理。",
+            "tactics": []
+          },
+          "grounds": [
+            {
+              "source_id": "C-002",
+              "kind": "contract",
+              "title": "合同第2段",
+              "original_text": "押金为2000元，退租交接后核对费用并退还余额。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 2,
+              "part_index": 1,
+              "application": "合同相关约定显示押金2000元应在退租交接后核对费用并退还余额，可作为沟通返还安排的依据。"
+            },
+            {
+              "source_id": "C-001",
+              "kind": "contract",
+              "title": "合同第1段",
+              "original_text": "房屋租赁合同。租金按月支付，双方根据实际约定及交接记录核对费用。",
+              "source_url": null,
+              "law_id": null,
+              "verified_date": null,
+              "paragraph_index": 1,
+              "part_index": 1,
+              "application": "合同相关约定提到双方根据实际约定及交接记录核对费用，可用于说明先核对再退押金的流程。"
+            }
+          ],
+          "replies": {
+            "tactful": {
+              "text": "您好，关于押金的事想和您确认一下：合同相关约定是退租交接后核对费用并退还余额。想请问目前交接和费用核对进行到哪一步了？如果方便，请先发可选时段，我确认后回复，我们把后续安排定下来。",
+              "best_for": "希望缓和沟通、先了解对方进度并推进交接安排时使用。",
+              "source_ids": [
+                "C-002",
+                "C-001"
+              ]
+            },
+            "reasoned": {
+              "text": "您好，押金2000元按合同相关约定应在退租交接后核对费用并退还余额。您说退还时间还不确定，我理解可能有交接或费用核对尚未完成。请说明目前卡在哪一步、是否已有扣款项目及依据；也请先发可选时段，我确认后回复，以便尽快明确返还安排。",
+              "best_for": "需要对方说明具体原因和费用依据、据理推进明确安排时使用。",
+              "source_ids": [
+                "C-002",
+                "C-001"
+              ]
+            },
+            "firm": {
+              "text": "您好，押金返还安排需要明确。合同相关约定为退租交接后核对费用并退还余额，目前尚未约定具体日期。请告知交接和费用核对的状态、是否存在扣款及依据，并请先发可选时段，我确认后回复。希望双方按合同相关约定把返还时间和金额确定下来。",
+              "best_for": "对方持续回避、需要坚定要求明确返还安排时使用。",
+              "source_ids": [
+                "C-002",
+                "C-001"
+              ]
+            }
+          },
+          "clarification_questions": [
+            "退租交接是否已经完成？",
+            "押金2000元中是否有已核对确认的扣款项目？"
+          ]
+        }
+      },
+      "assessment": "unclear",
+      "question_count": 2,
+      "retrieved_law_ids": [
+        "LAW-710",
+        "LAW-714",
+        "LAW-733",
+        "LAW-711"
+      ],
+      "elapsed_ms": 4632
+    }
+  ]
+}

@@ -1,5 +1,7 @@
 # Spec 04：v0.1 谈判 HTTP、三场景与执行回放
 
+2026-11-04状态：deprecated兼容保留。新前端及微信破招遵循[Spec 07](spec-07-quote-analysis.md)，不调用旧演练入口；本阶段保留旧服务和测试。
+
 ## V4 后端原子发布与容量（2026-10-31 授权）
 
 turn 默认必须携带 X-Interaction-Version:4、X-Practice-Epoch、X-Expected-Round；缺失/不合法返回受控409。meta 无需头。旧无头协议仅由显式 V4_ALLOW_LEGACY_HEADERS=true 开启。epoch 校验先于预览/创建；新会话仅在 expected_round=0 时创建。get_session 未找到时返回不落存储的空快照，不创建会话。

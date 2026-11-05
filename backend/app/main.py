@@ -14,6 +14,7 @@ from backend.app.api.knowledge import router as knowledge_router
 from backend.app.api.review import router as review_router
 from backend.app.api.negotiation import router as negotiation_router
 from backend.app.api.contracts import router as contracts_router
+from backend.app.api.quote_analysis import router as quote_analysis_router
 from backend.app.core.config import PROJECT_ROOT, Settings, get_settings
 from backend.app.schemas.health import HealthResponse
 from backend.app.core.http_limits import ApiBoundary
@@ -42,6 +43,7 @@ app.include_router(knowledge_router)
 app.include_router(review_router, prefix="/api/review")
 app.include_router(negotiation_router)
 app.include_router(contracts_router)
+app.include_router(quote_analysis_router)
 
 
 @app.exception_handler(RequestValidationError)
