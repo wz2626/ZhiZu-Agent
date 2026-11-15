@@ -776,7 +776,7 @@
           <section id="proposal-tool" class="proposal-tool" aria-label="表达助手输入">
             <p class="practice-note assistant-boundary">云端模型生成 · 供沟通参考。</p>
             <div class="proposal-goal-heading"><label for="proposal-goal">本次协商目标</label><small>可随时补充或修改</small></div>
-            <textarea class="ui-field w-full resize-y rounded-[10px] px-4 py-3 text-base leading-7" id="proposal-goal"  :value="proposal.goal" @input="changeGoal($event.target.value)" @compositionstart="beginComposition" @compositionend="endComposition" rows="4" maxlength="2000" autocomplete="off" spellcheck="false" :placeholder="directionGoalHint" :disabled="!reviewContextId||!selectedClause"></textarea>
+            <textarea class="ui-field w-full resize-y rounded-[10px] px-4 py-3 text-base leading-7" id="proposal-goal"  :value="proposal.goal" @input="changeGoal($event.target.value)" @compositionstart="beginComposition" @compositionend="endComposition" rows="4" v-code-point-limit="2000" autocomplete="off" spellcheck="false" :placeholder="directionGoalHint" :disabled="!reviewContextId||!selectedClause"></textarea>
             <fieldset class="expression-styles"><legend>表达风格</legend><div class="expression-style-options"><label v-for="style in expressionStyles" :key="style.value" class="expression-style-choice"><input type="radio" name="expression-style" :id="'expression-style-'+style.value" :value="style.value" :checked="proposal.expressionStyle===style.value" @change="changeExpressionStyle(style.value)" :disabled="composing"><span>{{style.label}}</span></label></div></fieldset>
             <p class="practice-note privacy-hint">号码自动在本机遮蔽；姓名、详细地址不会自动识别，请自行检查。</p>
             <p v-if="proposal.notice && !proposal.pending && proposal.notice!=='沟通草稿已就绪，可核对后复制或补充信息更新。'" id="proposal-status" class="practice-note" role="status">{{ proposal.notice }}</p>
@@ -787,7 +787,7 @@
             <template v-for="group in groupedAnswers" :key="group.kind"><component v-if="group.items.length" :is="group.retained?'details':'section'" :id="group.retained?'retained-answers':'current-answers'" :class="{'retained-answers':group.retained,'current-answers':!group.retained}" :open="group.retained && (proposal.retainedExpanded||retainedNeedsReview)" @toggle="toggleRetainedGroup($event)">
               <summary v-if="group.retained" class="supplement-title">{{ group.label }}<span class="ui-num">{{ group.items.length }} 项 · 可修改</span></summary>
               <p v-if="group.retained && retainedNeedsReview" class="practice-note notice-warn" role="status">字数超限，已展开保留的回答，请结合下方字数提示精简。</p>
-              <div v-for="answer in group.items" :key="answer.question_id" class="answer-item"><div class="answer-heading"><label :for="!group.retained||proposal.editingAnswerId===answer.question_id||retainedNeedsReview ? 'answer-'+answer.question_id : undefined">{{ answer.question }}</label><button v-if="group.retained" type="button" class="text-btn answer-edit" :aria-expanded="proposal.editingAnswerId===answer.question_id||retainedNeedsReview" :aria-controls="'answer-editor-'+answer.question_id" @click="editRetainedAnswer(answer.question_id)">{{ proposal.editingAnswerId===answer.question_id?'完成修改':'修改' }}</button></div><p v-if="group.retained && proposal.editingAnswerId!==answer.question_id && !retainedNeedsReview" class="answer-excerpt"><span class="answer-excerpt-label">你的回答</span><span class="answer-excerpt-text">{{ answerExcerpt(answer.text) }}</span></p><div class="answer-field" :id="'answer-editor-'+answer.question_id" v-show="!group.retained||proposal.editingAnswerId===answer.question_id||retainedNeedsReview"><textarea class="ui-field w-full resize-y rounded-[10px] px-4 py-3 text-base leading-7" :aria-describedby="'answer-count-'+answer.question_id" :id="'answer-'+answer.question_id" :value="answer.text" @input="changeAnswer(answer.question_id,$event.target.value)" @blur="finishAnswerEdit(answer.question_id,$event)" @compositionstart="beginComposition" @compositionend="endAnswerComposition(answer.question_id,$event)" rows="2" maxlength="2000" placeholder="填写已知信息；不确定可留空"></textarea><p :id="'answer-count-'+answer.question_id" class="answer-count ui-num" title="按字符计数，包含空格和换行。" :class="{'notice-warn':charCount(answer.text)>1000}">{{charCount(answer.text)}} / 1000 字符<span v-if="charCount(answer.text)>1000"> · 请删减 {{charCount(answer.text)-1000}} 字符</span></p></div></div>
+              <div v-for="answer in group.items" :key="answer.question_id" class="answer-item"><div class="answer-heading"><label :for="!group.retained||proposal.editingAnswerId===answer.question_id||retainedNeedsReview ? 'answer-'+answer.question_id : undefined">{{ answer.question }}</label><button v-if="group.retained" type="button" class="text-btn answer-edit" :aria-expanded="proposal.editingAnswerId===answer.question_id||retainedNeedsReview" :aria-controls="'answer-editor-'+answer.question_id" @click="editRetainedAnswer(answer.question_id)">{{ proposal.editingAnswerId===answer.question_id?'完成修改':'修改' }}</button></div><p v-if="group.retained && proposal.editingAnswerId!==answer.question_id && !retainedNeedsReview" class="answer-excerpt"><span class="answer-excerpt-label">你的回答</span><span class="answer-excerpt-text">{{ answerExcerpt(answer.text) }}</span></p><div class="answer-field" :id="'answer-editor-'+answer.question_id" v-show="!group.retained||proposal.editingAnswerId===answer.question_id||retainedNeedsReview"><textarea class="ui-field w-full resize-y rounded-[10px] px-4 py-3 text-base leading-7" :aria-describedby="'answer-count-'+answer.question_id" :id="'answer-'+answer.question_id" :value="answer.text" @input="changeAnswer(answer.question_id,$event.target.value)" @blur="finishAnswerEdit(answer.question_id,$event)" @compositionstart="beginComposition" @compositionend="endAnswerComposition(answer.question_id,$event)" rows="2" v-code-point-limit="2000" placeholder="填写已知信息；不确定可留空"></textarea><p :id="'answer-count-'+answer.question_id" class="answer-count ui-num" title="按字符计数，包含空格和换行。" :class="{'notice-warn':charCount(answer.text)>1000}">{{charCount(answer.text)}} / 1000 字符<span v-if="charCount(answer.text)>1000"> · 请删减 {{charCount(answer.text)-1000}} 字符</span></p></div></div>
             </component></template></div>
             <div class="proposal-controls proposal-submit-row flex flex-wrap items-center gap-2">
               <button id="generate-proposal" class="btn" type="button" @click="generateProposal" :disabled="!canGenerateProposal" aria-describedby="proposal-generate-readiness">{{ proposal.pending ? '生成中…' : proposal.request ? '重试同一草稿请求' : proposal.result ? '检查并更新参考稿' : '生成沟通草稿' }}</button>
@@ -805,7 +805,7 @@
         </section>
         <section id="quote-panel" v-show="toolMode==='reactive'" :inert="toolMode!=='reactive'" :aria-hidden="toolMode!=='reactive'" aria-labelledby="quote-title" :aria-busy="quote.pending">
           <header><h2 id="quote-title">回复分析</h2><p class="quote-hint">结合当前合同，分析对方诉求与依据，生成可选回复。</p></header>
-          <div><label for="landlord-quote">房东发来的原话</label><textarea id="landlord-quote" class="ui-field rounded-[10px] px-3 py-3" :value="quote.landlordQuote" @input="changeQuoteField('landlordQuote',$event.target.value)" @blur="maskQuoteField('landlordQuote')" @compositionstart="quote.composing=true;quote.composingField='landlordQuote'" @compositionend="finishQuoteComposition('landlordQuote',$event.target.value)" @keydown="quoteKeydown" rows="5" maxlength="2000" placeholder="粘贴房东刚发来的消息…" aria-describedby="quote-privacy quote-readiness"></textarea><div class="quote-input-meta quote-hint"><span id="quote-privacy">号码自动遮蔽；姓名和详细地址请自行检查。</span><span>{{charCount(quote.landlordQuote)}} / 2000</span></div></div>
+          <div><label for="landlord-quote">房东发来的原话</label><textarea id="landlord-quote" class="ui-field rounded-[10px] px-3 py-3" :value="quote.landlordQuote" @input="changeQuoteField('landlordQuote',$event.target.value)" @blur="maskQuoteField('landlordQuote')" @compositionstart="quote.composing=true;quote.composingField='landlordQuote'" @compositionend="finishQuoteComposition('landlordQuote',$event.target.value)" @keydown="quoteKeydown" rows="5" v-code-point-limit="2000" placeholder="粘贴房东刚发来的消息…" aria-describedby="quote-privacy quote-readiness"></textarea><div class="quote-input-meta quote-hint"><span id="quote-privacy">号码自动遮蔽；姓名和详细地址请自行检查。</span><span>{{charCount(quote.landlordQuote)}} / 2000</span></div></div>
           <details id="quote-more" class="quote-more" :open="quote.moreOpen" @toggle="quote.moreOpen=$event.target.open"><summary>补充情况 · 选填</summary><label for="quote-goal">你希望怎么解决？</label><textarea id="quote-goal" class="ui-field rounded-[10px] px-3 py-2" :value="quote.userGoal" @input="changeQuoteField('userGoal',$event.target.value)" @blur="maskQuoteField('userGoal')" @compositionstart="quote.composing=true;quote.composingField='userGoal'" @compositionend="finishQuoteComposition('userGoal',$event.target.value)" rows="2" placeholder="例如：希望核对扣款明细，再协商退还押金。"></textarea><label for="quote-context">补充背景</label><textarea id="quote-context" class="ui-field rounded-[10px] px-3 py-2" :value="quote.contextNote" @input="changeQuoteField('contextNote',$event.target.value)" @blur="maskQuoteField('contextNote')" @compositionstart="quote.composing=true;quote.composingField='contextNote'" @compositionend="finishQuoteComposition('contextNote',$event.target.value)" rows="3" placeholder="例如：目前是否已经退租，有哪些照片或交接记录。"></textarea><p class="quote-hint">目标 {{charCount(quote.userGoal)}} / 300 · 背景 {{charCount(quote.contextNote)}} / 1000</p></details>
           <div><p class="quote-hint">点击后将当前脱敏合同、原话及补充信息发送至云端模型。</p><div class="quote-actions"><button id="analyze-quote" type="button" class="btn btn-primary" @click="analyzeQuote" :disabled="!canAnalyzeQuote" aria-describedby="quote-readiness">{{quote.pending?'正在拆解并生成回复…':'拆解并生成回复'}}</button><span v-if="quote.pending" id="quote-timer" class="quote-hint" role="timer" aria-live="off">已用时 {{quote.elapsed}} 秒</span></div><p id="quote-readiness" class="quote-hint" role="status">{{quoteReadiness}}</p><button v-if="!privacyReady" id="quote-recheck" class="text-btn" type="button" @click="checkQuoteApi" :disabled="quoteMetaPending">重新检查服务</button></div>
           <p v-if="quote.error" id="quote-error" class="notice notice-error" role="alert">{{quote.error}}</p><p v-if="quote.notice" id="quote-notice" class="quote-hint" role="status">{{quote.notice}}</p>
@@ -861,11 +861,11 @@
             <h4 class="text-xs mb-1 mt-4">仍需向对方确认</h4>
             <template v-if="committed.unresolvedRequests !== null"><span class="practice-source">预设提醒</span><ul class="term-list"><li v-for="(item, index) in committed.unresolvedRequests" :key="index">{{ item }}</li><li v-if="!committed.unresolvedRequests.length">暂无列出事项，请人工核对。</li></ul></template>
             <label for="unresolved-requests" class="practice-source">自行补充（待确认）· 每行一项</label>
-            <textarea class="ui-field w-full resize-y rounded-[10px] px-4 py-3 text-base leading-7" id="unresolved-requests" v-model="negotiation.unresolvedText" @compositionstart="beginComposition" @compositionend="endChecklistComposition" rows="2" maxlength="4000" placeholder="例如：尚未就押金返还日期达成一致" :disabled="negotiation.pending"></textarea>
+            <textarea class="ui-field w-full resize-y rounded-[10px] px-4 py-3 text-base leading-7" id="unresolved-requests" v-model="negotiation.unresolvedText" @compositionstart="beginComposition" @compositionend="endChecklistComposition" rows="2" v-code-point-limit="4000" placeholder="例如：尚未就押金返还日期达成一致" :disabled="negotiation.pending"></textarea>
             <h4 class="text-xs mb-1 mt-4">需要准备的材料</h4>
             <template v-if="committed.missingFacts !== null"><span class="practice-source">预设提醒</span><ul class="term-list"><li v-for="(item, index) in committed.missingFacts" :key="index">{{ item }}</li><li v-if="!committed.missingFacts.length">暂无列出信息，请人工核对。</li></ul></template>
             <label for="missing-facts" class="practice-source">自行补充（待核实）· 每行一项</label>
-            <textarea class="ui-field w-full resize-y rounded-[10px] px-4 py-3 text-base leading-7" id="missing-facts" v-model="negotiation.missingFactsText" @compositionstart="beginComposition" @compositionend="endChecklistComposition" rows="2" maxlength="4000" placeholder="例如：补充交接记录与费用凭证" :disabled="negotiation.pending"></textarea>
+            <textarea class="ui-field w-full resize-y rounded-[10px] px-4 py-3 text-base leading-7" id="missing-facts" v-model="negotiation.missingFactsText" @compositionstart="beginComposition" @compositionend="endChecklistComposition" rows="2" v-code-point-limit="4000" placeholder="例如：补充交接记录与费用凭证" :disabled="negotiation.pending"></textarea>
             <p class="practice-note">以上预设提醒为通用参考，未逐项分析你的消息。自行补充与模拟条件分开保存。</p>
           </details>
           <details v-if="activePractice.messages.length" class="result-secondary" id="communication-ledger"><summary>查看已提交的沟通消息 · {{activePractice.messages.length}} 条</summary><p class="practice-note">这是你提交的原文，不等于对方承诺。</p><details v-for="message in activePractice.messages" :key="message.requestId"><summary>第 {{message.round}} 轮消息</summary><p class="proposal-message">{{message.text}}</p></details></details>
@@ -878,7 +878,7 @@
         <div id="negotiation-composer" class="negotiation-composer" v-show="taskPanel==='communication'" :inert="taskPanel!=='communication'">
           <div id="negotiation-api-status" v-if="!communicationOnly && negotiationApi.status !== 'ready'" class="notice notice-warn mb-3" role="status">{{ negotiationApi.note }}<button id="retry-negotiation-api" type="button" class="text-btn block mt-1" @click="checkNegotiationApi" :disabled="negotiationApi.checking">{{ negotiationApi.checking ? '正在检查' : '重新检查谈判功能' }}</button></div>
           <div class="composer-heading"><label for="negotiation-draft">我的协商消息</label><button v-if="committed.roundCount" type="button" class="text-btn text-[11px] font-normal" @click="showLatestResult">查看本轮结果 ↗</button><span v-else class="muted text-[10px] font-normal">发送前检查隐私</span></div>
-          <textarea class="ui-field w-full resize-y rounded-[10px] px-4 py-3 text-base leading-7" id="negotiation-draft" :value="negotiation.draft" @input="changeMessage($event.target.value)" @compositionstart="beginComposition" @compositionend="endComposition" @keydown="handleNegotiationKeydown" rows="6" maxlength="2000" autocomplete="off" spellcheck="false" placeholder="我想就这条约定进一步确认…"></textarea>
+          <textarea class="ui-field w-full resize-y rounded-[10px] px-4 py-3 text-base leading-7" id="negotiation-draft" :value="negotiation.draft" @input="changeMessage($event.target.value)" @compositionstart="beginComposition" @compositionend="endComposition" @keydown="handleNegotiationKeydown" rows="6" v-code-point-limit="2000" autocomplete="off" spellcheck="false" placeholder="我想就这条约定进一步确认…"></textarea>
 
           <p class="practice-note privacy-hint">号码自动在本机遮蔽；姓名、详细地址不会自动识别，请自行检查。</p>
           <div class="composer-actions flex flex-wrap items-center gap-2">
@@ -924,6 +924,27 @@
       }
       const { createApp, ref, reactive, computed, watch, nextTick, onMounted, onBeforeUnmount } = Vue;
       createApp({
+        directives: {
+          codePointLimit: {
+            mounted(element, {value: limit}) {
+              let composing = false;
+              function limitInput() {
+                if (composing || element.value.length <= limit) return false;
+                const points = Array.from(element.value);
+                if (points.length <= limit) return false;
+                element.value = points.slice(0, limit).join('');
+                return true;
+              }
+              // Apply the cap before Vue reads the value, after IME text is committed.
+              element.addEventListener('input', limitInput, true);
+              element.addEventListener('compositionstart', () => { composing = true; }, true);
+              element.addEventListener('compositionend', () => {
+                composing = false;
+                if (limitInput()) element.dispatchEvent(new Event('input', {bubbles: true}));
+              }, true);
+            },
+          },
+        },
         components: {
           RolePersona: {
             props: { role:String, state:String, pulse:Boolean },
@@ -1580,11 +1601,14 @@
               const response=await fetch('/api/review/proposal',{method:'POST',headers:{'Content-Type':'application/json','X-Interaction-Version':'4'},cache:'no-store',credentials:'same-origin',signal:controller.signal,body:JSON.stringify(request)});
               if(!current())return;
               if(!response.ok){
-                if(response.status===428){const detail=(await response.json()).detail,fields=previewFields(detail);if(!fields)throw new Error('invalid-preview');
+                if(response.status===428){const detail=(await response.json()).detail;
+                  if(!current())return;
+                  const fields=previewFields(detail);if(!fields)throw new Error('invalid-preview');
                   for(const f of fields){if(f.field==='goal_text')p.goal=f.safe_text;else if(f.field==='answers'&&request.answers[f.index]){const a=p.answers.find(a=>a.question_id===request.answers[f.index].question_id);if(a)a.text=f.safe_text;}else throw new Error('invalid-field');}
                   p.revision++;invalidateProposal(p,key);p.revealing=true;p.notice='服务端补充隐藏了号码，请检查目标和回答后再次生成。';nextTick(()=>p.revealing=false);return;}
                 if([400,404,409,410,422,429].includes(response.status)){
                   const detail=response.status===410?await response.json().catch(()=>null):null;
+                  if(!current())return;
                   p.tx=newTx();p.error=response.status===410?(detail?.detail?.code==='OPERATION_EXPIRED'?'原操作已超过处理期限，结果不会发布；目标与回答已保留，可重新生成。':'审查上下文已过期，请重新审查；参考稿与回答仍保留。'):response.status===429?'当前审查的草稿请求已达上限，请重新审查合同。':response.status===422?'目标与回答需合计不超过2000字符，并属于当前条款的问题。':'当前草稿上下文或请求不可用，请核对后重新生成。';return;}
                 throw new Error('transport');
               }
@@ -1943,7 +1967,69 @@
           function editContract(){activePane.value='contract';editing.value=true;}
           function loadSample() {
             invalidateContractImport();editRevision++;
-            rawText.value = '房屋租赁合同（合成演练文本）\n\n第一条  租客按月支付租金，租期一年。\n\n第二条  房东收取押金2000元，租赁结束后可不说明理由直接扣留全部押金。\n\n第三条  房屋及附属设施发生任何损坏，维修责任和费用均由租客承担。\n\n第四条  租客提前退租时，应提前沟通交接时间及相关费用。\n\n第五条  联系手机号：13800000000。身份证号：110101199001010000。以上号码均为合成测试标识。';
+            // 案例合同中的埋雷测试版，使用脱敏后的纯文本。
+            rawText.value = `标准房屋租赁合同
+
+出租人（甲方）：示例出租人　　证件类型及编号：身份证 ***
+
+承租人（乙方）：示例承租人　　证件类型及编号：身份证 ***
+
+根据国家有关法律、法规和本市有关规定，甲乙双方在平等、自愿的基础上，就房屋租赁的有关事宜达成协议如下：
+
+第一条 房屋基本情况与租赁用途
+
+（一）房屋坐落于【示例地址已隐去】，建筑面积85平方米。甲方保证出租房产权属清楚，若发生与甲方有关的产权纠纷或债权债务，由甲方负责清算并承担相关责任；若给乙方造成经济损失，甲方负责赔偿。
+
+（二）租赁用途：居住。乙方保证在租赁期限内按约定用途合理使用房屋，不从事任何违法活动，不存放危险物品，不妨碍相邻住户的正常生活。
+
+第二条 租赁期限与交付
+
+（一）房屋租赁期自2026年10月10日至2027年1月9日，共计3个月。甲方应于2026年10月9日前将房屋按约定条件交付给乙方。《房屋交割清单》（见附件一）经甲乙双方交验签字并移交房门钥匙后视为交付完成。
+
+（二）乙方继续承租的，应提前30日向甲方提出续租要求，协商一致后双方重新签订房屋租赁合同。租赁期满或合同解除后，甲方有权收回房屋，甲乙双方应对房屋、附属设备设施及水电使用等情况进行验收，结清各自应当承担的费用。
+
+第三条 提前退租与合同变更
+
+（一）租赁期内，乙方因实习结束、学校安排等个人原因提前退租的，应提前30日通知甲方，已交剩余租金及押金一律不予退还，且需额外向甲方支付相当于两个月租金的违约金。
+
+（二）甲方若因房屋交易出售、直系亲属自住或房屋重大翻修等个人原因需提前收回房屋的，只需提前3天通过微信通知乙方，退还未发生的租金即可，甲方不承担任何违约责任。
+
+第四条 租金、押金及日常费用
+
+（一）租金标准及支付方式：人民币2500元/月（大写：贰仟伍佰元整）。支付方式：银行转账，押一付三。乙方应于每个支付周期首月5日前足额支付租金。
+
+（二）押金：人民币2500元整（¥：2500元）。押金不可用作抵扣日常房租。租赁期满或合同解除后，房屋租赁押金除抵扣应由乙方承担的违约赔偿及欠费外，剩余部分应如数返还给乙方。
+
+（三）租赁期内，下列日常实际发生费用由乙方承担：(1)水费 (2)电费 (3)燃气费 (4)物业管理费 (5)宽带上网费 (6)电梯运行费。
+
+第五条 房屋使用与退房交接标准
+
+（一）未经甲方书面同意，乙方不得擅自改变房屋结构或拆卸改装室内设施，亦不得将承租房屋全部或部分转租、出借给第三人使用。
+
+（二）乙方应爱护使用租赁房屋及室内家具家电，因乙方人为过错造成损坏的，由乙方负责修复或照价赔偿。租赁期满退房时，乙方必须保证房屋及所有设施“整洁如新”，不得有任何使用痕迹。甲方有权在退房时直接从押金中扣除1000元作为深度保洁与墙面折旧补偿费。
+
+第六条 维修养护责任
+
+（一）租赁期间，甲方对房屋主体结构每隔6个月检查一次，乙方应予配合。房屋及其所有附属设施（含下水管道疏通、老旧电路跳闸、空调及热水器故障等）在租赁期间发生任何问题，无论是否属于自然损耗或老化，维修责任和换新费用均由乙方全额承担。
+
+第七条 不可抗力与法定免责
+
+（一）因不可抗力（如特大自然灾害、地震等）、政府拆迁改造或经房屋安全鉴定机构鉴定为危险房屋不能继续使用而导致合同解除的，甲乙双方互不承担违约责任，租金按实际使用天数结算，多退少补。
+
+第八条 其他约定与争议解决
+
+（一）其他约定事项：暂无补充约定事项。
+
+（二）本合同项下发生的争议，由双方当事人协商解决；协商不成的，依法向房屋所在地有管辖权的人民法院起诉。本合同生效后，双方对合同内容的变更或补充应采取书面形式作为附件，附件与本合同具有同等法律效力。
+
+（三）本合同（及附件）一式贰份，其中甲方执壹份，乙方执壹份，自双方签字盖章后生效。
+
+
+出租人（甲方）签章：____________　　　　承租人（乙方）签章：____________
+
+电话：____________　　　　电话：____________
+
+______年____月____日　　　　______年____月____日`;
             inputError.value = '';editing.value=true;maskContract();lastBoundedContract=rawText.value;
           }
 

@@ -26,7 +26,7 @@ const server=http.createServer(async(req,res)=>{
  }
  if(req.url==='/api/review/analyze-detailed'){
   let raw='';for await(const chunk of req)raw+=chunk;const body=JSON.parse(raw);
-  res.end(JSON.stringify({status:'success',results:[{clause_id:'C-01',original_clause:body.contract_text.split('\n')[0],risk_level:'LOW',explanation:'合成审查结果，仅测试原文与版本行为。',evidence_ids:[],negotiation_tip:'核对具体事实。'}],total_risks:1,evidence_by_id:{}}));return;
+  res.end(JSON.stringify({status:'success',review_context_id:'browser_fixture',results:[{clause_id:'C-01',original_clause:body.contract_text.split('\n')[0],risk_level:'LOW',explanation:'合成审查结果，仅测试原文与版本行为。',evidence_ids:[],negotiation_tip:'核对具体事实。'}],total_risks:1,evidence_by_id:{}}));return;
  }
  if(req.url.startsWith('/vendor/')){res.setHeader('Content-Type','application/javascript');res.end(fs.readFileSync(path.join(root,'frontend-web',req.url.slice(1))));return;}
  if(req.url==='/favicon.ico'){res.statusCode=204;res.end();return;}
@@ -92,11 +92,16 @@ async function complete(){await until('!document.getElementById("analyze-quote")
  await ev('document.getElementById("quote-goal").dispatchEvent(new CompositionEvent("compositionend",{bubbles:true}))');
  assert.ok(!(await ev('document.getElementById("quote-goal").value')).includes('13900000000'));
  pass('IME in one field does not postpone another field masking, and still blocks submit');
- assert.equal(await ev('document.getElementById("landlord-quote").maxLength'),2000);
- await fill('landlord-quote','');await ev('document.getElementById("landlord-quote").focus()');await cdp.send('Input.insertText',{text:'字'.repeat(2001)});
- assert.equal(await ev('document.getElementById("landlord-quote").value.length'),2000);
+ const boundary='字'.repeat(1999)+'😀';
+ await fill('landlord-quote','');await ev('document.getElementById("landlord-quote").focus()');
+ await cdp.send('Input.insertText',{text:boundary+'余'});
+ assert.equal(await ev('document.getElementById("landlord-quote").value'),boundary);
+ await cdp.send('Input.insertText',{text:'😀'});
+ assert.equal(await ev('document.getElementById("landlord-quote").value'),boundary);
+ assert.ok(await ev('document.querySelector("#landlord-quote + .quote-input-meta").textContent.includes("2000 / 2000")'));
+ await click('#analyze-quote');await complete();assert.equal(requests.at(-1).landlord_quote,boundary);
  await fill('landlord-quote','请核对维修费用。');
- pass('Native textarea input enforces the 2000-character cap');
+ pass('The textarea, counter and submitted quote agree at the 2000-code-point boundary');
  mode='bad_state';await click('#analyze-quote');await complete();assert.ok(await ev('!!document.getElementById("quote-error")'));
  assert.ok(await ev('document.getElementById("quote-result").textContent.includes("有材料支持")'));
  pass('Client rejects success+unclear instead of overwriting the previous coherent card');
@@ -117,6 +122,26 @@ async function complete(){await until('!document.getElementById("analyze-quote")
  pass('Editing during a request preserves new text and marks the returned old snapshot');
  // Preserve the actual review/version flow as well as the no-review path.
  await click('#analyze-contract');await until('document.querySelectorAll("#risk-items [data-clause]").length===1','review fixture');await click('[data-clause="C-01"]');
+ for(const status of [410,428]){
+  // Resolve response headers first, then let a newer draft start before releasing the old body.
+  await ev(`window.originalFetch=window.fetch; window.draftBodies=[];
+    window.fetch=(url,options)=>url==='/api/review/proposal'
+      ? Promise.resolve({ok:false,status:${status},json:()=>new Promise(resolve=>window.draftBodies.push(resolve))})
+      : window.originalFetch(url,options)`);
+  try {
+   await fill('proposal-goal','旧目标');await click('#generate-proposal');
+   await until('window.draftBodies.length===1','old error body pending');
+   await fill('proposal-goal','新目标');await click('#generate-proposal');
+   await until('window.draftBodies.length===2','new error body pending');
+   const preview={detail:{code:'PRIVACY_PREVIEW_REQUIRED',privacy_policy_version:policy.version,fields:[{field:'goal_text',safe_text:'旧目标预览'}]}};
+   await ev('window.draftBodies[0]('+JSON.stringify(preview)+')');await pause(40);
+   assert.equal(await ev('document.getElementById("proposal-goal").value'),'新目标');
+   assert.equal(await ev('document.getElementById("proactive-panel").getAttribute("aria-busy")'),'true');
+   await ev('window.draftBodies[1]({})');
+   await until('document.getElementById("proactive-panel").getAttribute("aria-busy")==="false"','new request finishes');
+  } finally {await ev('window.fetch=window.originalFetch');}
+  pass('Late '+status+' draft body preserves the newer goal and pending request');
+ }
  await click('#mode-reactive');await fill('landlord-quote','历史合同版本的消息。');await click('#analyze-quote');await complete();assert.equal(requests.at(-1).contract_text,contract);
  // Different owners must not collide through Object.toString coercion either.
  await fill('quote-context','历史记录号码13800000000');await click('#edit-contract');await fill('quote-context','编辑记录号码13900000000');await pause(600);
