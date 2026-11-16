@@ -2,6 +2,7 @@
 
 import logging
 import math
+import os
 import re
 from urllib.parse import urlsplit
 from typing import Protocol
@@ -23,7 +24,7 @@ from backend.app.services.operation_store import OperationBusy, OperationExpired
 from backend.app.services.model_gateway import check_deadline, remaining_timeout, CloudTransport
 from backend.app.core.privacy import redact_pii
 from backend.app.services.review_input_guard import classify_review_input
-from backend.app.services.review_trace import FAILURE_MESSAGES, append_trace, public_feedback
+from backend.app.services.review_trace import FAILURE_MESSAGES, MISSING_VECTOR_CONFIG, append_trace, public_feedback
 from backend.app.services.vector_store import (
     STORAGE_ERRORS, LawVectorStoreService, load_authoritative_laws, mask_sensitive_text,
 )
@@ -176,6 +177,10 @@ class ContractReviewService:
             append_trace(trace, node="configuration", attempt=0, status="failed",
                          started=started, feedback=[FAILURE_MESSAGES[code]])
             return self._detailed_failure(code, trace)
+        if os.getenv("ZHIZU_INSTANCE_ID") and not self.settings.embedding_configured:
+            append_trace(trace, node="configuration", attempt=0, status="failed",
+                         started=started, feedback=[MISSING_VECTOR_CONFIG])
+            return self._detailed_failure(ReviewFailureCode.KB_NOT_READY, trace, reason=MISSING_VECTOR_CONFIG)
         append_trace(trace, node="configuration", attempt=0, status="completed", started=started)
 
         started = perf_counter()
@@ -269,11 +274,12 @@ class ContractReviewService:
     @staticmethod
     def _detailed_failure(
         code: ReviewFailureCode, trace: list[ReviewTraceEvent],
-        *, errors: list[str] | None = None, retry_count: int = 0,
+        *, errors: list[str] | None = None, retry_count: int = 0, reason: str | None = None,
     ) -> ReviewDetailedResponse:
+        message = public_feedback([reason or FAILURE_MESSAGES[code]])[0]
         return ReviewDetailedResponse(
             status="needs_review", results=[], total_risks=0, failure_code=code,
-            reason=FAILURE_MESSAGES[code], errors=public_feedback(errors or [FAILURE_MESSAGES[code]]),
+            reason=message, errors=public_feedback(errors or [message]),
             retry_count=retry_count, trace=trace,
         )
 

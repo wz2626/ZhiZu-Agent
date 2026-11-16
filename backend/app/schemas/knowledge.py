@@ -90,6 +90,7 @@ class KBStatusResponse(BaseModel):
     authoritative_law_count: Literal[32] = 32
     indexed_count: int = Field(ge=0)
     is_ready: bool
+    state: Literal['missing', 'unreadable', 'incompatible', 'ready']
     embedding_mode: NonEmpty
     source_url: HttpUrl
     verified_date: date

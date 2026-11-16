@@ -12,7 +12,7 @@ from pathlib import Path
 import chromadb
 from langchain_core.embeddings import Embeddings
 
-from backend.app.core.config import PROJECT_ROOT, get_settings
+from backend.app.core.config import PROJECT_ROOT, get_settings, kb_path
 from backend.app.schemas.knowledge import EvidenceItem, KBInitResult, KBStatusResponse, LawArticle
 from backend.app.services.embedding import DIMENSIONS, get_embeddings
 
@@ -37,6 +37,9 @@ def _check_sqlite_readable(directory: Path) -> None:
     """Reject damaged files before Chroma can cache a partially started System."""
     database_uri = (directory / "chroma.sqlite3").as_uri() + "?mode=ro"
     with closing(sqlite3.connect(database_uri, uri=True)) as connection:
+        table = connection.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='collections'").fetchone()
+        if table is None:
+            raise ValueError("not a Chroma collection database")
         checks = connection.execute("PRAGMA quick_check").fetchall()
         if checks != [("ok",)]:
             raise ValueError("law storage integrity check failed")
@@ -83,7 +86,7 @@ class LawVectorStoreService:
         create_if_missing: bool = True,
     ) -> None:
         directory = persist_directory if persist_directory is not None else get_settings().chroma_path
-        self.persist_directory = Path(directory).resolve()
+        self.persist_directory = kb_path(directory)
         self.collection_name = collection_name
         self.embeddings = embeddings if embeddings is not None else get_embeddings()
         self.embedding_mode = getattr(self.embeddings, "mode", "custom")
@@ -154,18 +157,25 @@ class LawVectorStoreService:
     ) -> KBStatusResponse:
         """Inspect an existing collection without creating a directory or collection."""
         directory = persist_directory if persist_directory is not None else get_settings().chroma_path
-        path = Path(directory).resolve()
+        path = kb_path(directory)
         selected_embeddings = embeddings if embeddings is not None else get_embeddings()
-        if (path / "chroma.sqlite3").is_file():
-            try:
+        state = "unreadable"
+        try:
+            if (path / "chroma.sqlite3").is_file():
                 _check_sqlite_readable(path)
                 with chromadb.PersistentClient(path=str(path)) as client:
                     collection = client.get_collection(name=collection_name)
                     return cls._collection_status(path, collection_name, selected_embeddings, collection)
-            except (ValueError, *STORAGE_ERRORS) as error:
-                # Do not expose database details or assume a damaged DB has zero records.
-                logger.warning("KB storage inspection failed (%s)", type(error).__name__)
-        return cls._collection_status(path, collection_name, selected_embeddings)
+            elif not any(path.iterdir()):
+                state = "missing"
+        except FileNotFoundError:
+            # Only a genuinely absent directory can be prepared automatically.
+            if not path.exists() and not path.is_symlink():
+                state = "missing"
+        except (ValueError, *STORAGE_ERRORS) as error:
+            logger.warning("KB storage inspection failed (%s)", type(error).__name__)
+        status = cls._collection_status(path, collection_name, selected_embeddings)
+        return status.model_copy(update={"state": state})
 
     def get_status(self) -> KBStatusResponse:
         """Inspect the collection already opened by this service."""
@@ -205,6 +215,7 @@ class LawVectorStoreService:
             persist_directory=str(path),
             indexed_count=indexed_count,
             is_ready=is_ready,
+            state="ready" if is_ready else "incompatible",
             embedding_mode=embedding_mode,
             source_url=SOURCE_URL,
             verified_date=VERIFIED_DATE,

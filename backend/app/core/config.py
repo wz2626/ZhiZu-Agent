@@ -31,6 +31,14 @@ class Settings:
     chat_timeout_seconds: float = 20.0
 
     @property
+    def chat_configured(self) -> bool:
+        return bool(self.chat_base_url and self.chat_model and has_real_key(self.chat_api_key))
+
+    @property
+    def embedding_configured(self) -> bool:
+        return bool(self.embedding_base_url and self.embedding_model and has_real_key(self.embedding_api_key))
+
+    @property
     def env_configured(self) -> bool:
         """Check presence only; this does not validate keys against a cloud API."""
         values = (
@@ -46,6 +54,12 @@ class Settings:
         return all(values) and all(has_real_key(key) for key in keys)
 
 
+def kb_path(directory: str | Path) -> Path:
+    if not str(directory).strip():
+        raise ValueError("CHROMA_PATH must name a directory")
+    return (PROJECT_ROOT / directory).resolve()
+
+
 def _chat_timeout() -> float:
     try:
         value = float(os.getenv("CHAT_TIMEOUT_SECONDS", "20"))
@@ -58,6 +72,9 @@ def _chat_timeout() -> float:
 
 def get_settings() -> Settings:
     """Environment variables take precedence over the repository's .env file."""
+    default_kb = "./backend/chroma_db"
+    if (PROJECT_ROOT / ".runtime/zhizu-bundled-kb.json").is_file():
+        default_kb = "./.runtime/chroma_cloud"
     return Settings(
         chat_base_url=os.getenv("CHAT_BASE_URL", "https://api.siliconflow.cn/v1").strip(),
         chat_model=os.getenv("CHAT_MODEL", "deepseek-ai/DeepSeek-V3").strip(),
@@ -67,6 +84,6 @@ def get_settings() -> Settings:
         ).strip(),
         embedding_model=os.getenv("EMBEDDING_MODEL", "BAAI/bge-m3").strip(),
         embedding_api_key=os.getenv("EMBEDDING_API_KEY", "").strip(),
-        chroma_path=os.getenv("CHROMA_PATH", "./backend/chroma_db").strip(),
+        chroma_path=os.getenv("CHROMA_PATH", default_kb).strip(),
         chat_timeout_seconds=_chat_timeout(),
     )

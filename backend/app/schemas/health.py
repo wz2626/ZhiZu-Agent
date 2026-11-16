@@ -6,3 +6,9 @@ class HealthResponse(BaseModel):
     project: str
     version: str
     env_configured: bool
+
+
+class StartupStatusResponse(BaseModel):
+    instance_id: str | None
+    chat_configured: bool
+    embedding_configured: bool

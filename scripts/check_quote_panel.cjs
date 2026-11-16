@@ -7,6 +7,7 @@ const pause=ms=>new Promise(r=>setTimeout(r,ms)),cases=[],requests=[],paths=[];
 const pass=label=>{cases.push(label);console.log('PASS '+label)};
 const policy=JSON.parse(execFileSync(path.join(root,'.venv/Scripts/python.exe'),['-c','import json;from backend.app.core.privacy import privacy_policy;print(json.dumps(privacy_policy()))'],{cwd:root,windowsHide:true,encoding:'utf8'}));
 let mode='success',delay=70,edge,cdp,origin;
+let privacyUnavailable=true;
 function card(body){if(mode==='out_of_scope')return {schema_version:'quote-v1',request_id:body.request_id,status:'out_of_scope',card:null};return {schema_version:'quote-v1',request_id:body.request_id,status:mode==='needs_context'?'needs_context':'success',card:{
  breakdown:{landlord_position:'对方要求核对费用。',assessment:['needs_context','bad_state'].includes(mode)?'unclear':'supported',analysis:'请先核对费用项目、事实和凭证。',tactics:[]},
  grounds:[{source_id:'C-001',kind:'contract',title:'合同第1段',original_text:body.contract_text.split('\n')[0],application:'需结合实际约定核实。',source_url:null}],
@@ -14,7 +15,10 @@ function card(body){if(mode==='out_of_scope')return {schema_version:'quote-v1',r
  clarification_questions:mode==='needs_context'?['费用明细和凭证是什么？']:[]}};}
 const server=http.createServer(async(req,res)=>{
  paths.push(req.url);res.setHeader('Content-Type','application/json; charset=utf-8');
+ if(req.url==='/api/negotiation/quote-meta'&&privacyUnavailable){res.statusCode=503;res.end('{}');return;}
  if(req.url==='/api/health'){res.end(JSON.stringify({status:'ok',env_configured:true}));return;}
+ if(req.url==='/api/startup/status'){res.end(JSON.stringify({instance_id:null,chat_configured:true,embedding_configured:true}));return;}
+ if(req.url==='/api/kb/status'){res.end(JSON.stringify({state:'ready',is_ready:true,indexed_count:32,embedding_mode:'cloud'}));return;}
  if(req.url==='/api/negotiation/quote-meta'){res.end(JSON.stringify({schema_version:'quote-v1',privacy_policy:policy,limits:{contract_text:5000,landlord_quote:2000,user_goal:300,context_note:1000}}));return;}
  if(req.url==='/api/negotiation/analyze-quote'){
   let raw='';for await(const chunk of req)raw+=chunk;const body=JSON.parse(raw);requests.push(body);const selected=mode;
@@ -54,7 +58,17 @@ async function complete(){await until('!document.getElementById("analyze-quote")
  const target=await(await fetch('http://127.0.0.1:'+port+'/json/new?about:blank',{method:'PUT'})).json();const ws=new WebSocket(target.webSocketDebuggerUrl);await new Promise(r=>ws.addEventListener('open',r,{once:true}));cdp=new CDP(ws);
  await cdp.send('Runtime.enable');await cdp.send('Page.enable');await cdp.send('Network.enable');await cdp.send('Fetch.enable',{patterns:[{urlPattern:'*',requestStage:'Request'}]});
  await cdp.send('Emulation.setDeviceMetricsOverride',{width:1440,height:900,deviceScaleFactor:1,mobile:false});await cdp.send('Page.navigate',{url:origin});
- await until('!!window.__zhizuLayoutDiagnostics?.length && !document.getElementById("quote-recheck")','mounted and private');
+ await until('!!window.__zhizuLayoutDiagnostics?.length && document.getElementById("quote-recheck")','privacy metadata unavailable');
+ await click('.startup-info summary');
+ const privacyRow="Array.from(document.querySelectorAll('.startup-row')).find(row=>row.querySelector('dt').textContent==='隐私规则')";
+ assert.ok(await ev(privacyRow+".textContent.includes('待加载')"));
+ assert.equal(await ev(privacyRow+".querySelector('.startup-dot').dataset.dot"),'neutral');
+ privacyUnavailable=false;
+ await click('.startup-refresh');
+ await until(privacyRow+".textContent.includes('已加载') && !document.getElementById('quote-recheck')",'privacy metadata recovered');
+ assert.equal(await ev(privacyRow+".querySelector('.startup-dot').dataset.dot"),'ok');
+ await click('.startup-info summary');
+ pass('Privacy text and dot recover together after a failed metadata request');
  assert.equal(await ev('document.getElementById("mode-proactive").getAttribute("aria-pressed")'),'true');
  assert.ok(await ev('!!document.getElementById("proactive-panel").getClientRects().length'));
  assert.equal(await ev('!!document.getElementById("quote-panel").getClientRects().length'),false);
@@ -63,6 +77,19 @@ async function complete(){await until('!document.getElementById("analyze-quote")
  for(const id of ['negotiation-panel','round-count','negotiation-score','latest-negotiation-result'])assert.equal(await ev(`!!document.getElementById('${id}').getClientRects().length`),false);
  assert.equal(paths.includes('/api/negotiation/meta'),false);assert.equal(paths.includes('/openapi.json'),false);
  pass('Quote panel replaces visible practice/score/round UI and loads independent privacy metadata');
+ await click('.startup-info summary');
+ await until("document.querySelector('.startup-info').innerText.includes('已就绪 · 32 条')",'cloud index ready');
+ assert.equal(await ev("document.querySelectorAll('.startup-row:nth-child(3) [data-dot=neutral],.startup-row:nth-child(4) [data-dot=neutral]').length"),2);
+ const refreshDecoration="getComputedStyle(document.querySelector('.startup-refresh')).textDecorationLine";
+ await cdp.send('Input.dispatchMouseEvent',{type:'mouseMoved',x:0,y:0});
+ assert.equal(await ev(refreshDecoration),'none');
+ const refreshPoint=await ev("(()=>{const r=document.querySelector('.startup-refresh').getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2}})()");
+ await cdp.send('Input.dispatchMouseEvent',{type:'mouseMoved',...refreshPoint});
+ assert.equal(await ev(refreshDecoration),'underline');
+ assert.ok(await ev("document.querySelector('.startup-info').innerText.includes('已加载，可导入')"));
+ assert.ok(await ev("document.querySelector('.startup-info').innerText.includes('已配置，凭据未验证')"));
+ await click('.startup-info summary');
+ pass('Service, privacy, credential configuration and cloud index readiness are distinct');
  await shot('01-empty-desktop');
  await fill('landlord-quote','请核对维修费用。');assert.equal(await ev('document.getElementById("analyze-quote").disabled'),true);
  const contract='房屋租赁合同，双方应按约履行并核对交接记录。\n维修责任按实际原因和约定核对。';await fill('contract-input',contract);

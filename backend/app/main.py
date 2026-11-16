@@ -16,7 +16,7 @@ from backend.app.api.negotiation import router as negotiation_router
 from backend.app.api.contracts import router as contracts_router
 from backend.app.api.quote_analysis import router as quote_analysis_router
 from backend.app.core.config import PROJECT_ROOT, Settings, get_settings
-from backend.app.schemas.health import HealthResponse
+from backend.app.schemas.health import HealthResponse, StartupStatusResponse
 from backend.app.core.http_limits import ApiBoundary
 
 def require_single_process():
@@ -86,6 +86,15 @@ def health(settings: Annotated[Settings, Depends(get_settings)]) -> HealthRespon
         version=app.version,
         env_configured=settings.env_configured,
     )
+
+
+@app.get("/api/startup/status", response_model=StartupStatusResponse, tags=["startup"])
+def startup_status(settings: Annotated[Settings, Depends(get_settings)]):
+    return {
+        "instance_id": os.environ.get("ZHIZU_INSTANCE_ID"),
+        "chat_configured": settings.chat_configured,
+        "embedding_configured": settings.embedding_configured,
+    }
 
 
 @app.get("/", response_class=FileResponse, include_in_schema=False)

@@ -506,6 +506,13 @@
     .contract-editor {display:flex;flex-direction:column;gap:14px}
     .contract-editor-surface {display:flex;flex-direction:column;min-width:0;border:1px solid var(--line-control);border-radius:12px;overflow:hidden;background:var(--paper);transition:border-color 140ms,box-shadow 140ms}
     .contract-editor-surface:focus-within {border-color:var(--accent);box-shadow:0 0 0 3px rgba(16,102,93,.12)}
+    @keyframes contract-guide-pulse {
+      45% {border-color:var(--accent);box-shadow:0 0 0 4px rgba(16,102,93,.24),0 0 16px rgba(16,102,93,.18)}
+    }
+    [data-contract-guide] {animation:contract-guide-pulse 1.2s ease-in-out}
+    @media(prefers-reduced-motion:reduce) {
+      [data-contract-guide] {box-shadow:0 0 0 3px var(--accent)!important}
+    }
     .keyboard-navigation .contract-editor-surface:has(#contract-input:focus-visible) {outline:2px solid var(--focus-keyboard);outline-offset:3px}
     .contract-editor-caption {display:flex;align-items:center;gap:12px;padding:14px 16px 4px;color:var(--text-secondary);font-size:13px;font-weight:500}
     .dossier .contract-editor-surface #contract-input {display:block;width:100%;border:0;border-radius:0;background:transparent;box-shadow:none;padding:10px 16px 14px;line-height:1.85}
@@ -709,6 +716,32 @@
     #quote-clause-context {margin:0;padding:20px 20px 0}
     #proactive-panel .assistant-icon {width:23px;height:23px}
     @media(max-width:600px){#quote-panel{padding:16px}#quote-clause-context{padding:16px 16px 0}#quote-panel .quote-reply{padding:12px}}
+    .startup-info{position:relative;font-size:13px}
+    .startup-info>summary{list-style:none;display:inline-flex;align-items:center;gap:7px;cursor:pointer;color:var(--accent);padding:6px 8px;border-radius:8px}
+    .startup-info>summary::-webkit-details-marker{display:none}
+    .startup-info>summary::marker{content:''}
+    .startup-info>summary:hover{background:#0f766e0a}
+    .startup-info[open]>summary{background:#0f766e10;color:#0b4f48}
+    .startup-info-arrow{width:0;height:0;border-left:4.5px solid transparent;border-right:4.5px solid transparent;border-top:5px solid currentColor;transition:transform .15s ease}
+    .startup-info[open] .startup-info-arrow{transform:rotate(180deg)}
+    .startup-info-panel{position:absolute;z-index:100;right:0;top:calc(100% + 6px);width:min(320px,85vw);max-height:min(480px,calc(100vh - 64px));overflow-y:auto;background:var(--surface-1);border:1px solid var(--line-stroke);border-radius:12px;padding:14px;box-shadow:0 8px 24px #0002;line-height:1.6}
+    .startup-rows{display:grid;gap:6px;margin:0}
+    .startup-row{display:grid;grid-template-columns:4.75em minmax(0,1fr);column-gap:10px}
+    .startup-row.startup-gap{margin-top:7px}
+    .startup-row dt{font-weight:600;color:var(--ink)}
+    .startup-row dd{margin:0;display:flex;align-items:flex-start;gap:8px;min-width:0;overflow-wrap:anywhere}
+    .startup-dot{width:8px;height:8px;flex:none;border-radius:50%;background:var(--muted);opacity:.45;margin-top:5px}
+    .startup-dot[data-dot=ok]{background:var(--accent);opacity:1}
+    .startup-dot[data-dot=warn]{background:var(--danger);opacity:1}
+    .startup-divider{border:0;border-top:1px solid var(--line-soft);margin:12px 0 10px}
+    .startup-help{margin:0 0 8px}
+    .startup-note{margin:0 0 10px;color:var(--muted);font-size:12px}
+    .startup-note code{font:11px/1.6 Consolas,monospace;background:var(--surface-2);border:1px solid var(--line-soft);border-radius:4px;padding:1px 5px;overflow-wrap:anywhere}
+    .startup-actions{display:flex;justify-content:flex-end}
+    .startup-info .startup-refresh{padding:6px 12px;border-radius:6px;min-height:32px;text-decoration:none}
+    @media (hover:hover){.startup-info .startup-refresh:enabled:hover{text-decoration:underline;text-underline-offset:3px}}
+    .startup-refresh:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+    .startup-refresh:disabled{opacity:.55;cursor:wait}
   </style>
 </head>
 <body>
@@ -716,7 +749,19 @@
   <noscript><div class="boot">此工作台需要启用 JavaScript 才能在本地脱敏与确认。</div></noscript>
   <div id="workspace-app" v-cloak>
   <div id="app" class="shell" :class="{'motion-ready':motionReady,'keyboard-navigation':keyboardNavigation}" @pointerdown.capture="keyboardNavigation=false" @keydown.tab.capture="keyboardNavigation=true">
-    <header class="topbar"><div class="brand"><span class="brand-mark" aria-hidden="true"><span class="brand-glyph">租</span></span><strong>智租博弈</strong><span class="muted">租房合同检查与沟通准备</span></div><div class="topbar-actions"><button id="service-status" type="button" class="service-status" :data-state="health.checking?'checking':health.status" :disabled="health.checking" :title="health.note+' 点击可重新检查。'" :aria-label="healthLabel+'。'+health.note+' 点击重新检查连接。'" @click="checkHealth"><span class="service-status-dot" aria-hidden="true"></span><span role="status" aria-live="polite">{{ healthLabel }}</span></button></div></header>
+    <header class="topbar"><div class="brand"><span class="brand-mark" aria-hidden="true"><span class="brand-glyph">租</span></span><strong>智租博弈</strong><span class="muted">租房合同检查与沟通准备</span></div><div class="topbar-actions"><button id="service-status" type="button" class="service-status" :data-state="health.checking?'checking':health.status" :disabled="health.checking" :title="health.note+' 点击可重新检查。'" :aria-label="healthLabel+'。'+health.note+' 点击重新检查连接。'" @click="checkHealth"><span class="service-status-dot" aria-hidden="true"></span><span role="status" aria-live="polite">{{ healthLabel }}</span></button><details class="startup-info" @keydown.esc="onStartupPanelEsc" @toggle="onStartupPanelToggle"><summary><span>模型与法条库</span><span class="startup-info-arrow" aria-hidden="true"></span></summary><section class="startup-info-panel">
+      <dl class="startup-rows">
+        <div class="startup-row"><dt>本地服务</dt><dd><span class="startup-dot" :data-dot="serviceDotState()"></span><span>{{ healthLabel }}</span></dd></div>
+        <div class="startup-row"><dt>隐私规则</dt><dd><span class="startup-dot" :data-dot="privacyDotState()"></span><span>{{ privacyReady ? '已加载，可导入并核对脱敏' : '待加载' }}</span></dd></div>
+        <div class="startup-row startup-gap"><dt>聊天配置</dt><dd><span class="startup-dot" data-dot="neutral"></span><span>{{ configLabel(startup.chat) }}</span></dd></div>
+        <div class="startup-row"><dt>向量配置</dt><dd><span class="startup-dot" data-dot="neutral"></span><span>{{ configLabel(startup.embedding) }}</span></dd></div>
+        <div class="startup-row"><dt>法条库</dt><dd><span class="startup-dot" :data-dot="kbDotState()"></span><span>{{ startup.kb }}</span></dd></div>
+      </dl>
+      <hr class="startup-divider">
+      <p class="startup-help">{{ startup.help }}</p>
+      <p class="startup-note">双击 <code>配置模型服务.bat</code> 可设置或更换 Key，保存后重启工作台生效。</p>
+      <div class="startup-actions"><button type="button" class="text-btn startup-refresh" :disabled="startup.loading" @click="refreshStartup();checkQuoteApi();checkHealth()">重新检查</button></div>
+    </section></details></div></header>
     <div class="workspace-status"><div><h1>合同工作台</h1><p role="status">{{ phase==='reviewing' ? '正在分析已提交的合同，编辑不会改变本次请求。' : phase==='failed' ? '本次分析未完成，已有内容仍然保留。' : readyReview ? '新分析已完成，可点击查看结果；当前任务仍然保留。' : results.length ? '选择一条提醒，查看原因和沟通建议。' : '粘贴合同，检查隐私后开始分析。' }}</p></div><button v-if="readyReview" id="view-ready-review" class="btn review-ready" type="button" @click="selectReview(readyReview.id)">新分析已就绪 · 查看结果 →</button><nav class="pane-switcher" aria-label="工作区面板"><button type="button" @click="setActivePane('risk')" :aria-pressed="activePane==='risk'" aria-controls="risk-navigation">合同提醒{{ results.length?' · '+totalRisks:'' }}</button><button type="button" @click="setActivePane('contract')" :aria-pressed="activePane==='contract'" aria-controls="dossier">合同</button><button type="button" @click="setActivePane('task')" :aria-pressed="activePane==='task'" aria-controls="task-panel">沟通工具</button></nav></div>
     <main id="workspace" class="workspace workspace-grid" :data-focus="selectedClauseId || undefined" :data-active-pane="activePane" :class="{'is-reviewing':phase==='reviewing','has-results':results.length, 'has-task':taskPanel!=='explanation'}" @keydown.esc="exitFocus">
       <aside id="risk-navigation" data-pane="risk" class="panel risk-navigation ui-surface min-w-0" aria-label="合同提醒">
@@ -1446,7 +1491,31 @@
           function enterNegotiation(id){switchSafely(()=>{if(id){ensureClauseRecord(reviewVersionId.value+':'+id);standalone.value=false;selectedClauseId.value=id;
             if(!clauseRecord().scenario){const recommended=recommendScenario(selectedClause.value?.original_clause||'');if(recommended)selectScenario(recommended,'recommended');}
           }setTask('communication');revealTask();});}
-          function returnToDossier(){switchSafely(()=>{activePane.value='contract';setTask('explanation');editing.value=!submittedText.value;nextTick(()=>document.getElementById('contract-title').focus({preventScroll:true}));});}
+          let guideTimer;
+          function returnToDossier(){
+            switchSafely(async()=>{
+              activePane.value='contract';
+              setTask('explanation');
+              editing.value=!submittedText.value;
+              await nextTick();
+              if(!editing.value){
+                document.getElementById('contract-title').focus();
+                return;
+              }
+              const hasText=Boolean(rawText.value.trim());
+              const control=document.getElementById(hasText?'analyze-contract':'contract-input');
+              const highlight=hasText?control:control.closest('.contract-editor-surface');
+              const focusTarget=control.disabled?document.getElementById('contract-scroll'):control;
+              focusTarget.focus({preventScroll:true});
+              highlight.scrollIntoView({behavior:scrollBehavior(),block:hasText?'nearest':'start',inline:'nearest'});
+              clearTimeout(guideTimer);
+              document.querySelector('[data-contract-guide]')?.removeAttribute('data-contract-guide');
+              // Commit the reset so repeated clicks restart the same CSS animation.
+              void highlight.offsetWidth;
+              highlight.setAttribute('data-contract-guide','');
+              guideTimer=setTimeout(()=>highlight.removeAttribute('data-contract-guide'),1200);
+            });
+          }
 
           function closeTrace() { traceExpanded.value=false;nextTick(()=>{if(traceTrigger?.isConnected)traceTrigger.focus({preventScroll:true});}); }
           function onWorkspaceFocus(event) {
@@ -2175,6 +2244,56 @@ ______年____月____日　　　　______年____月____日`;
             }catch(error){record.status='failed';record.error=error.name==='AbortError'?'分析等待超时，请重新分析。':error.publicMessage||'没有收到可用的分析结果，你的内容仍然保留。';if(epoch===reviewEpoch){phase.value='failed';reviewError.value=record.error;editing.value=true;}}
             finally{clearTimeout(timer);requestControllers.delete(controller);if(epoch===reviewEpoch){stopWait('review');reviewController=null;}}
           }
+          const startup=reactive({chat:null,embedding:null,kb:'待检查',kbState:'checking',help:'',loading:false});
+          const configLabel=value=>value===null?'待检查':value?'已配置，凭据未验证':'待配置';
+          const serviceDotState=()=>health.checking?'neutral':health.status==='online'?'ok':health.status==='offline'?'warn':'neutral';
+          const privacyDotState=()=>privacyReady.value?'ok':'neutral';
+
+          const kbDotState=()=>startup.kbState==='ready'?'ok':['incompatible','unreadable','error'].includes(startup.kbState)?'warn':'neutral';
+          function onStartupPanelEsc(event){
+            const panel=event.currentTarget;
+            if(!panel.open)return;
+            panel.open=false;
+            panel.querySelector('summary')?.focus();
+          }
+          function onStartupOutsidePointerDown(event){
+            const panel=document.querySelector('.startup-info');
+            if(panel&&panel.open&&!panel.contains(event.target))panel.open=false;
+          }
+          function fitStartupPanel(){
+            const panel=document.querySelector('.startup-info-panel'),details=document.querySelector('.startup-info');
+            if(!panel||!details||!details.open)return;
+            const scale=parseFloat(getComputedStyle(document.body).zoom)||1;
+            const top=panel.getBoundingClientRect().top;
+            panel.style.maxHeight=Math.max(140,(window.innerHeight-top-8)/scale)+'px';
+          }
+          function onStartupPanelToggle(){
+            if(document.querySelector('.startup-info')?.open)nextTick(fitStartupPanel);
+          }
+          async function refreshStartup(){
+            if(startup.loading)return;
+            startup.loading=true;startup.chat=null;startup.embedding=null;startup.kb='检查中';startup.kbState='checking';startup.help='';
+            const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),10000);
+            requestControllers.add(controller);
+            try{
+              const options={cache:'no-store',signal:controller.signal};
+              const response=await fetch('/api/startup/status',options);
+              if(!response.ok)throw Error();
+              const config=await response.json();
+              if(typeof config.chat_configured!=='boolean'||typeof config.embedding_configured!=='boolean')throw Error();
+              startup.chat=config.chat_configured;startup.embedding=config.embedding_configured;
+              startup.help=startup.chat?'可尝试回复分析。':'导入和脱敏可在本机使用；回复分析需聊天 Key。';
+              if(!startup.embedding){startup.kb='请先配置向量服务（Windows 交付包已附默认索引）';startup.kbState='unavailable';return;}
+              const kbResponse=await fetch('/api/kb/status',options);
+              if(!kbResponse.ok)throw Error();
+              const kb=await kbResponse.json();
+              const ready=kb.is_ready&&kb.embedding_mode==='cloud'&&kb.indexed_count===32;
+              startup.kb=ready?'已就绪 · 32 条':({missing:'索引缺失，请在配置工具中选择「3 法条库维护」',incompatible:'模型或法条不匹配，请检查原库',unreadable:'目录已有内容或不可读，请检查原库'}[kb.state]||'当前库无法用于云审查');
+              startup.kbState=ready?'ready':({missing:'missing',incompatible:'incompatible',unreadable:'unreadable'}[kb.state]||'unavailable');
+              if(ready&&startup.chat)startup.help='完整审查的本地条件已齐备；成功审查后选择条款可生成草稿。';
+            }catch{startup.kb='检查未完成，请重新检查';startup.kbState='error';}
+            finally{clearTimeout(timer);requestControllers.delete(controller);startup.loading=false;}
+          }
           async function checkHealth() {
             if (health.checking) return;
             health.checking = true;
@@ -2189,10 +2308,11 @@ ______年____月____日　　　　______年____月____日`;
             } catch { health.status = 'offline'; health.note = '请确认本地服务已启动，并通过同源首页打开。'; }
             finally { clearTimeout(timer); health.checking = false; healthController = null; }
           }
-          onMounted(() => { document.addEventListener('dragover',preventFileNavigation);document.addEventListener('drop',preventFileNavigation);motionQuery.addEventListener('change',updateMotion);window.addEventListener('blur',onDecorationBlur);window.addEventListener('focus',onDecorationFocus);document.addEventListener('visibilitychange',onDecorationVisibility);boot.hidden = true; checkHealth(); healthPollTimer=setInterval(()=>{if(!document.hidden)void checkHealth();},30000); checkQuoteApi().finally(startSpatialLayout); });
+          onMounted(() => { document.addEventListener('dragover',preventFileNavigation);document.addEventListener('drop',preventFileNavigation);motionQuery.addEventListener('change',updateMotion);window.addEventListener('blur',onDecorationBlur);window.addEventListener('focus',onDecorationFocus);document.addEventListener('visibilitychange',onDecorationVisibility);boot.hidden = true; refreshStartup(); checkHealth(); healthPollTimer=setInterval(()=>{if(!document.hidden)void checkHealth();},30000);document.addEventListener('pointerdown',onStartupOutsidePointerDown);window.addEventListener('resize',fitStartupPanel); checkQuoteApi().finally(startSpatialLayout); });
           onBeforeUnmount(() => {
+            clearTimeout(guideTimer);
             for(const timer of quoteMaskTimers.values())clearTimeout(timer);
-            invalidateContractImport();document.removeEventListener('dragover',preventFileNavigation);document.removeEventListener('drop',preventFileNavigation);
+            invalidateContractImport();document.removeEventListener('dragover',preventFileNavigation);document.removeEventListener('drop',preventFileNavigation);document.removeEventListener('pointerdown',onStartupOutsidePointerDown);window.removeEventListener('resize',fitStartupPanel);
             clearDecorations();motionQuery.removeEventListener('change',updateMotion);clearTimeout(maskTimer);for(const timer of editorMaskTimers.values())clearTimeout(timer);for(const controller of requestControllers)controller.abort();requestControllers.clear();
             layoutReady = false;
             layoutObserver?.disconnect();
@@ -2219,7 +2339,7 @@ ______年____月____日　　　　______年____月____日`;
             selectClause, moveMatch, showLatestResult, showNegotiationError, checkHealth,
             sendState, recoverSend, supplementGoal, viewProposalDraft, committed, previousCommitted, turnEffect, effectLabel, changeLabel, formatTermValue, confirmedTermLines, termLines, canSendNegotiation, negotiationApi,
             proposal, proposalElapsed, proposalEvidenceLabel, proposalActionState, canGenerateProposal, generateProposal, fillProposal,
-            reviewElapsed, negotiationElapsed, sendNegotiation, handleNegotiationKeydown, checkNegotiationApi, exportState, exportChecklist,
+            startup, configLabel, refreshStartup, serviceDotState, privacyDotState, kbDotState, onStartupPanelEsc, onStartupPanelToggle, reviewElapsed, negotiationElapsed, sendNegotiation, handleNegotiationKeydown, checkNegotiationApi, exportState, exportChecklist,
             traceRuns, activeTrace, selectedTraceId, latestTraceId, visibleTraceEvents, traceVisibleCount,
             tracePlaying, playTrace, showAllTrace, traceNodeLabels, traceStatusLabels, formatDuration, traceEventName, openTraceEvent,
           };

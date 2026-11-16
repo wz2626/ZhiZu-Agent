@@ -204,6 +204,23 @@ def test_retrieval_failures_never_generate_or_invent_graph_nodes(store_options, 
     assert "sk-synthetic-" not in response.model_dump_json()
 
 
+@pytest.mark.parametrize("vector_key, expected_hint, last_node", [
+    ("", "填写向量 Key", "configuration"),
+    ("fixture-vector-key", "法条知识库未就绪", "retrieval"),
+])
+def test_managed_review_distinguishes_vector_config_from_missing_index(client, monkeypatch,
+                                                                       vector_key, expected_hint, last_node):
+    monkeypatch.setenv("ZHIZU_INSTANCE_ID", "fixture-instance")
+    monkeypatch.setenv("EMBEDDING_API_KEY", vector_key)
+    monkeypatch.setattr("backend.app.services.review.ChatOpenAI", lambda **kwargs: FakeLLM())
+    response = ReviewDetailedResponse.model_validate(client.post(
+        "/api/review/analyze-detailed", json={"contract_text": CONTRACT},
+    ).json())
+    assert response.failure_code == "KB_NOT_READY" and expected_hint in response.reason
+    assert response.trace[-1].node == last_node
+    assert response.trace[-1].feedback == response.errors == [response.reason]
+
+
 def test_missing_real_store_is_read_only(client, monkeypatch):
     # Real adapter with absent SQLite path, simulated chat, no actual vectors.
     monkeypatch.setattr("backend.app.services.review.ChatOpenAI", lambda **kwargs: FakeLLM())

@@ -20,7 +20,13 @@ FAILURE_MESSAGES = {
     ReviewFailureCode.GRAPH_EXECUTION_FAILED: "审查图执行异常，已停止审查，需要人工复核。",
 }
 
+MISSING_VECTOR_CONFIG = (
+    "完整审查需要配置向量服务。请双击「配置模型服务.bat」填写向量 Key，保存后重启工作台。"
+    "Windows 交付包已附默认法条索引。"
+)
+
 _VALIDATION_FEEDBACK = {
+    MISSING_VECTOR_CONFIG,
     "non-finite constants are not valid JSON", "duplicate JSON key",
     "review output must be JSON text", "review output must be a JSON array",
     "review array entries must be objects", "evidence_ids must be an array of strings",
