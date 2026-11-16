@@ -14,7 +14,7 @@ from starlette.requests import ClientDisconnect
 from backend.app.core.document_limits import Budget, DocumentError, FILE_BYTES, UPLOAD_SECONDS, error_body, extractor_info
 from backend.app.schemas.contracts import ContractParseResponse
 from backend.app.schemas.interaction import validate_headers
-from backend.app.services.contract_parser import document_format, parse_contract
+from backend.app.services.contract_parser import document_format, parse_isolated
 from backend.app.services.parse_jobs import close_form, parse_runtime
 
 router = APIRouter(prefix="/api/contracts", tags=["contracts"])
@@ -56,7 +56,7 @@ async def parse_upload(request: Request):
         info = extractor_info(format_name)
         request.scope["state"]["parse_extractor"] = info
         budget = Budget()
-        job = parse_runtime.start(form, lease, lambda: parse_contract(upload.file, format_name, upload.size, request_id, budget))
+        job = parse_runtime.start(form, lease, lambda: parse_isolated(upload.file, format_name, upload.size, request_id, budget))
         transferred = True
         # A native Task.cancel on this HTTP waiter must not cancel the job task.
         result = await asyncio.shield(job.task)

@@ -11,6 +11,7 @@ from langchain_openai import ChatOpenAI
 from openai import APITimeoutError
 from pydantic import ValidationError
 
+from backend.app.core.cloud_errors import HINTS, provider_code
 from backend.app.core.config import Settings, get_settings, has_real_key
 from backend.app.core.privacy import redact_pii, safe_payload, PRIVACY_POLICY_VERSION
 from backend.app.schemas.proposal import ProposalDraft, ProposalRequest, ProposalResponse, ProposalTraceEvent
@@ -284,9 +285,11 @@ class ProposalService:
                 except (TimeoutError, httpx.TimeoutException, APITimeoutError):
                     self._event(trace, "drafting", attempt, "failed", started, list(evidence), [_MESSAGES["CHAT_TIMEOUT"]])
                     return self._failure(request, "CHAT_TIMEOUT", trace, attempt - 1)
-                except Exception:
+                except Exception as error:
                     self._event(trace, "drafting", attempt, "failed", started, list(evidence), [_MESSAGES["CHAT_CALL_FAILED"]])
-                    return self._failure(request, "CHAT_CALL_FAILED", trace, attempt - 1)
+                    code = provider_code(error)
+                    hint = "聊天服务" + HINTS[code] if code else None
+                    return self._failure(request, "CHAT_CALL_FAILED", trace, attempt - 1, hint)
                 self._event(trace, "drafting", attempt, "completed", started, list(evidence))
                 started = perf_counter()
                 try:

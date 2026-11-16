@@ -3,6 +3,7 @@
 from time import perf_counter
 from typing import Literal
 
+from backend.app.core.cloud_errors import HINTS
 from backend.app.schemas.review import ReviewFailureCode, ReviewTraceEvent
 
 FAILURE_MESSAGES = {
@@ -38,6 +39,8 @@ _VALIDATION_FEEDBACK = {
     "JSON 结构校验失败：请核对字段类型和嵌套结构。",
     "校验反馈不可安全展示，请人工复核。",
     *FAILURE_MESSAGES.values(),
+    *("聊天服务" + hint for hint in HINTS.values()),
+    *("向量服务" + hint for hint in HINTS.values()),
 }
 _FIELDS = {"clause_id", "original_clause", "risk_level", "explanation", "evidence_ids", "negotiation_tip"}
 

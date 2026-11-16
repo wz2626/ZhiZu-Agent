@@ -7,6 +7,7 @@ import re
 import httpx
 from langchain_core.embeddings import Embeddings
 
+from backend.app.core.cloud_errors import EmbeddingRequestError, EmbeddingResponseError, provider_code
 from backend.app.core.config import get_settings, has_real_key
 from backend.app.core.privacy import redact_pii
 from backend.app.services.model_gateway import check_deadline, remaining_timeout, post_embeddings
@@ -72,23 +73,28 @@ class SiliconFlowEmbeddings(Embeddings):
                 raise ValueError("embedding response indices must be integers")
             indexed = sorted(entries, key=lambda item: item["index"])
             raw_vectors = [item["embedding"] for item in indexed]
+        except httpx.HTTPStatusError as error:
+            code = provider_code(error)
+            if code:
+                raise EmbeddingRequestError(code) from None
+            raise RuntimeError("embedding service request failed; check endpoint, model and credentials") from None
         except (httpx.HTTPError, KeyError, TypeError, ValueError, IndexError, AttributeError):
             raise RuntimeError("embedding service request failed; check endpoint, model and credentials") from None
         if len(raw_vectors) != len(texts):
-            raise ValueError(
+            raise EmbeddingResponseError(
                 f"embedding response count mismatch: expected {len(texts)}, got {len(raw_vectors)}"
             )
         # Sorting alone accepts duplicate/shifted indices and can silently bind
         # a vector to the wrong input article during ingestion or retrieval.
         if [item["index"] for item in indexed] != list(range(len(texts))):
-            raise ValueError("embedding response indices must uniquely cover input positions")
+            raise EmbeddingResponseError("embedding response indices must uniquely cover input positions")
         vectors = []
         for vector_index, raw_vector in enumerate(raw_vectors):
             if not isinstance(raw_vector, list):
-                raise ValueError("embedding response vector must be a list of finite numbers")
+                raise EmbeddingResponseError("embedding response vector must be a list of finite numbers")
             actual_dimension = len(raw_vector)
             if actual_dimension != self.expected_dimension:
-                raise ValueError(
+                raise EmbeddingResponseError(
                     f"embedding dimension mismatch: expected {self.expected_dimension}, "
                     f"got {actual_dimension}"
                 )
@@ -99,13 +105,13 @@ class SiliconFlowEmbeddings(Embeddings):
                     "must be a finite int or float (bool is not allowed)"
                 )
                 if not isinstance(value, (int, float)) or isinstance(value, bool):
-                    raise ValueError(error)
+                    raise EmbeddingResponseError(error)
                 try:
                     number = float(value)
                 except (OverflowError, ValueError):
-                    raise ValueError(error) from None
+                    raise EmbeddingResponseError(error) from None
                 if not math.isfinite(number):
-                    raise ValueError(error)
+                    raise EmbeddingResponseError(error)
                 vector.append(number)
             vectors.append(vector)
         return vectors

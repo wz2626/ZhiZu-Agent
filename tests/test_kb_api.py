@@ -289,7 +289,9 @@ def test_query_vector_or_distance_error_returns_503(kb_environment, monkeypatch,
     assert response.json()["detail"]["code"] == "KB_NOT_READY"
 
 
-def test_cloud_embedding_failure_has_distinct_error_code(kb_environment, monkeypatch):
+@pytest.mark.parametrize("invalid_vector", [False, True])
+def test_cloud_embedding_failure_has_distinct_error_code(kb_environment, monkeypatch, invalid_vector):
+    from backend.app.core.cloud_errors import EmbeddingResponseError
     client, directory = kb_environment
     secret = "sk-synthetic-upstream-error"
 
@@ -298,6 +300,8 @@ def test_cloud_embedding_failure_has_distinct_error_code(kb_environment, monkeyp
         model = "test-cloud-model"
 
         def embed_query(self, text):
+            if invalid_vector:
+                raise EmbeddingResponseError(secret)
             raise RuntimeError(secret)
 
     monkeypatch.setattr("backend.app.services.vector_store.get_embeddings", FailingCloudEmbeddings)
@@ -350,3 +354,19 @@ def test_search_masks_extended_formats_and_preserves_dates(kb_environment):
     })
     assert response.status_code == 200
     assert response.json()["query"] == "维修联系[手机号]或[手机号]，旧身份证[身份证号]，日期2026-10-07，第712条"
+
+
+@pytest.mark.parametrize(("status", "expected"), [(401, "MODEL_AUTH_FAILED"), (402, "MODEL_QUOTA_EXCEEDED"),
+                                                 (403, "MODEL_ACCESS_DENIED"), (429, "MODEL_RATE_LIMITED")])
+def test_vector_provider_errors_keep_only_public_diagnostics(monkeypatch, status, expected):
+    import httpx
+    from backend.app.core.cloud_errors import EmbeddingRequestError
+    response = httpx.Response(status, request=httpx.Request("POST", "https://offline.invalid"),
+                              text="synthetic-private-body")
+    monkeypatch.setattr("backend.app.services.embedding.post_embeddings", lambda *args, **kwargs: response)
+    service = SiliconFlowEmbeddings(base_url="https://offline.invalid", model="test", api_key="synthetic-only")
+    with pytest.raises(EmbeddingRequestError) as failure:
+        service.embed_query("房屋维修")
+    assert failure.value.code == expected
+    assert "向量服务" in failure.value.hint
+    assert "synthetic-private-body" not in str(failure.value)

@@ -633,3 +633,19 @@ def test_separate_contract_heading_does_not_authorize_unselected_article(api, us
     else:
         assert result.json()["card"]["grounds"][0]["source_id"] == "C-002"
     assert model.calls == 1
+
+
+@pytest.mark.parametrize(("status", "code"), [
+    (401, "MODEL_AUTH_FAILED"), (402, "MODEL_QUOTA_EXCEEDED"),
+    (403, "MODEL_ACCESS_DENIED"), (429, "MODEL_RATE_LIMITED"), (500, "MODEL_SERVICE_ERROR"),
+])
+def test_provider_errors_have_public_codes(api, status, code):
+    import httpx
+    client, model = api
+    model.error = httpx.HTTPStatusError("private provider body", request=httpx.Request("POST", "https://invalid"),
+                                        response=httpx.Response(status))
+    response = client.post("/api/negotiation/analyze-quote", json=request().model_dump())
+    assert response.status_code == 503
+    assert response.json()["detail"]["code"] == code
+    assert "private provider body" not in response.text
+    assert model.calls == 1

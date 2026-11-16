@@ -601,3 +601,58 @@ def test_version_and_upload_encoding_errors_have_diagnostics(monkeypatch):
         assert response.status_code == 409 and response.json()["detail"]["request_id"]
         response = client.post("/api/contracts/parse", headers={**HEADERS, "Content-Encoding": "gzip"}, files={"file": ("a.docx", word())})
         assert response.status_code == 400 and response.json()["detail"]["extractor"] is None
+
+
+@pytest.mark.parametrize("declaration", ["Default", "Override"])
+def test_declared_xml_part_is_validated_independently_of_suffix(declaration):
+    from lxml import etree
+    from backend.app.services.docx_parser import preflight_docx
+
+    result = BytesIO()
+    with ZipFile(BytesIO(word())) as source, ZipFile(result, "w") as archive:
+        for entry in source.infolist():
+            data = source.read(entry)
+            if entry.filename == "[Content_Types].xml":
+                root = etree.fromstring(data)
+                attrs = {"Extension": "example"} if declaration == "Default" else {"PartName": "/custom.example"}
+                etree.SubElement(root, etree.QName(etree.QName(root).namespace, declaration),
+                                 ContentType="application/xml", **attrs)
+                data = etree.tostring(root)
+            archive.writestr(entry, data)
+        archive.writestr("custom.example", b"ordinary non-XML text")
+    with pytest.raises(DocumentError) as failure:
+        preflight_docx(result, Budget())
+    assert failure.value.code == "CORRUPTED_DOCUMENT"
+
+
+def test_isolated_worker_timeout_releases_slot_and_next_import_succeeds(monkeypatch):
+    from backend.app.api import contracts
+    from time import monotonic
+    with monkeypatch.context() as patch:
+        patch.setattr(contracts, "Budget", lambda: Budget(deadline=monotonic() + 0.005))
+        response = upload(word())
+        assert response.status_code == 504
+        assert response.json()["detail"]["code"] == "PARSE_TIMEOUT"
+    assert upload(word()).status_code == 200
+
+
+def test_os_enforces_worker_memory_ceiling():
+    import os
+    from pathlib import Path
+    import subprocess
+    import sys
+
+    # A disposable interpreter with a small quota tests the OS limit without a hostile file.
+    check = """
+from backend.app.services import parse_worker
+parse_worker.MEMORY_BYTES = 64 * 1024 * 1024
+parse_worker.limit_memory()
+try:
+    block = bytearray(parse_worker.MEMORY_BYTES + 1)
+except MemoryError:
+    raise SystemExit(0)
+raise SystemExit(1)
+"""
+    environment = {key: os.environ[key] for key in ("SystemRoot", "WINDIR", "TEMP", "TMP") if key in os.environ}
+    subprocess.run([sys.executable, "-B", "-c", check], cwd=Path(__file__).resolve().parents[1],
+                   env=environment, check=True, timeout=10)

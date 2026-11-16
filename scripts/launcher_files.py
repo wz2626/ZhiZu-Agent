@@ -35,7 +35,7 @@ def file_lock(path):
 
 def atomic_write(path, data):
     path.parent.mkdir(parents=True, exist_ok=True)
-    fd, name = tempfile.mkstemp(dir=path.parent)
+    fd, name = tempfile.mkstemp(dir=path.parent, prefix=".env.tmp-" if path.name == ".env" else None)
     temporary = Path(name)
     try:
         with os.fdopen(fd, "wb") as handle:

@@ -12,6 +12,7 @@ import httpx
 from langchain_core.messages import BaseMessage
 from langchain_openai import ChatOpenAI
 
+from backend.app.core.cloud_errors import EmbeddingRequestError, EmbeddingResponseError
 from backend.app.core.config import Settings, get_settings, has_real_key
 from backend.app.schemas.knowledge import EvidenceItem
 from backend.app.schemas.review import (
@@ -185,6 +186,7 @@ class ContractReviewService:
 
         started = perf_counter()
         evidence: list[EvidenceItem] = []
+        retrieval_reason = None
         retrieval_code = None
         searching = False
         try:
@@ -211,6 +213,11 @@ class ContractReviewService:
                     retrieval_code = ReviewFailureCode.NO_EVIDENCE
         except (OperationBusy, OperationExpired):
             raise
+        except EmbeddingRequestError as error:
+            retrieval_code = ReviewFailureCode.UPSTREAM_EMBEDDING_ERROR
+            retrieval_reason = error.hint
+        except EmbeddingResponseError:
+            retrieval_code = ReviewFailureCode.UPSTREAM_EMBEDDING_ERROR
         except (ValueError, *STORAGE_ERRORS):
             retrieval_code = ReviewFailureCode.KB_NOT_READY
         except RuntimeError:
@@ -226,7 +233,7 @@ class ContractReviewService:
             feedback=[FAILURE_MESSAGES[retrieval_code]] if retrieval_code else [],
         )
         if retrieval_code:
-            return self._detailed_failure(retrieval_code, trace)
+            return self._detailed_failure(retrieval_code, trace, reason=retrieval_reason)
 
         started = perf_counter()
         try:
@@ -259,7 +266,9 @@ class ContractReviewService:
                 context_id = self.context_store.create(safe_text, results, evidence_by_id)
                 return response.model_copy(update={"review_context_id": context_id})
             code = state.get("failure_code") or ReviewFailureCode.VALIDATION_FAILED
-            return self._detailed_failure(code, trace, errors=state["errors"],
+            errors = state["errors"]
+            reason = errors[0] if errors and code == ReviewFailureCode.CHAT_CALL_FAILED else None
+            return self._detailed_failure(code, trace, errors=errors, reason=reason,
                                           retry_count=state["retry_count"])
         except (OperationBusy, OperationExpired):
             raise

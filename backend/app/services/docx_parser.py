@@ -24,6 +24,9 @@ def preflight_docx(stream, budget):
             names = [item.filename for item in entries]
             if len(set(names)) != len(names) or not {"[Content_Types].xml", "_rels/.rels", "word/document.xml"} <= set(names):
                 raise DocumentError("UNSAFE_DOCUMENT")
+            defaults, overrides = {}, {}
+            # Validate the manifest under the same XML limits before using its declarations.
+            entries.sort(key=lambda item: item.filename != "[Content_Types].xml")
             for item in entries:
                 budget.check()
                 path = PurePosixPath(item.filename)
@@ -31,7 +34,9 @@ def preflight_docx(stream, budget):
                     raise DocumentError("UNSAFE_DOCUMENT")
                 if item.flag_bits & 1:
                     raise DocumentError("ENCRYPTED_DOCUMENT")
-                xml = item.filename.endswith((".xml", ".rels"))
+                extension = path.suffix.lower().lstrip(".")
+                content_type = overrides.get("/" + item.filename.lower(), defaults.get(extension, ""))
+                xml = extension in {"xml", "rels"} or content_type.endswith(("+xml", "/xml"))
                 if item.file_size > 50 * 1024 * 1024 or (xml and item.file_size > 10 * 1024 * 1024):
                     raise DocumentError("DOCUMENT_LIMIT_EXCEEDED")
                 if item.file_size > max(1, item.compress_size) * 1000:
@@ -64,6 +69,12 @@ def preflight_docx(stream, budget):
                 if root.getroottree().docinfo.doctype:
                     raise DocumentError("UNSAFE_DOCUMENT")
                 if item.filename == "[Content_Types].xml":
+                    for declaration in root:
+                        content_type = declaration.get("ContentType", "").lower()
+                        if declaration.tag == "{http://schemas.openxmlformats.org/package/2006/content-types}Override":
+                            overrides[declaration.get("PartName", "").lower()] = content_type
+                        elif declaration.tag == "{http://schemas.openxmlformats.org/package/2006/content-types}Default":
+                            defaults[declaration.get("Extension", "").lower()] = content_type
                     main = any(e.get("PartName") == "/word/document.xml" and e.get("ContentType") ==
                                "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml" for e in root)
                 if item.filename == "word/document.xml":

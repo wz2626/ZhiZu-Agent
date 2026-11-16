@@ -6,6 +6,7 @@ import httpx
 from langchain_openai import ChatOpenAI
 from pydantic import ValidationError
 
+from backend.app.core.cloud_errors import HINTS, provider_code
 from backend.app.core.config import get_settings, has_real_key
 from backend.app.services.model_gateway import CloudTransport, invoke_model, remaining_timeout, execution_deadline, check_deadline
 from backend.app.services.operation_store import OperationExpired
@@ -36,23 +37,30 @@ class QuoteAnalysisService:
             sources = evidence_pack(request)
         except (OSError, ValueError, TypeError, KeyError, ValidationError):
             raise QuoteFailure(503, "KNOWLEDGE_UNAVAILABLE", "本地依据暂不可用，请保留输入后重试。") from None
-        settings = self.settings or get_settings()
         client = None
         try:
-            llm = self.llm
-            if llm is None:
-                if not has_real_key(settings.chat_api_key):
-                    raise QuoteFailure(503, "MODEL_UNAVAILABLE", "云端模型尚未配置，请保留输入。")
-                client = httpx.Client(timeout=remaining_timeout(min(settings.chat_timeout_seconds, 30)), transport=CloudTransport())
-                provider_options = {}
-                if urlparse(settings.chat_base_url).hostname == "api.deepseek.com":
-                    provider_options["extra_body"] = {"thinking": {"type": "disabled"}}
-                llm = ChatOpenAI(base_url=settings.chat_base_url,
-                    model=os.getenv("QUOTE_CHAT_MODEL", settings.chat_model), api_key=settings.chat_api_key,
-                    temperature=0.2, max_tokens=3072, max_retries=0, use_responses_api=False,
-                    model_kwargs={"response_format": {"type": "json_object"}},
-                    timeout=remaining_timeout(min(settings.chat_timeout_seconds, 30)), http_client=client,
-                    **provider_options)
+            try:
+                settings = self.settings or get_settings()
+                llm = self.llm
+                if llm is None:
+                    if not has_real_key(settings.chat_api_key):
+                        raise QuoteFailure(503, "MODEL_UNAVAILABLE", "云端模型尚未配置，请保留输入。")
+                    client = httpx.Client(timeout=remaining_timeout(min(settings.chat_timeout_seconds, 30)), transport=CloudTransport())
+                    provider_options = {}
+                    if urlparse(settings.chat_base_url).hostname == "api.deepseek.com":
+                        provider_options["extra_body"] = {"thinking": {"type": "disabled"}}
+                    llm = ChatOpenAI(base_url=settings.chat_base_url,
+                        model=os.getenv("QUOTE_CHAT_MODEL", settings.chat_model), api_key=settings.chat_api_key,
+                        temperature=0.2, max_tokens=3072, max_retries=0, use_responses_api=False,
+                        model_kwargs={"response_format": {"type": "json_object"}},
+                        timeout=remaining_timeout(min(settings.chat_timeout_seconds, 30)), http_client=client,
+                        **provider_options)
+            except QuoteFailure:
+                raise
+            except OperationExpired:
+                raise
+            except Exception:
+                raise QuoteFailure(503, "MODEL_UNAVAILABLE", "聊天服务配置无效，请检查服务地址及模型。") from None
             try:
                 # Up to 2500 one-character natural paragraphs are legal within
                 # a 5000-character contract. Their source IDs add envelope text;
@@ -67,6 +75,9 @@ class QuoteAnalysisService:
                 from openai import APITimeoutError
                 if isinstance(error, APITimeoutError):
                     raise QuoteFailure(504, "MODEL_TIMEOUT", "等待模型超时，请保留内容后决定是否重新生成。") from None
+                code = provider_code(error)
+                if code:
+                    raise QuoteFailure(503, code, "聊天服务" + HINTS[code]) from None
                 raise QuoteFailure(503, "MODEL_UNAVAILABLE", "模型服务暂不可用，请保留内容后重试。") from None
             try:
                 if getattr(result, "response_metadata", {}).get("finish_reason", "stop") != "stop":

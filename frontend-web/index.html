@@ -1579,6 +1579,22 @@
           const isRecord = value => value !== null && typeof value === 'object' && !Array.isArray(value);
           const isStringList = value => Array.isArray(value) && value.every(item => typeof item === 'string');
           const safeList = list => list.map(item => redact(item).text);
+          function serviceErrorHint(code){
+            const hints={
+              MODEL_SERVICE_ERROR:'聊天服务暂时不可用，请稍后重试。',
+              MODEL_AUTH_FAILED:'聊天服务认证失败，请检查聊天 API Key 配置。',
+              MODEL_ACCESS_DENIED:'聊天服务访问被拒绝，请检查账号和模型权限。',
+              MODEL_QUOTA_EXCEEDED:'聊天服务额度不足，请检查余额或计费配置。',
+              MODEL_RATE_LIMITED:'聊天服务受到限流，请稍后重试。',
+              KNOWLEDGE_UNAVAILABLE:'本地依据暂不可用，请检查法条库。',
+              MODEL_UNAVAILABLE:'聊天服务暂不可用，请检查模型配置或稍后重试。',
+              INTERACTION_VERSION:'交互协议已更新，请刷新页面。',
+              SERVICE_BUSY:'服务繁忙，请稍后重试。',
+              REQUEST_INFLIGHT:'原请求可能仍在处理，请保留编号稍后重试。',
+              OPERATION_EXPIRED:'原操作已超过处理期限，请保留输入后重试。'
+            };
+            return Object.hasOwn(hints,code)?hints[code]:'';
+          }
           const publicFailureMessage=(reason,errors)=>[...new Set(safeList([reason,...(isStringList(errors)?errors:[])].filter(item=>typeof item==='string')).map(item=>item.trim()).filter(Boolean))].join('；');
           function safeJsonValue(value) {
             if (typeof value === 'string') return redact(value).text;
@@ -1676,10 +1692,11 @@
                   for(const f of fields){if(f.field==='goal_text')p.goal=f.safe_text;else if(f.field==='answers'&&request.answers[f.index]){const a=p.answers.find(a=>a.question_id===request.answers[f.index].question_id);if(a)a.text=f.safe_text;}else throw new Error('invalid-field');}
                   p.revision++;invalidateProposal(p,key);p.revealing=true;p.notice='服务端补充隐藏了号码，请检查目标和回答后再次生成。';nextTick(()=>p.revealing=false);return;}
                 if([400,404,409,410,422,429].includes(response.status)){
-                  const detail=response.status===410?await response.json().catch(()=>null):null;
+                  const detail=await response.json().catch(()=>null);
                   if(!current())return;
-                  p.tx=newTx();p.error=response.status===410?(detail?.detail?.code==='OPERATION_EXPIRED'?'原操作已超过处理期限，结果不会发布；目标与回答已保留，可重新生成。':'审查上下文已过期，请重新审查；参考稿与回答仍保留。'):response.status===429?'当前审查的草稿请求已达上限，请重新审查合同。':response.status===422?'目标与回答需合计不超过2000字符，并属于当前条款的问题。':'当前草稿上下文或请求不可用，请核对后重新生成。';return;}
-                throw new Error('transport');
+                  p.tx=newTx();if(detail?.detail?.code==='INTERACTION_VERSION'){p.error=serviceErrorHint('INTERACTION_VERSION');return;}p.error=response.status===410?(detail?.detail?.code==='OPERATION_EXPIRED'?'原操作已超过处理期限，结果不会发布；目标与回答已保留，可重新生成。':'审查上下文已过期，请重新审查；参考稿与回答仍保留。'):response.status===429?'当前审查的草稿请求已达上限，请重新审查合同。':response.status===422?'目标与回答需合计不超过2000字符，并属于当前条款的问题。':'当前草稿上下文或请求不可用，请核对后重新生成。';return;}
+                const detail=await response.json().catch(()=>null);
+                throw Object.assign(new Error('transport'),{publicMessage:serviceErrorHint(detail?.detail?.code)});
               }
               const data=await response.json();if(!current())return;
               if(!isRecord(data)||data.review_context_id!==contextId||data.clause_id!==clause.clause_id||data.draft_request_id!==request.draft_request_id)throw new Error('identity');
@@ -1693,7 +1710,7 @@
               // Retained entries keep their original question labels and IDs.
               p.tx=newTx();p.notice='沟通草稿已就绪，可核对后复制或补充信息更新。';p.copyEpoch++;p.copyText='';p.copyNotice='';
               acceptProposalDecoration(request,key,data.replayed);
-            }catch(error){if(current()){p.tx.state='unknown';p.error='尚未收到有效参考稿，可重试同一草稿请求；修改目标或回答后将创建新请求。';}}
+            }catch(error){if(current()){p.tx.state='unknown';p.error=error.publicMessage||'尚未收到有效参考稿，可重试同一草稿请求；修改目标或回答后将创建新请求。';}}
             finally{clearTimeout(timer);requestControllers.delete(controller);if(p.epoch===epoch){stopWait('proposal:'+key);proposalControllers.delete(key);if(p.tx.state==='inflight')p.tx.state='unknown';}}
           }
           async function copyProposalDraft(){
@@ -1838,11 +1855,11 @@
             const snapshot={ownerKey:quoteOwnerKey.value,signature:quoteSignature(owner),body:{request_id:newId(),contract_text:quoteContract.value,landlord_quote:owner.landlordQuote,user_goal:owner.userGoal,context_note:owner.contextNote}};
             const attempt=++owner.attempt,controller=new AbortController(),started=performance.now();owner.pending=true;owner.elapsed=0;owner.error='';owner.notice='';owner.copyEpoch++;
             requestControllers.add(controller);const timer=setInterval(()=>owner.elapsed=Math.floor((performance.now()-started)/1000),250),timeout=setTimeout(()=>controller.abort(),50000);
-            try{const response=await fetch('/api/negotiation/analyze-quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(snapshot.body),signal:controller.signal});const data=await response.json();if(owner.attempt!==attempt)return;
-              if(!response.ok){if(response.status===428){const applied=applyQuotePreview(data.detail,snapshot,owner);owner.error=applied?'服务端已隐藏新增号码，请核对当前显示内容后再次提交。':'需要重新核对隐私；新编辑保留，请回到左侧编辑合同并重新检查服务。';return;}
-                if(response.status===502&&data.detail?.code==='MODEL_OUTPUT_UNSAFE'){owner.error='本次回复触发内容安全规则，未予展示；请核对原话与诉求后再生成。';return;}
+            try{const response=await fetch('/api/negotiation/analyze-quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(snapshot.body),signal:controller.signal});const data=await response.json().catch(()=>null);if(owner.attempt!==attempt)return;
+              if(!response.ok){if(response.status===428){const applied=applyQuotePreview(data?.detail,snapshot,owner);owner.error=applied?'服务端已隐藏新增号码，请核对当前显示内容后再次提交。':'需要重新核对隐私；新编辑保留，请回到左侧编辑合同并重新检查服务。';return;}
+                if(response.status===502&&data?.detail?.code==='MODEL_OUTPUT_UNSAFE'){owner.error='本次回复触发内容安全规则，未予展示；请核对原话与诉求后再生成。';return;}
                 const errors={422:'字段或字数不符合要求，请核对后提交。',413:'请求内容过大，请精简后提交。',429:'请求过于频繁，请稍后再试。',502:'本次结果的结构、状态或引用未通过检查，输入与旧结果保留。可补充信息后重新生成。',503:'服务繁忙、依据或模型暂不可用，请保留输入后重试。',504:'等待模型超时；输入与旧结果保留，重新生成可能再次计费。'};
-                owner.error=errors[response.status]||'本次分析未完成，请保留内容后重试。';return;}
+                owner.error=serviceErrorHint(data?.detail?.code)||errors[response.status]||'本次分析未完成，请保留内容后重试。';return;}
               const accepted=readQuoteCard(data,snapshot);if(!accepted)throw Error('invalid-card');
               if(accepted.status==='out_of_scope'){owner.result=null;owner.resultSnapshot=null;owner.copyEpoch++;owner.copyText='';owner.copyNotice='';owner.notice='这段内容暂无法作为租房沟通分析，请补充与合同有关的原话。';return;}
               owner.result=accepted;owner.resultSnapshot=snapshot;owner.copyText='';owner.copyNotice='';
@@ -1955,7 +1972,8 @@
                   else if(detail?.code==='INTERACTION_VERSION'){finish();negotiationApi.status='unavailable';negotiationApi.note='交互协议不兼容，请更新网页与服务后重新检查。';n.error='交互协议不兼容，请更新网页与服务后重新检查；练习记录与输入保留。';}
                   else {n.tx.state='unknown';n.error='服务报告了未识别的冲突，请保留原快照并恢复请求或另开练习。';}return;}
                 if([400,404,405,422].includes(response.status)){finish();n.error='本次请求未被接受，请检查服务入口、字段或字数后重试。';return;}
-                throw new Error('transport');
+                const detail=await response.json().catch(()=>null);
+                throw Object.assign(new Error('transport'),{publicMessage:serviceErrorHint(detail?.detail?.code)});
               }
               const data=await response.json();if(!current())return;
               if(!isRecord(data)||data.session_id!==request.session_id||data.request_id!==request.request_id||data.scenario!==request.scenario)throw new Error('identity');
@@ -2061,7 +2079,7 @@
 
 （一）租赁期内，乙方因实习结束、学校安排等个人原因提前退租的，应提前30日通知甲方，已交剩余租金及押金一律不予退还，且需额外向甲方支付相当于两个月租金的违约金。
 
-（二）甲方若因房屋交易出售、直系亲属自住或房屋重大翻修等个人原因需提前收回房屋的，只需提前3天通过微信通知乙方，退还未发生的租金即可，甲方不承担任何违约责任。
+（二）甲方若因房屋交易出售、直系亲属自住或房屋重大翻修等个人原因需提前收回房屋的，只需提前3天通过微信通知乙方，并退还乙方已预付的剩余租期租金，甲方不承担任何违约责任。
 
 第四条 租金、押金及日常费用
 
@@ -2229,7 +2247,10 @@ ______年____月____日　　　　______年____月____日`;
             try{
               const response=await fetch('/api/review/analyze-detailed',{method:'POST',headers:{'Content-Type':'application/json','X-Interaction-Version':'4'},cache:'no-store',credentials:'same-origin',signal:controller.signal,body:JSON.stringify({contract_text:text,top_k:4})});
               if(response.status===428){const fields=previewFields((await response.json()).detail);if(!fields||fields.length!==1||fields[0].field!=='contract_text')throw new Error('preview');record.status='failed';if(editRevision===revision){rawText.value=fields[0].safe_text;editRevision++;}throw Object.assign(new Error(),{publicMessage:'服务端补充隐藏了号码，请核对合同编辑内容后重新分析。'});}
-              if(!response.ok)throw Object.assign(new Error(),{publicMessage:'本次分析未完成，请稍后重试；你的内容仍然保留。'});
+              if(!response.ok){
+                const data=await response.json().catch(()=>null);
+                throw Object.assign(new Error(),{publicMessage:serviceErrorHint(data?.detail?.code)||'本次分析未完成，请稍后重试；你的内容仍然保留。'});
+              }
               const data=await response.json();
               if(!validResponse(data))throw Object.assign(new Error(),{publicMessage:'没有收到可用的分析结果，原有内容仍然保留。'});
               recordTrace(data,'合同审查',id);

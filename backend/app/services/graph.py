@@ -13,6 +13,7 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.runtime import Runtime
 from pydantic import TypeAdapter, ValidationError
 
+from backend.app.core.cloud_errors import HINTS, provider_code
 from backend.app.schemas.knowledge import EvidenceItem
 from backend.app.schemas.review import ReviewClauseResult, ReviewFailureCode, ReviewTraceEvent, RiskLevel
 from backend.app.services.review_trace import FAILURE_MESSAGES, append_trace
@@ -200,9 +201,11 @@ def drafting_node(state: ReviewState, runtime: Runtime[ReviewContext]) -> dict:
                        cloud_error_chain(error), (perf_counter() - started) * 1000)
         failure = (ReviewFailureCode.CHAT_TIMEOUT if isinstance(error, (TimeoutError, httpx.TimeoutException, APITimeoutError))
                    else ReviewFailureCode.CHAT_CALL_FAILED)
+        code = provider_code(error)
+        message = "聊天服务" + HINTS[code] if code else FAILURE_MESSAGES[failure]
         return _traced_update(state, runtime, {
             "current_draft": None, "messages": messages, "final_results": [],
-            "errors": [FAILURE_MESSAGES[failure]], "status": "mock", "failure_code": failure,
+            "errors": [message], "status": "mock", "failure_code": failure,
             "retry_pending": False,
         }, node="drafting", started=started, status="failed")
     return _traced_update(state, runtime, {

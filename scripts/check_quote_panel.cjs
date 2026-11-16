@@ -24,6 +24,7 @@ const server=http.createServer(async(req,res)=>{
   let raw='';for await(const chunk of req)raw+=chunk;const body=JSON.parse(raw);requests.push(body);const selected=mode;
   // Freeze each fixture at acceptance, just as the service freezes inputs.
   const result=card(body);await pause(delay);
+  if(selected.startsWith('MODEL_')){res.statusCode=503;res.end(JSON.stringify({detail:{code:selected,message:'DO_NOT_DISPLAY_UPSTREAM'}}));return;}
   if(['failure','unsafe'].includes(selected)){res.statusCode=502;res.end(JSON.stringify({detail:{code:selected==='unsafe'?'MODEL_OUTPUT_UNSAFE':'MODEL_OUTPUT_INVALID',message:'DO_NOT_DISPLAY_UPSTREAM'}}));return;}
   if(selected==='privacy'){res.statusCode=428;res.end(JSON.stringify({detail:{code:'PRIVACY_PREVIEW_REQUIRED',privacy_policy_version:policy.version,fields:[{field:'landlord_quote',safe_text:body.landlord_quote+'（服务端安全预览）'}]}}));return;}
   res.end(JSON.stringify(result));return;
@@ -140,6 +141,11 @@ async function complete(){await until('!document.getElementById("analyze-quote")
  pass('Honest elapsed timer; needs_context keeps three clarification replies and opens the background editor');
  mode='failure';delay=60;const previous=await ev('document.getElementById("quote-result").textContent');await fill('quote-context','我有交接单。');await click('#analyze-quote');await complete();assert.ok(await ev('document.getElementById("quote-error").textContent.includes("未通过")'));assert.ok(!(await ev('document.body.textContent')).includes('DO_NOT_DISPLAY_UPSTREAM'));assert.equal(await ev('document.getElementById("quote-context").value'),'我有交接单。');assert.ok((await ev('document.getElementById("quote-result").textContent')).includes('费用明细'));assert.ok(previous);
  pass('Controlled generation failure preserves input and the previous card without leaking upstream output');
+ for(const [code,hint] of Object.entries({MODEL_AUTH_FAILED:'API Key',MODEL_QUOTA_EXCEEDED:'额度不足',MODEL_ACCESS_DENIED:'模型权限',MODEL_RATE_LIMITED:'限流'})){
+  mode=code;await click('#analyze-quote');await complete();
+  assert.ok((await ev('document.getElementById("quote-error").textContent')).includes(hint));
+ }
+ pass('Provider failures give distinct safe instructions and allow the next submission');
  mode='unsafe';await click('#analyze-quote');await complete();assert.ok(await ev('document.getElementById("quote-error").textContent.includes("内容安全规则")'));assert.ok(await ev('!!document.getElementById("quote-result")'));
  pass('Safety refusal has a distinct controlled hint and preserves prior card');
  mode='privacy';await click('#analyze-quote');await complete();assert.ok(await ev('document.getElementById("landlord-quote").value.includes("服务端安全预览")'));assert.ok(await ev('document.getElementById("quote-error").textContent.includes("再次提交")'));
@@ -148,6 +154,10 @@ async function complete(){await until('!document.getElementById("analyze-quote")
  mode='success';delay=350;await click('#analyze-quote');await fill('landlord-quote','这是在途后新编辑的消息。');await complete();assert.equal(await ev('document.getElementById("landlord-quote").value'),'这是在途后新编辑的消息。');assert.ok(await ev('!!document.getElementById("quote-stale")'));
  pass('Editing during a request preserves new text and marks the returned old snapshot');
  // Preserve the actual review/version flow as well as the no-review path.
+ await ev(`window.originalFetch=window.fetch;window.fetch=(url,options)=>url==='/api/review/analyze-detailed'?Promise.resolve(new Response(JSON.stringify({detail:{code:'INTERACTION_VERSION'}}),{status:409})):window.originalFetch(url,options)`);
+ await click('#analyze-contract');await until('document.querySelector("#dossier .notice-error")?.textContent.includes("请刷新页面")','version mismatch');
+ await ev('window.fetch=window.originalFetch');
+ pass('Review version mismatch prompts refresh and releases submit');
  await click('#analyze-contract');await until('document.querySelectorAll("#risk-items [data-clause]").length===1','review fixture');await click('[data-clause="C-01"]');
  for(const status of [410,428]){
   // Resolve response headers first, then let a newer draft start before releasing the old body.

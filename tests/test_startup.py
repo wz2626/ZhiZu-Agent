@@ -92,6 +92,7 @@ def test_key_change_preserves_other_fields_and_comments(tmp_path, monkeypatch):
     assert path.read_bytes() == before
     save_key(path, "EMBEDDING_API_KEY", "sample-vector")
     assert path.read_bytes().startswith(before)
+    assert not list(tmp_path.glob(".env.tmp-*"))
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="Windows launcher lock")
@@ -145,3 +146,41 @@ def test_bootstrap_candidates_check_version_and_pointer_width():
     for version, bits, rejected in [((3, 12), 63, False), ((3, 12), 31, True), ((3, 11), 63, True)]:
         candidate = SimpleNamespace(version_info=version, maxsize=(1 << bits) - 1)
         assert all(eval(probe, {"sys": candidate, "__builtins__": {}}) == rejected for probe in probes)
+
+
+def test_diagnostics_are_disabled_before_sdk_initialization():
+    import os
+    import subprocess
+    marker = "SYNTHETIC_CONTRACT_DIAGNOSTIC_TEST"
+    program = """
+import logging
+logging.basicConfig(level=logging.DEBUG)
+from backend.app.main import app
+from langsmith.utils import tracing_is_enabled
+from openai import OpenAI
+import httpx
+assert not tracing_is_enabled()
+def reply(request):
+    return httpx.Response(200, json={"object": "list", "data": []})
+with httpx.Client(transport=httpx.MockTransport(reply)) as http:
+    client = OpenAI(api_key="synthetic-only", http_client=http, base_url="https://offline.invalid")
+    client.chat.completions.create(model="test", messages=[{"role":"user","content":%r}])
+""" % marker
+    env = dict(os.environ, OPENAI_LOG="debug", LANGSMITH_TRACING="true", LANGCHAIN_TRACING_V2="true")
+    result = subprocess.run([sys.executable, "-B", "-c", program], cwd=PROJECT_ROOT, env=env,
+                            capture_output=True, timeout=30)
+    assert result.returncode == 0
+    assert marker.encode() not in result.stdout + result.stderr
+
+
+@pytest.mark.parametrize("raises", [True, False])
+def test_browser_open_failure_keeps_launcher_running(monkeypatch, capsys, raises):
+    monkeypatch.syspath_prepend(str(PROJECT_ROOT / "scripts"))
+    import launcher
+    def unavailable(url):
+        if raises:
+            raise OSError("browser unavailable")
+        return False
+    monkeypatch.setattr(launcher.webbrowser, "open", unavailable)
+    launcher.show_page({"port": 8000}, True)
+    assert "手动访问" in capsys.readouterr().out

@@ -76,7 +76,12 @@ def show_page(record, open_browser):
     url = f"http://127.0.0.1:{record['port']}/"
     print("工作台地址", url, flush=True)
     if open_browser:
-        webbrowser.open(url)
+        try:
+            opened = webbrowser.open(url)
+        except Exception:
+            opened = False
+        if not opened:
+            print("请在浏览器中手动访问上方工作台地址。", flush=True)
 
 
 def initialize_config():

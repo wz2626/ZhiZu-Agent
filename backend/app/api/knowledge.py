@@ -5,6 +5,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 
+from backend.app.core.cloud_errors import EmbeddingRequestError, EmbeddingResponseError
 from backend.app.core.config import Settings, get_settings
 from backend.app.schemas.knowledge import KBSearchRequest, KBSearchResponse, KBStatusResponse
 from backend.app.services.vector_store import STORAGE_ERRORS, LawVectorStoreService, mask_sensitive_text
@@ -70,6 +71,10 @@ def kb_search(
             if not status.is_ready:
                 raise _not_ready(indexed_count)
             results = service.search_evidence(safe_query, top_k=request.top_k)
+    except EmbeddingRequestError as error:
+        raise HTTPException(503, detail={"code": error.code, "message": error.hint}) from None
+    except EmbeddingResponseError:
+        raise _upstream_embedding_error() from None
     except (ValueError, *STORAGE_ERRORS):
         raise _not_ready(indexed_count) from None
     except RuntimeError:
