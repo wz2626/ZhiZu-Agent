@@ -14,3 +14,12 @@ pdfplumber==0.11.10
 pdfminer.six==20260107
 python-multipart==0.0.33
 Pillow==13.0.0
+
+# Direct imports in HTTP handling, document parsing and model error handling
+anyio==4.15.1
+starlette==1.7.0
+lxml==6.1.3
+openai==2.54.0
+
+# JSON Schema validation in the test suite
+jsonschema==4.26.0
